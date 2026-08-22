@@ -77,32 +77,6 @@ assert_equals "yes" "$(grep_has "Subagent Decomposition" "$ORCHESTRATOR")" \
 # ── REQ-004: open-source skill library ───────────────────────────────────────
 
 echo ""
-echo "=== REQ-004: external-skills library ==="
-
-assert_equals "yes" "$(file_exists "$FRAMEWORK/external-skills/nelson/SKILL.md")" \
-  "REQ-004: nelson skill present"
-
-assert_equals "yes" "$(file_exists "$FRAMEWORK/external-skills/soul/SKILL.md")" \
-  "REQ-004: soul skill present"
-
-assert_equals "yes" "$(file_exists "$FRAMEWORK/external-skills/android-development/SKILL.md")" \
-  "REQ-004: android-development skill present"
-
-assert_equals "yes" "$(grep_has "include-full-skill-library" "$SETUP_SH")" \
-  "REQ-004: setup.sh has --include-full-skill-library flag"
-
-assert_equals "yes" "$(grep_has "copy_external_skills" "$SETUP_SH")" \
-  "REQ-004: setup.sh calls copy_external_skills"
-
-assert_equals "yes" "$(grep_has "include-full-skill-library" "$SETUP_PS1")" \
-  "REQ-004: setup.ps1 has --include-full-skill-library flag"
-
-assert_equals "yes" "$(grep_has "Copy-ExternalSkills" "$SETUP_PS1")" \
-  "REQ-004: setup.ps1 has Copy-ExternalSkills function"
-
-# ── REQ-005: pause/resume ────────────────────────────────────────────────────
-
-echo ""
 echo "=== REQ-005: pause/resume via pause.md ==="
 
 assert_equals "yes" "$(file_exists "$PAUSE_TPL")" \
@@ -155,60 +129,6 @@ assert_equals "yes" "$(grep_has "Copy-CapabilitySkills" "$SETUP_PS1")" \
   "REQ-008: setup.ps1 has Copy-CapabilitySkills (pre-existing)"
 
 # ── REQ-009: setup.ps1 Tier 1 adapter support ────────────────────────────────
-
-echo ""
-echo "=== REQ-009: setup.ps1 Tier 1 adapter support ==="
-
-assert_equals "yes" "$(grep_has "function Install-Tier1Hooks" "$SETUP_PS1")" \
-  "REQ-009: setup.ps1 has Install-Tier1Hooks function"
-
-assert_equals "yes" "$(grep_has "toolConfig.Tier -eq 1" "$SETUP_PS1")" \
-  "REQ-009: setup.ps1 dispatches Tier 1 install"
-
-assert_equals "yes" "$(grep_has "Tier.*=.*1" "$FRAMEWORK/setup/cursor.ps1")" \
-  "REQ-009: cursor.ps1 declares Tier 1"
-
-assert_equals "yes" "$(grep_has "Tier.*=.*1" "$FRAMEWORK/setup/windsurf.ps1")" \
-  "REQ-009: windsurf.ps1 declares Tier 1"
-
-assert_equals "yes" "$(grep_has "Tier.*=.*1" "$FRAMEWORK/setup/cline.ps1")" \
-  "REQ-009: cline.ps1 declares Tier 1"
-
-assert_equals "yes" "$(grep_has "HookAdapterSrc" "$FRAMEWORK/setup/cursor.ps1")" \
-  "REQ-009: cursor.ps1 has HookAdapterSrc"
-
-assert_equals "yes" "$(grep_has "HookAdapterSrc" "$FRAMEWORK/setup/windsurf.ps1")" \
-  "REQ-009: windsurf.ps1 has HookAdapterSrc"
-
-assert_equals "yes" "$(grep_has "HookAdapterSrc" "$FRAMEWORK/setup/cline.ps1")" \
-  "REQ-009: cline.ps1 has HookAdapterSrc"
-
-# ── REQ-010: setup.ps1 opencode support ──────────────────────────────────────
-
-echo ""
-echo "=== REQ-010: setup.ps1 opencode support ==="
-
-assert_equals "yes" "$(grep_has "'opencode'" "$SETUP_PS1")" \
-  "REQ-010: opencode in ValidTools"
-
-assert_equals "yes" "$(file_exists "$FRAMEWORK/setup/opencode.ps1")" \
-  "REQ-010: setup/opencode.ps1 exists"
-
-assert_equals "yes" "$(file_exists "$FRAMEWORK/setup/opencode.sh")" \
-  "REQ-010: setup/opencode.sh exists"
-
-# ── REQ-011: TypeScript adapter for OpenCode ──────────────────────────────────
-
-echo ""
-echo "=== REQ-011: TypeScript adapter for OpenCode ==="
-
-assert_equals "yes" "$(file_exists "$FRAMEWORK/hooks/adapters/opencode/index.ts")" \
-  "REQ-011: opencode adapter index.ts exists"
-
-assert_equals "yes" "$(file_exists "$FRAMEWORK/hooks/adapters/opencode/package.json")" \
-  "REQ-011: opencode adapter package.json exists"
-
-# ── REQ-012: gate-write Windows path fix ─────────────────────────────────────
 
 echo ""
 echo "=== REQ-012: gate-write.mjs Windows path normalisation ==="

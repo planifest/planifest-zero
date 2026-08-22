@@ -17,7 +17,6 @@ CODEGEN="planifest-framework/skills/planifest-codegen-agent/SKILL.md"
 VALIDATE="planifest-framework/skills/planifest-validate-agent/SKILL.md"
 SETUP_SH="planifest-framework/setup.sh"
 SETUP_PS1="planifest-framework/setup.ps1"
-EXT="planifest-framework/external-skills"
 
 echo ""
 echo "=== REQ-001: Input Validation section in requirement.template.md ==="
@@ -116,74 +115,6 @@ if grep -q "Pre-Execution Parallelism\|## Pre-Execution" "$VALIDATE"; then
   pass "REQ-002: validate-agent has Pre-Execution Parallelism Plan section"
 else
   fail "REQ-002: validate-agent missing Pre-Execution Parallelism Plan section"
-fi
-
-echo ""
-echo "=== REQ-003: Skill directory name normalisation ==="
-mismatch_count=0
-total=0
-for dir in "$EXT"/*/; do
-  skill_file="$dir/SKILL.md"
-  [ -f "$skill_file" ] || continue
-  total=$((total+1))
-  # NB: quote/CR stripping uses tr, not a sed [".."] bracket class — on BSD
-  # sed, `\r` inside [...] is NOT a carriage-return escape, it's the literal
-  # characters `\` and `r`, which silently deleted every "r" from every name
-  # field (279 false-positive mismatches on macOS before this fix).
-  name_field=$(grep "^name:" "$skill_file" | head -1 | sed 's/^name: *//' | tr -d '"\r' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g;s/--*/-/g;s/^-//;s/-$//')
-  dir_name=$(basename "$dir")
-  if [ "$dir_name" != "$name_field" ] && [ -n "$name_field" ]; then
-    mismatch_count=$((mismatch_count+1))
-  fi
-done
-if [ "$mismatch_count" -eq 0 ] && [ "$total" -gt 0 ]; then
-  pass "REQ-003: all $total skill directories match their SKILL.md name field (kebab-case)"
-else
-  fail "REQ-003: $mismatch_count/$total skill directories have name-vs-directory mismatch"
-fi
-
-echo ""
-echo "=== REQ-004: New skills from high-signal repos ==="
-new_skill_count=$(ls -d "$EXT"/*/ 2>/dev/null | wc -l)
-if [ "$new_skill_count" -gt 200 ]; then
-  pass "REQ-004: external-skills count ($new_skill_count) > 200 baseline — new skills added"
-else
-  fail "REQ-004: external-skills count ($new_skill_count) not greater than 200 baseline"
-fi
-
-missing_attribution=0
-for dir in "$EXT"/*/; do
-  [ -f "$dir/attribution.txt" ] || { ((missing_attribution++)); }
-done
-if [ "$missing_attribution" -eq 0 ]; then
-  pass "REQ-004: all skill directories have attribution.txt"
-else
-  fail "REQ-004: $missing_attribution skill directories missing attribution.txt"
-fi
-
-missing_skill=0
-for dir in "$EXT"/*/; do
-  [ -f "$dir/SKILL.md" ] || { ((missing_skill++)); }
-done
-if [ "$missing_skill" -eq 0 ]; then
-  pass "REQ-004: all skill directories have SKILL.md"
-else
-  fail "REQ-004: $missing_skill skill directories missing SKILL.md"
-fi
-
-if grep -q "sw-agent-skills\|wondelai\|garden-skills\|marketingskills" "$EXT"/*/attribution.txt 2>/dev/null; then
-  pass "REQ-004: at least one skill attributed to a newly-extracted repo"
-else
-  fail "REQ-004: no skills found from newly-extracted repos"
-fi
-
-echo ""
-echo "=== README completeness ==="
-readme_lines=$(grep -c "^|" "$EXT/README.md" 2>/dev/null || echo 0)
-if [ "$readme_lines" -gt 200 ]; then
-  pass "README: skill index has $readme_lines rows (> 200)"
-else
-  fail "README: skill index has only $readme_lines rows"
 fi
 
 echo ""

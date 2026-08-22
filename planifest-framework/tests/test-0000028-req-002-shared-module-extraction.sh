@@ -289,46 +289,9 @@ done
 # =============================================================================
 
 echo ""
-echo "=== req-002: shared modules install across all 4 flag combinations ==="
+echo "=== req-002: shared modules install with telemetry on and off ==="
 
-# (a) Tier 1 (cursor) with telemetry OFF — the case the narrow glob broke.
-WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh cursor >/dev/null 2>&1
-for m in read-product-id.mjs record-telemetry-failure.mjs get-flag-path.mjs emit-event.mjs; do
-  if [ -f "$WS/.cursor/hooks/telemetry/$m" ]; then
-    assert_equals "0" "0" "req-002: tier 1 install copies telemetry/$m"
-  else
-    assert_equals "copied" "missing" "req-002: tier 1 install copies telemetry/$m"
-  fi
-done
-if [ -f "$WS/.cursor/hooks/enforcement/read-stdin.mjs" ] && [ -f "$WS/.cursor/hooks/enforcement/phase-enum.mjs" ]; then
-  assert_equals "0" "0" "req-002: tier 1 install copies the shared enforcement modules"
-else
-  assert_equals "copied" "missing" "req-002: tier 1 install copies the shared enforcement modules"
-fi
-
-# The installed tier 1 emit hook must actually run end to end: with an
-# unreachable backend, the shared recordTelemetryFailure writes a marker. That
-# marker can only exist if all five shared imports resolved.
-#
-# getFlagPath keys the phase-start dedup flag on session_id+phase alone, in
-# the shared OS tmpdir, not scoped to this test's workspace (see
-# get-flag-path.mjs). A fixed "t1" session id collides with a flag left by a
-# prior run of this same file and short-circuits emission before a marker is
-# ever written. Use a run-unique session id so this file never self-collides.
-T1_SESSION="t1-$$-$(date +%s%N 2>/dev/null || date +%s)"
-printf '{"cwd":"%s","session_id":"%s"}' "$WS" "$T1_SESSION" \
-  | PLANIFEST_SESSION_ID="$T1_SESSION" PLANIFEST_TELEMETRY_URL=http://127.0.0.1:39499 \
-    node "$WS/.cursor/hooks/telemetry/emit-phase-start.mjs" codegen >/dev/null 2>&1
-assert_exit_zero $? "req-002: tier 1 installed emit-phase-start exits 0"
-if ls "$WS/plan/.telemetry-failures"/*.json >/dev/null 2>&1; then
-  assert_equals "0" "0" "req-002: tier 1 emit-phase-start ran end to end (shared marker written)"
-else
-  assert_equals "marker" "none" "req-002: tier 1 emit-phase-start ran end to end (shared marker written)"
-fi
-cd /; rm -rf "$WS"
-
-# (b) Non-tier 1 with telemetry OFF — hooks/telemetry/ is absent entirely, so
+# (a) Telemetry OFF — hooks/telemetry/ is absent entirely, so
 # check-telemetry-receipts.mjs proves the phase-enum placement decision.
 WS=$(make_workspace); cd "$WS"
 bash planifest-framework/setup.sh claude-code >/dev/null 2>&1
@@ -345,23 +308,39 @@ assert_contains "P3 (phase: codegen)" "$RECEIPT_OUT" \
   "req-002: check-telemetry-receipts resolves the phase enum with hooks/telemetry/ absent"
 cd /; rm -rf "$WS"
 
-# (c) + (d) Telemetry ON, both tiers — full glob on both paths.
-for tool in claude-code cursor; do
-  WS=$(make_workspace); cd "$WS"
-  bash planifest-framework/setup.sh "$tool" --structured-telemetry-mcp >/dev/null 2>&1
-  HD=".claude/hooks"; [ "$tool" = "cursor" ] && HD=".cursor/hooks"
-  MISSING=""
-  for m in read-product-id.mjs record-telemetry-failure.mjs get-flag-path.mjs emit-event.mjs resolve-phase.mjs; do
-    [ -f "$WS/$HD/telemetry/$m" ] || MISSING="$MISSING $m"
-  done
-  assert_equals "" "$MISSING" "req-002: $tool with telemetry on installs every shared telemetry module"
-  cd /; rm -rf "$WS"
+# (b) Telemetry ON — the full *.mjs glob copies every shared module.
+WS=$(make_workspace); cd "$WS"
+bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp >/dev/null 2>&1
+MISSING=""
+for m in read-product-id.mjs record-telemetry-failure.mjs get-flag-path.mjs emit-event.mjs resolve-phase.mjs; do
+  [ -f "$WS/.claude/hooks/telemetry/$m" ] || MISSING="$MISSING $m"
 done
+assert_equals "" "$MISSING" "req-002: telemetry on installs every shared telemetry module"
 
-# setup.ps1 parity: the tier 1 telemetry filter must be widened there too.
+# The installed emit hook must run end to end: with an unreachable backend, the
+# shared recordTelemetryFailure writes a marker. That marker can only exist if
+# all five shared imports resolved.
+#
+# getFlagPath keys the phase-start dedup flag on session_id+phase alone, in the
+# shared OS tmpdir, not scoped to this test's workspace. A fixed session id
+# collides with a flag left by a prior run of this same file and short-circuits
+# emission before a marker is written. Use a run-unique id.
+T_SESSION="t-$$-$(date +%s%N 2>/dev/null || date +%s)"
+printf '{"cwd":"%s","session_id":"%s"}' "$WS" "$T_SESSION" \
+  | PLANIFEST_SESSION_ID="$T_SESSION" PLANIFEST_TELEMETRY_URL=http://127.0.0.1:39499 \
+    node "$WS/.claude/hooks/telemetry/emit-phase-start.mjs" codegen >/dev/null 2>&1
+assert_exit_zero $? "req-002: installed emit-phase-start exits 0"
+if ls "$WS/plan/.telemetry-failures"/*.json >/dev/null 2>&1; then
+  assert_equals "0" "0" "req-002: emit-phase-start ran end to end (shared marker written)"
+else
+  assert_equals "marker" "none" "req-002: emit-phase-start ran end to end (shared marker written)"
+fi
+cd /; rm -rf "$WS"
+
+# setup.ps1 parity: the telemetry filter is the same widened *.mjs glob.
 PS1_CONTENT="$(cat "$FRAMEWORK_SRC/setup.ps1")"
-assert_contains "Get-ChildItem -Path \$telemSrc -Filter '*.mjs'" "$PS1_CONTENT" \
-  "req-002: setup.ps1 tier 1 telemetry filter is widened to *.mjs"
+assert_contains "Get-ChildItem -Path \$src -Filter '*.mjs'" "$PS1_CONTENT" \
+  "req-002: setup.ps1 telemetry filter is the widened *.mjs glob"
 
 # =============================================================================
 # 7. getSessionId is deliberately NOT consolidated

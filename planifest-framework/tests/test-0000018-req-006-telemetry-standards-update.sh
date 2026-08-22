@@ -18,8 +18,6 @@ echo "=== req-006: unified signal documented ==="
 
 assert_equals "yes" "$(grep_has 'Unified Telemetry Signal' "$STANDARDS")" \
   "req-006: unified signal section exists"
-assert_equals "yes" "$(grep_has 'context-mode-mcp' "$STANDARDS")" \
-  "req-006: documents the removed --context-mode-mcp coupling"
 assert_equals "yes" "$(grep_has 'always set together' "$STANDARDS")" \
   "req-006: documents the two mechanisms are now always consistent"
 

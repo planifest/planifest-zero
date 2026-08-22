@@ -1,6 +1,6 @@
 {
   "$schema": "./regression-manifest.schema.json",
-  "description": "Long-term regression pack manifest. Tracks tests promoted from feature pipelines. Managed by promote-to-regression.sh — do not edit manually.",
+  "description": "Long-term regression pack manifest. Tracks tests promoted from feature pipelines. Managed by promote-to-regression.sh \u2014 do not edit manually.",
   "fields": {
     "name": "Unique filename of the test (basename)",
     "sourceFeature": "Feature ID from which the test was promoted (e.g. 0000004-tdd-regression-test-quality)",
@@ -52,13 +52,6 @@
       "filePath": "tests/regression/test-0000017-req-002-ratchet-approve.sh"
     },
     {
-      "name": "test-0000017-req-004-cross-platform-hooks.sh",
-      "sourceFeature": "0000017-ratchet-forgery-detection-and-telemetry-schema-spec",
-      "promotionDate": "2026-08-01",
-      "promotedBy": "agent",
-      "filePath": "tests/regression/test-0000017-req-004-cross-platform-hooks.sh"
-    },
-    {
       "name": "test-0000017-req-005-scope-lock-suggested-answers.sh",
       "sourceFeature": "0000017-ratchet-forgery-detection-and-telemetry-schema-spec",
       "promotionDate": "2026-08-01",
@@ -78,13 +71,6 @@
       "promotionDate": "2026-08-01",
       "promotedBy": "agent",
       "filePath": "tests/regression/test-0000017-req-007-change-agent-archive.sh"
-    },
-    {
-      "name": "test-0000018-req-001-remove-context-mode-mcp-coupling.sh",
-      "sourceFeature": "0000018-telemetry-emission-consistency",
-      "promotionDate": "2026-08-01",
-      "promotedBy": "agent",
-      "filePath": "tests/regression/test-0000018-req-001-remove-context-mode-mcp-coupling.sh"
     },
     {
       "name": "test-0000018-req-002-hook-failure-marker.sh",

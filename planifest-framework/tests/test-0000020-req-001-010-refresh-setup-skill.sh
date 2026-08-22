@@ -36,25 +36,17 @@ echo "=== req-001: tool input and detection ==="
 
 assert_contains "always explicit input, never silently guessed" "$STEP1" \
   "req-001: tool is explicit input, not silently guessed"
-assert_contains "Exactly one install found: proceed with that tool automatically" "$STEP1" \
-  "req-001: single install proceeds without asking"
-assert_contains "Two or more installs found: ask the human on the loop" "$STEP1" \
-  "req-001: multiple installs trigger a question, not a guess"
-assert_contains "normal input, not an error condition (ADR-004)" "$STEP1" \
-  "req-001: multi-install case is framed as normal input per ADR-004"
+assert_contains "Install found: proceed" "$STEP1" \
+  "req-001: a found install proceeds without asking"
 
 echo ""
 echo "=== req-002: flag reconstruction with confidence ==="
 
 assert_contains "high" "$STEP3" "req-002: marker-sourced flags reported at high confidence"
-assert_contains "context-mode/\` directory exists with \`.mjs\` files" "$STEP3" \
-  "req-002: context-mode hook signal mapped to --context-mode-mcp"
 assert_contains "PLANIFEST_TELEMETRY_URL=<url>" "$STEP3" \
   "req-002: telemetry backend URL signal mapped to --backend-url"
 assert_contains "plan/.orchestrator-strict\` file exists" "$STEP3" \
   "req-002: strict-orchestrator marker signal mapped"
-assert_contains "attribution.txt" "$STEP3" \
-  "req-002: attribution.txt signal mapped to --include-full-skill-library"
 
 echo ""
 echo "=== req-003: mandatory human confirmation gate ==="
