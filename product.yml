@@ -22,7 +22,3 @@ versionPolicy: "max-component-version"
 components:
   - id: "planifest-framework"
     path: "planifest-framework/component.yml"
-  - id: "setup-hook-integration"
-    path: "src/setup-hook-integration/component.yml"
-  - id: "context-mode-hooks"
-    path: "src/context-mode-hooks/component.yml"
