@@ -10,9 +10,6 @@
     WorkflowsDir = '.claude\commands'
     BootFile     = 'CLAUDE.md'
     BootTemplate   = "planifest-framework/templates/standard-boot.md"
-    # context-mode enforcement hooks — installed when --context-mode-mcp is passed
-    HooksSrc       = 'hooks/context-mode'
-    HooksDir       = '.claude/hooks/context-mode'
     SettingsFile   = '.claude/settings.json'
     # structured telemetry hooks — installed when --structured-telemetry-mcp is passed (0000018 req-001)
     TelemetryHooksSrc = 'hooks/telemetry'
