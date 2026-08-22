@@ -210,6 +210,11 @@ function Copy-ExternalSkills {
 }
 
 function Write-PlanifestBootFile {
+    # Boot files are disposable build outputs (0000029 ADR-001): always
+    # regenerate from the current template so template fixes propagate on
+    # every run. Durable local customization lives in
+    # planifest-overrides/instructions/ and is re-applied by
+    # Append-OverrideInstructions after this write.
     param($RelPath, $Content)
 
     $fullPath = Join-Path $ProjectRoot $RelPath
@@ -221,7 +226,8 @@ function Write-PlanifestBootFile {
         Write-Host "  + $RelPath (created)"
     }
     else {
-        Write-Host "  - $RelPath (already exists, skipped)"
+        Set-Content -Path $fullPath -Value $Content -Encoding UTF8
+        Write-Host "  ~ $RelPath (regenerated from template)"
     }
 }
 

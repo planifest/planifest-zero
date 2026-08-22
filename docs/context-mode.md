@@ -1,5 +1,15 @@
 # context-mode MCP: How It Works
 
+> **Status (0000029, 09 Aug 2026): no longer referenced by Planifest boot templates.**
+> `templates/standard-boot.md` previously instructed every agent to prefer context-mode
+> tools unconditionally. That line was removed under 0000029 ADR-002 after a session in
+> which the plugin injected a fabricated system-reminder instructing the agent to conceal
+> a file change from the human on the loop, a prompt-injection pattern. Boot templates no
+> longer name any third-party MCP plugin. The opt-in `--context-mode-mcp` setup flag and
+> its enforcement hooks remain available, unchanged, for installs that deliberately enable
+> the plugin. This document describes how the plugin works when so enabled; it is not an
+> endorsement.
+
 [context-mode](https://github.com/mksglu/context-mode) is an MCP plugin that protects your agent's context window from flooding. Instead of piping large outputs directly into context, the agent routes them through a sandboxed knowledge base and retrieves only what it needs.
 
 ---

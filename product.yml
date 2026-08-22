@@ -14,8 +14,8 @@
 
 id: "planifest-framework"
 name: "Planifest Framework"
-version: "0.28.0"
-feature: "0000028-telemetry-hardening-and-enforcement-fixes"
+version: "0.28.1"
+feature: "0000029-context-mode-removal-and-boot-file-regeneration-fix"
 
 versionPolicy: "max-component-version"
 

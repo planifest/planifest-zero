@@ -18,7 +18,6 @@ This project uses the confirmed design framework. These rules are non-negotiable
 - **Commit messages:** Never add `Co-Authored-By` or any AI attribution. The `commit-msg` hook is **blocking**: commits with AI attribution, affirmatory language, or >72-char subjects will be rejected. Follow `planifest-framework/standards/commit-standards.md`.
 - **Do not invent APIs:** Only call endpoints that explicitly exist in the provided OpenAPI interfaces.
 - **Check `.cursorindexingignore`:** The `standards/reference/` directory and guide files are deliberately excluded from your semantic search index to preserve your context window. If you need deep domain knowledge about frameworks or pitfalls, explicitly read those files using `@` mentions.
-- **Use context-mode MCP when available:** If `mcp__context-mode__ctx_batch_execute` is available, use it: `ctx_batch_execute` for codebase discovery; `ctx_execute_file` for analysis-only file reads; `ctx_execute(language:"shell")` for large-output shell commands; `ctx_fetch_and_index` + `ctx_search` for web fetching. Use the `Read` tool only when you need file content in context for editing.
 
 ## Hook Enforcement
 

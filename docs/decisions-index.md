@@ -257,6 +257,15 @@ ADR files: [plan/_archive/0000028-telemetry-hardening-and-enforcement-fixes-2026
 | ADR-003 | Em Dash Guard Attachment Point and Bypass | accepted | The guard is a `PreToolUse(Write, Edit)` hook, `hooks/enforcement/em-dash-guard.mjs`, sibling to `gate-write.mjs` rather than a modification of it, so a defect in one cannot disable the other. A git hook was rejected because the character would already be on disk by commit time. Scoped to five prefixes: `plan/current/`, `docs/`, and `planifest-framework/` skills, templates and standards. Since Claude Code offers no per-call skip flag, the bypass is an in-content sentinel comment, visible in the artifact's own diff, reusable and writable by either party, deliberately unlike `.ratchet-approve`, which guards a commitment being weakened rather than a single character of punctuation |
 | ADR-004 | Self-Modification Sequencing for Hook Extraction and Reinstall | accepted | When a feature rewrites the hooks executing its own build, rewire one caller at a time: edit, commit, re-run `setup.sh` for that edit alone, then assert a real side effect (event received, marker written, process spawned), never merely that the process returned. Exit 0 is uninformative by design (NFR-001), so a hook broken mid-edit degrades to a silent no-op, and an ESM import of a missing module fails before the hook's own try/catch runs. One `setup.sh` re-run at the end was rejected because it collapses good straight to multiply-broken with no way to bisect. A separate worktree was rejected outright by repo instruction |
 
+### Feature 0000029: context-mode-removal-and-boot-file-regeneration-fix
+
+ADR files: [plan/_archive/0000029-context-mode-removal-and-boot-file-regeneration-fix-2026-08-09/adr/](../plan/_archive/0000029-context-mode-removal-and-boot-file-regeneration-fix-2026-08-09/adr/)
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Boot Files Are Disposable Build Outputs | accepted | `write_boot_file`/`Write-PlanifestBootFile` overwrite the boot file unconditionally on every setup run; the skip-if-exists guard protected hand-editing, a workflow the framework does not support, while silently blocking template fixes from ever reaching installed repos. Durable customization belongs exclusively in `planifest-overrides/instructions/`, re-applied every run |
+| ADR-002 | Boot Templates Never Name Third-Party MCP Plugins | accepted | Removes the unconditional context-mode instruction from `templates/standard-boot.md` (shipped into 6 of 9 tools' boot files) after the plugin injected a fabricated system-reminder instructing the agent to conceal a change from the human. Standing rule: boot-file text is trusted instruction text and never endorses a named third-party plugin; tool availability belongs to host-tool configuration, not template prose. The opt-in `--context-mode-mcp` hook path is untouched |
+
 ---
 
 *Template: decisions-index.template.md*

@@ -155,6 +155,10 @@ copy_external_skills() {
 }
 
 write_boot_file() {
+  # Boot files are disposable build outputs (0000029 ADR-001): always
+  # regenerate from the current template so template fixes propagate on every
+  # run. Durable local customization lives in planifest-overrides/instructions/
+  # and is re-applied by append_override_instructions after this write.
   local path="$1"
   local content="$2"
 
@@ -163,7 +167,8 @@ write_boot_file() {
     echo "$content" > "$path"
     echo "  + $(basename "$path") (created)"
   else
-    echo "  - $(basename "$path") (already exists, skipped)"
+    echo "$content" > "$path"
+    echo "  ~ $(basename "$path") (regenerated from template)"
   fi
 }
 

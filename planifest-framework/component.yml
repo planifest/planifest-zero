@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000028-telemetry-hardening-and-enforcement-fixes"
-version: "0.28.0"
+feature: "0000029-context-mode-removal-and-boot-file-regeneration-fix"
+version: "0.28.1"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -70,6 +70,8 @@ responsibilities:
   - "Reject U+2014 in Planifest prose at write time via the em-dash-guard.mjs PreToolUse(Write, Edit) hook, scoped to plan/current/, docs/, and planifest-framework/ skills, templates and standards, bypassed only by a visible in-content sentinel comment (0000028-req-006, ADR-003)"
   - "Rewire one caller at a time when self-modifying installed hooks: commit the shared module first, re-run setup.sh for that edit alone, then assert a real side effect rather than an exit code before the next rewire (0000028-ADR-004)"
   - "Wire every hooks/enforcement/ entry into settings.json through a node interpreter prefix rather than a bare .mjs path, so the enforcement layer cannot fail open at exit 126 on a non-executable file mode (0000028-P5 SEC-001)"
+  - "Always overwrite the boot file (CLAUDE.md/AGENTS.md) from the current template on every setup.sh/setup.ps1 run, since durable local customization lives in planifest-overrides/instructions/ and is re-applied every run (0000029-req-001)"
+  - "Keep templates/standard-boot.md free of any reference to a specific third-party MCP plugin by name; a boot template must not instruct the agent to prefer a plugin that may not be installed, trusted, or reviewed (0000029-req-002)"
 
 exceptions:
   - "Does not write to planifest-overrides/ — that directory is user-owned"
@@ -151,6 +153,8 @@ scope:
     - "hooks/enforcement/em-dash-guard.mjs and its setup.sh/setup.ps1 PreToolUse registration (0000028-req-006)"
     - "Tier 1 telemetry install glob widened from emit-phase-*.mjs to *.mjs in setup.sh and setup.ps1, so a shared module is never silently dropped for Cursor, Windsurf and Cline (0000028-req-002)"
     - "node interpreter prefix on every enforcement hook command string written into settings.json by setup.sh (0000028-P5 SEC-001)"
+    - "write_boot_file/Write-BootFile always-overwrite behaviour, replacing the prior skip-if-exists guard (0000029-req-001)"
+    - "templates/standard-boot.md free of any named third-party MCP plugin reference (0000029-req-002)"
   outOfScope:
     - "Application-level code generation (handled by planifest-codegen-agent)"
     - "CI pipeline configuration for consumer projects"
