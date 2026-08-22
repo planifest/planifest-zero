@@ -1,21 +1,19 @@
-# product.yml — product-level version manifest (ADR-002, feature 0000016)
+# product.yml: product-level version manifest (ADR-002, feature 0000016).
 #
-# Created at 0000023-framework-pipeline-fixes P9 — this project crossed from
-# 1 to effectively-always-had 3 components (planifest-framework,
-# setup-hook-integration, context-mode-hooks) without a product.yml existing
-# yet; created now per the ship-agent's P9 Step 9 case 3.
+# This project has one component. It keeps a product.yml anyway because
+# telemetry hooks source product_id from the `id` field below, so events stay
+# attributable to the same product regardless of clone location or machine
+# (feature 0000024).
 #
-# components[] revised 2026-08-08: holds {id, path} pointers to each
-# component's own component.yml, not a cached version — versions are read
-# live at derivation time (node planifest-framework/scripts/product-version.mjs),
-# so this list
-# only needs editing when a component is added or removed, never on a
-# version bump. See docs/decisions-index.md's Feature 0000016 ADR-002 entry.
+# components[] holds {id, path} pointers to each component's own
+# component.yml, not a cached version. Versions are read live at derivation
+# time by `node planifest-framework/scripts/product-version.mjs`, so this list
+# only needs editing when a component is added or removed.
 
 id: "planifest-framework"
 name: "Planifest Framework"
-version: "0.28.1"
-feature: "0000029-context-mode-removal-and-boot-file-regeneration-fix"
+version: "0.1.0"
+feature: "0000030-framework-cut-down"
 
 versionPolicy: "max-component-version"
 
