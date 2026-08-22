@@ -8,8 +8,8 @@
 ```json
 {
   "tool": "claude-code",
-  "flags": ["--structured-telemetry-mcp","--strict-orchestrator"],
+  "flags": ["--structured-telemetry-mcp"],
   "backendUrl": "http://localhost:3741",
-  "writtenAt": "2026-08-22T05:03:41Z"
+  "writtenAt": "2026-08-22T11:20:32Z"
 }
 ```
