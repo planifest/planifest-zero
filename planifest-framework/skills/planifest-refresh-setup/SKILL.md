@@ -15,28 +15,14 @@ hooks:
 
 The target tool is always explicit input, never silently guessed:
 
-1. If the human on the loop named a tool in their request (e.g. "refresh setup for cursor"), use it directly. Valid tool identifiers match `setup.sh`/`setup.ps1`'s `$VALID_TOOLS` / `$ValidTools`: `claude-code`, `cursor`, `windsurf`, `cline`, `codex`, `opencode`, `antigravity`, `copilot`, `roo-code`.
-2. If no tool was named, scan the repo root for installed-tool signals:
-
-   | Tool | Signal |
-   |------|--------|
-   | `claude-code` | `.claude/` directory present |
-   | `cursor` | `.cursor/` directory present |
-   | `windsurf` | `.windsurf/` directory present |
-   | `cline` | `.clinerules/` directory present |
-   | `codex` | `.agents/` directory present, or `OPENAI_*` env vars set |
-   | `opencode` | `.opencode/` directory present |
-   | `antigravity` | `.gemini/` directory present |
-   | `copilot` | `.github/skills/` (Planifest-installed skills) present |
-   | `roo-code` | deprecated (shut down 15 May 2026, see `setup/roo-code.sh`) - if this is the only signal found, tell the human on the loop it is deprecated and recommend `cline` instead; do not proceed with a refresh for it |
-
-3. Exactly one install found: proceed with that tool automatically, no question asked.
-4. Two or more installs found: ask the human on the loop which tool to refresh before doing anything else. This is normal input, not an error condition (ADR-004) - do not frame it as a failure or halt-and-report the way Step 6's failure handling does.
-5. Zero installs found: this is REQ-007's "no install found" case - go to Step 1a instead of continuing.
+1. `claude-code` is the only supported tool. It matches `setup.sh`/`setup.ps1`'s `$VALID_TOOLS` / `$ValidTools`.
+2. Scan the repo root for the install signal: a `.claude/` directory.
+3. Install found: proceed.
+4. No install found: this is REQ-007's "no install found" case - go to Step 1a instead of continuing.
 
 ### Step 1a - No Install Found (REQ-007)
 
-If a tool was named and no install exists for it, or no tool was named and no install exists for any supported tool, report this plainly and stop:
+If no install exists, report this plainly and stop:
 
 > No Planifest install found{ for `{tool}`, if named}. This looks like an initial setup, not a refresh - run `setup.sh`/`setup.ps1` directly instead.
 
@@ -46,8 +32,8 @@ Do not proceed to Step 2. Do not ask "which tool" in this branch (that question 
 
 Before running full detection, check whether this is a recovery scenario:
 
-1. Determine the tool's own directory (`.claude`, `.cursor`, etc. - same mapping as Step 1's signal table).
-2. Check whether the tool's boot file is missing. For `claude-code` this is `CLAUDE.md`; for tools using a shared boot file convention, check `AGENTS.md` too if that tool's config uses it (see `planifest-framework/setup/{tool}.sh`, `TOOL_BOOT_FILE`).
+1. The tool's own directory is `.claude`.
+2. Check whether the boot file `CLAUDE.md` is missing.
 3. Check `{tool-dir}/.planifest-setup-flags` for `attemptStatus: "pending"`.
 4. If **both** are true (boot file missing AND `attemptStatus: pending`), this is an interrupted prior run:
    - Report the recovered state to the human on the loop: the flags and command from the marker file, at high confidence (source: marker file, not re-inferred).

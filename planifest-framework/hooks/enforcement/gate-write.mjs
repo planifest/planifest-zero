@@ -23,8 +23,7 @@ import { readStdin } from "./read-stdin.mjs";
 const ALWAYS_PERMITTED_PREFIXES = ["plan/", "plan\\", "docs/", "docs\\"];
 const ALWAYS_PERMITTED_FILES = [
   "claude.md", "agents.md", ".planifest-session", ".skips", ".feature-id",
-  ".gitignore", ".gitattributes", ".claudeignore", ".cursorignore",
-  ".windsurfignore", ".clineignore", ".cursorindexingignore",
+  ".gitignore", ".gitattributes", ".claudeignore",
   "pause.md",
 ];
 

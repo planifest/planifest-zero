@@ -144,7 +144,7 @@ Operational metadata used by the CI/CD pipeline and template stamping system.
 | `metadata.createdBy` | Yes | System | `agent` or `human`. |
 | `metadata.lastModifiedBy` | Yes | System | `agent` or `human`. |
 | `metadata.skill` | Yes | Agent | Which skill produced or last modified this manifest (e.g., `codegen-agent`, `change-agent`). |
-| `metadata.tool` | Yes | Agent | Which agentic tool was used (e.g., `claude-code`, `cursor`, `antigravity`). |
+| `metadata.tool` | Yes | Agent | Which agentic tool was used (`claude-code`). |
 | `metadata.model` | Yes | Agent | Which model produced the output (e.g., `claude-sonnet-4-20250514`). |
 
 ---
