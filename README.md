@@ -161,6 +161,23 @@ Issues and pull requests are welcome. Agent skills and templates are the areas m
 
 ---
 
+## Documentation
+
+`planifest-docs` holds the human documentation: architecture notes, research, and the roadmap. Agents do not need these. They work from the skills and templates in `planifest-framework/`. It is available as a [git repository](https://github.com/planifest/planifest-docs) and a [GitHub Pages site](https://planifest.github.io/planifest-docs/).
+
+| Document | Purpose |
+|----------|---------|
+| [Master Plan](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p001-planifest-master-plan.md) | Architecture overview |
+| [Product Concept](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p002-planifest-product-concept.md) | Vision and commercial model |
+| [Functional Decisions](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p003-planifest-functional-decisions.md) | Decision log with rationale |
+| [Pathway to Agentic Development](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p004-the-pathway-to-agentic-development.md) | Background and rationale |
+| [Pipeline](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p015-planifest-pipeline.md) | Pipeline phase descriptions |
+| [Roadmap](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p014-planifest-roadmap.md) | Deferred items and future features |
+
+These docs still describe the multi-tool framework. They pre-date the 0.1.0 cut-down.
+
+---
+
 ## Licence
 
 [Apache License 2.0](LICENSE.txt), chosen over MIT primarily for its explicit patent grant.
