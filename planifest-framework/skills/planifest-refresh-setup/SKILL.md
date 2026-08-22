@@ -58,15 +58,13 @@ Before running full detection, check whether this is a recovery scenario:
 
 Skip this step if Step 2 already produced a recovered flag set.
 
-1. Check `{tool-dir}/.planifest-setup-flags` for the target tool. If it exists and is well-formed (see schema in `src/setup-hook-integration/docs/data-contract.md`), read `flags`, `backendUrl`, and report every flag at **high** confidence, source: marker file.
+1. Check `{tool-dir}/.planifest-setup-flags` for the target tool. If it exists and is well-formed (see `planifest-framework/component.yml`), read `flags`, `backendUrl`, and report every flag at **high** confidence, source: marker file.
 2. If the marker file is absent, incomplete, or for a different tool than the one being refreshed, infer flags from installed hook wiring instead:
 
    | Signal | Implies | Confidence |
    |--------|---------|-----------|
-   | `{tool-dir}/hooks/context-mode/` directory exists with `.mjs` files | `--context-mode-mcp` | high |
    | `{tool-dir}/hooks/telemetry/` directory exists with `context-pressure.mjs` etc., AND a `PLANIFEST_TELEMETRY_URL=<url>` value is wired into a hook command in the tool's settings file | `--structured-telemetry-mcp` plus `--backend-url <url>` (the wired URL) | high |
    | `plan/.orchestrator-strict` file exists | `--strict-orchestrator` | high |
-   | `attribution.txt` files present under `{tool-dir}/skills/*/` (alongside `SKILL.md`) | `--include-full-skill-library` | medium (attribution.txt could theoretically exist without the flag if a skill was added manually - flag as medium, not high) |
    | None of the above signals present for a given flag | that flag was not used | high (absence of a signal is itself a confident signal) |
 
 3. Build the full flag list and the exact command that will be run: `setup.sh {tool} {flags...}` (or `setup.ps1 {tool} {flags...}` on Windows).

@@ -32,8 +32,6 @@ When `Build target: docker` is declared in `plan/current/design.md`:
 
 ## Process
 
-> When `ctx_execute` is available, run CI checks through it so large test/build output stays in the sandbox; only the failure summary enters context.
-
 Run the project's CI checks in this strict order:
 
 0. **Library audit**: for the component's declared language, check `planifest-overrides/library-standards/{language}/prefer-avoid.md` (if exists) then `planifest-framework/standards/library-standards/{language}/prefer-avoid.md`. Scan the installed dependency manifest against the avoid list. If an avoided library is present: fail, name the library, name the preferred alternative, and report. Skip if the language subdir is a stub or absent.
@@ -98,7 +96,7 @@ Do NOT proceed to the next pipeline phase if any check is failing. The pipeline 
 
 ## Parallelism Directive
 
-**Pre-Execution Parallelism Plan:** before executing any CI check, identify independent checks and dispatch them in a single parallel batch (multiple Bash or ctx_execute calls in one message); state the dependency reason for anything run serially.
+**Pre-Execution Parallelism Plan:** before executing any CI check, identify independent checks and dispatch them in a single parallel batch (multiple Bash calls in one message); state the dependency reason for anything run serially.
 
 | MUST parallelise | Cannot parallelise |
 |------------------|--------------------|

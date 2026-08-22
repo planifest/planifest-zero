@@ -57,7 +57,6 @@ Write the build report to `plan/_archive/{feature-id}-{date}/build-report.md`.
 
 | Tool | Call count | Purpose |
 |------|-----------|---------|
-| ctx_fetch_and_index | {n} | Web research |
 | ...                 | ... | ... |
 
 ## Parallel Task Bursts

@@ -15,8 +15,6 @@ hooks:
 
 ## Input
 
-> When `ctx_batch_execute` is available, use it for the full security scan; use `ctx_execute_file` to analyse specific flagged files.
-
 - The validated implementation and any Infrastructure as Code (Terraform, Pulumi, CDK, etc., if declared in the stack) at `src/{component-id}/` (all components in the feature)
 - Design at `plan/current/design.md`
 - OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable)

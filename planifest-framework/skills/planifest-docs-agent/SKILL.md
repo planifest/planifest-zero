@@ -127,8 +127,6 @@ Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md`. Read `planifest-framework/t
 
 ### Drift Detection
 
-> When `ctx_batch_execute` is available, run all drift checks as a single batch call rather than sequential file reads.
-
 Perform these specific drift checks:
 
 | Check | Source of Truth | Verify Against | Action if Drift Found |
