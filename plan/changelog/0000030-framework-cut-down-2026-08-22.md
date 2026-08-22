@@ -45,7 +45,7 @@ This build reduced the repo to a Claude Code only framework and cleared its accu
 
 The framework supported nine tool targets but only Claude Code was in use. Roughly a third of `setup.sh` existed to branch by tool tier. Commit 6a50af1 had already dropped context-mode from the boot templates, leaving `--context-mode-mcp` installing hooks nothing else referenced.
 
-Full rationale and the alternatives considered: ADR-001 in this feature's archive.
+Full rationale and the alternatives considered: [ADR-001](../_archive/0000030-framework-cut-down-2026-08-22/adr/ADR-001-claude-code-only-target.md).
 
 ---
 
