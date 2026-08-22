@@ -72,3 +72,12 @@ P0 exchange (pre-flight): Q: Is main up to date, and what happens to the uncommi
 | Self-corrections | `{{count}}` |
 | Phases skipped | `{{list or "none"}}` |
 | Phases with a recorded telemetry gap | `0` |
+
+#### P0 gate
+
+- Adoption mode: standard-iterative, detected from 30 archived features and `docs/about.md`.
+- Version confirmed: 0.1.0. Downward from 0.28.1 under an explicit human override; rationale recorded in `design.md`.
+- Backlog pickup: all 23 entries discarded in bulk by human decision, matching the empty-the-folder scope item. No entry was pulled into this feature.
+- Scope Lock Challenge: not run. The Change Pipeline route does not re-run P0 coaching.
+- Run mode: continuous.
+- Design confirmed: 22 Aug 2026 @ 04:03 p.m. BST.
