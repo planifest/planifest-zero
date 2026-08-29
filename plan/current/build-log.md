@@ -107,6 +107,19 @@ Gate accepted: P0 (2026-08-30)
 Gate: P1 complete. Six requirement files, execution plan, scope, risk register, glossary. OpenAPI and runtime artifacts correctly omitted. Continuous run: proceeding to P2 without stopping.
 Gate accepted: P1 (2026-08-30, continuous run)
 
+### P2: Architecture Decisions (adr)
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-29T23:35:00Z` |
+| Model tier | primary orchestration, cheaper drafting |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | `4` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Telemetry | emitted |
+| Notes | Four independent decisions, four parallel drafters: five-phase contract and skill consolidation, rename and product identity, single-route pipeline, present-state docs policy. No stack-choice ADR needed beyond these: the stack is unchanged from the design. |
+
 ---
 
 ## Summary (filled at P7)
