@@ -35,7 +35,7 @@ Each requirement must be:
 - **Testable** - you can write a test case from the requirement alone
 - **Traceable** - sourced from a user story or acceptance criterion in the brief
 
-| Ã¢ÂÅ’ Bad | Ã¢Å“â€¦ Good |
+| Bad | Good |
 |--------|---------|
 | "The system should handle authentication" | "FR-001: The system shall accept a POST to /api/v1/auth/login with email and password, returning a JWT access token (15min TTL) and refresh token (7d TTL)" |
 | "Users can manage their profile" | "FR-003: The system shall accept a PATCH to /api/v1/users/:id with partial profile fields, returning the updated user object" |
@@ -71,8 +71,8 @@ Material gaps the plan skill could not resolve from the brief. These are **not**
 
 ```
 Feature Brief -> Execution Plan -> ADRs -> Code
-              -> OpenAPI Spec (if API) ←-
-              -> Data Model â”€â”€-> Data Contract
+              -> OpenAPI Spec (if API)
+              -> Data Model -> Data Contract
 ```
 
 The execution plan is the central artifact. ADRs explain HOW to implement the requirements. The implement phase reads both.

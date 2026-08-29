@@ -8,7 +8,7 @@ version: "0.1.0"
 
 **Feature ID:** {{0000000}}-{{kebab-case-name}}
 
-> Written by a human. The orchestrator reads this and coaches you through any gaps before passing it to the spec-agent.
+> Written by a human. The orchestrator reads this and coaches you through any gaps before handing it to the plan phase.
 >
 > **Feature ID format:** A 7-digit zero-padded number followed by a kebab-case name (e.g., `0000001-user-auth`, `0000002-payment-gateway`). Choose the next available number.
 
@@ -33,7 +33,7 @@ Break the feature into discrete features. Each feature should be small enough th
 
 ## Waves
 
-If the feature has more than 5-6 features, split it into waves. Each wave becomes a separate iteration of the Agentic Iteration Loop with its own execution plan, ADRs, and codegen pass. Earlier waves ship before later waves begin.
+If the feature has more than 5-6 features, split it into waves. Each wave becomes a separate pipeline run with its own plan and implement phases. Earlier waves ship before later waves begin.
 
 | Wave | Features Included | Ships When |
 |------|-------------------|------------|
@@ -95,7 +95,7 @@ The agent implements within these constraints - it does not choose the architect
 
 ## Non-Functional Requirements
 
-Specific, measurable targets. If you don't have a target, leave it blank - the spec-agent will ask.
+Specific, measurable targets. If you don't have a target, leave it blank - the orchestrator will ask.
 
 | NFR | Target | Measurement |
 |-----|--------|-------------|
@@ -114,7 +114,7 @@ Specific, measurable targets. If you don't have a target, leave it blank - the s
 
 ## Scenario Paths
 
-Before writing acceptance criteria, consider the paths your feature must handle. The orchestrator will read these answers and use them to reduce coaching questions and run a more targeted Scope Lock Challenge. Empty entries will be treated as gaps to fill during P0.
+Before writing acceptance criteria, consider the paths your feature must handle. The orchestrator will read these answers and use them to reduce coaching questions and run a more targeted Scope Lock Challenge. Empty entries will be treated as gaps to fill during discovery.
 
 **Happy path:** What does success look like end-to-end? Describe the flow from first action to final outcome when everything works.
 

@@ -8,7 +8,7 @@
 
 ## Purpose
 
-The Feature Brief is the **only human-authored input** to the confirmed design Agentic Iteration Loop. Everything the agent builds - execution plans, ADRs, code, tests, docs - derives from this document. If it's vague, everything downstream is vague. If it's specific, the agent has a fighting chance.
+The Feature Brief is the **only human-authored input** to the confirmed design pipeline. Everything the agent builds - execution plans, ADRs, code, tests, docs - derives from this document. If it's vague, everything downstream is vague. If it's specific, the agent has a fighting chance.
 
 You are the Product Owner and Technical Architect. This brief is where you exercise both roles.
 
@@ -28,7 +28,7 @@ You are the Product Owner and Technical Architect. This brief is where you exerc
 
 Write 2-3 sentences. Be specific about the problem, who has it, and how you'll know it's solved.
 
-| Ã¢ÂÅ’ Bad | Ã¢Å“â€¦ Good |
+| Bad | Good |
 |--------|---------|
 | "Improve performance" | "Reduce checkout latency from 3s to under 500ms - 40% of users abandon at payment" |
 | "Add user management" | "Enable self-service account creation so customer support stops onboarding 200 users/week manually" |
@@ -46,7 +46,7 @@ The Priority column uses MoSCoW: must-have, should-have, could-have. The orchest
 
 ### Waves
 
-Only needed if you have more than 5-6 features. Waves are sequential iterations of the Agentic Iteration Loop:
+Only needed if you have more than 5-6 features. Waves are sequential pipeline runs:
 - Wave 1 ships before Wave 2 begins
 - Wave 2's agent reads Wave 1's component manifests for context
 - This is how Planifest manages context at scale
@@ -93,7 +93,7 @@ How you know the feature is done. These become the orchestrator's exit criteria.
 
 1. **Too big.** The most common mistake. If the brief describes more than one system, it's too big. Split it.
 2. **Vague stories.** "As a user, I want to manage my account" - manage how? What operations? What data?
-3. **Missing stack.** The codegen-agent cannot begin without a stack declaration. Decide before you brief.
+3. **Missing stack.** The implement phase cannot begin without a stack declaration. Decide before you brief.
 4. **No scope boundaries.** Without "Out of Scope", the agent has no guardrails. It may build things you didn't want.
 5. **Assumed NFRs.** If you need p95 < 200ms, say so. The agent won't guess your latency requirements.
 
@@ -108,7 +108,7 @@ How you know the feature is done. These become the orchestrator's exit criteria.
    - **Architecture**: Standards. The cross-cutting rules and non-functional requirements.
    - **Engineering**: Implementation. How the system was actually built.
    The orchestrator coaches you through any gaps - one question at a time.
-4. Once complete, the orchestrator produces the **confirmed design** and begins the Agentic Iteration Loop
+4. Once complete, the orchestrator produces the **confirmed design** and begins the pipeline
 
 ---
 
