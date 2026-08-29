@@ -1,15 +1,6 @@
 # Agent tool config
 .claude/
-.cursor/
-.agents/
-.agent/
-.gemini/
-.github/skills/
-.windsurf/
-.clinerules/
 CLAUDE.md
-AGENTS.md
-GEMINI.md
 
 # Flags-used marker (0000020) - local per-tool install state, not source. Matches
 # at any depth (e.g. .claude/.planifest-setup-flags, .github/.planifest-setup-flags)

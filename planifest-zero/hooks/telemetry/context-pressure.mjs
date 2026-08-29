@@ -5,8 +5,7 @@
  * Emits a `context_pressure` event to the structured telemetry MCP backend
  * when estimated context fill exceeds THRESHOLD_PCT (default: 70%).
  *
- * Installed only when both --structured-telemetry-mcp and --context-mode-mcp
- * are active at setup time. See plan/current/design.md — Context Pressure Hook.
+ * Installed when --structured-telemetry-mcp is active at setup time.
  *
  * Fill % is estimated from transcript file size. This is a proxy metric —
  * it grows proportionally with context use within a session and resets at
