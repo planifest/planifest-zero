@@ -32,6 +32,10 @@ tool targets and that flag, so running either file today fails immediately.
 The risk is a silent gap in coverage. Anyone reading the tests directory sees a
 setup test and assumes setup is covered.
 
+This entry covers the two files. Entry 0000084 covers the mechanism that hid
+them, namely a runner that reports counts without checking whether anything in
+the directory went undiscovered.
+
 ## Suggested Action
 
 Decide whether setup needs its own suite. If it does, rename both files to the
