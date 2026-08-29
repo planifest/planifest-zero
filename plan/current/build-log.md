@@ -81,6 +81,16 @@ Adoption mode: standard-iterative, confirmed by human on 2026-08-29 (accepted wi
 
 P0 exchange (agent use): Q: session carried a standing directive not to dispatch subagents unless requested / A: human authorised: "use multiple agents wherever practical." Recorded as the per-session grant.
 
+Scope Lock (happy path): build completes, grep clean, tests green, fresh setup verified; human merges the PR and 0000032 runs five-phase [source: agent-draft-edited]
+Scope Lock (first-run path): setup regenerates .claude/ pruning the nine retired skills; discovery starts from empty; telemetry restarts under planifest-zero id [source: agent-draft-edited]
+Scope Lock (error path): backend rejecting new phase values fails loudly in CI, whose telemetry job extends to all five names; markers stay for runtime [source: agent-draft-edited]
+Scope Lock (cross-session): granular commits bound the exposure; plan/current/ formats stay stable so the old orchestrator can resume [source: agent-draft-edited]
+
+P0 exchange (run mode): Q: check per phase or continuous / A: continuous. plan/.run-mode written.
+P0 exchange (design confirmation): Q: confirm design.md as drafted / A: confirmed. Two acceptance criteria added from Scope Lock flags (setup prunes retired skills; CI posts five phase names).
+
+Gate accepted: P0 (2026-08-30)
+
 ---
 
 ## Summary (filled at P7)

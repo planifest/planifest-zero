@@ -115,10 +115,13 @@ One wave. Human decision of 2026-08-29: single run, no waves.
 
 ## Scenario Paths
 
-**Happy path:** filled by Scope Lock Challenge (build log).
-**First-run path:** filled by Scope Lock Challenge (build log).
-**Error / sad path:** filled by Scope Lock Challenge (build log).
-**Cross-session continuity:** filled by Scope Lock Challenge (build log).
+**Happy path:** The build executes the rename, the phase collapse, the route deletion, the skill cut, and the docs rewrite. Success: the grep for the old name is clean outside change records, run-tests.sh exits 0, and a fresh setup.sh in a temp clone completes without error. You merge the PR, setup.sh re-runs to activate the new contract, and feature 0000032 runs under the five phases.
+
+**First-run path:** setup.sh regenerates `.claude/` with the 12-skill suite and five-phase hooks, and deletes the nine retired skills rather than leaving them beside the new set. Discovery initialises `plan/current/` from empty after the auto-trigger fires. Telemetry attribution restarts under the `planifest-zero` product id. setup.sh must complete before any pipeline command.
+
+**Error / sad path:** Most likely failure: the telemetry backend rejects the five new phase enum values. This fails loudly in CI, whose telemetry job is extended to post all five phase names, rather than degrading silently. The failure-marker protocol stays for runtime errors.
+
+**Cross-session continuity:** Uncommitted rename state is the exposure; granular commits minimise it and git recovers the rest. Resume reads `plan/current/`, which the old installed orchestrator parses, so this feature must not change the live artifact formats mid-run.
 
 ## Acceptance Criteria
 
@@ -131,3 +134,5 @@ One wave. Human decision of 2026-08-29: single run, no waves.
 - [ ] `setup.sh claude-code --structured-telemetry-mcp` from a fresh temp clone exits 0; regenerated `.claude/` tree references only `planifest-zero` paths.
 - [ ] run-tests.sh exits 0.
 - [ ] `planifest-overrides/` instructions, setup-config, capability-skills, and library-standards dirs all still honoured by the renamed scripts.
+- [ ] `setup.sh` deletes retired skills from `.claude/skills/` when regenerating, leaving exactly the 12 new skills.
+- [ ] The CI telemetry job posts all five phase names, not only `ship`.
