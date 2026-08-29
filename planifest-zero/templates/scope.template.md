@@ -6,7 +6,7 @@ version: "0.1.0"
 ---
 # Scope - {{feature-name}}
 
-**Skill:** [spec-agent](../skills/spec-agent-SKILL.md)
+**Skill:** [plan](../skills/planifest-plan/SKILL.md)
 **Feature:** {{feature-id}}
 **Wave:** {{wave-number}} (if waved)
 **Version:** {{semver}}

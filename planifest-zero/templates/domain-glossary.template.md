@@ -6,7 +6,7 @@ version: "0.1.0"
 ---
 # Domain Glossary - {{feature-name}}
 
-**Skill:** [spec-agent](../skills/spec-agent-SKILL.md) (updated by any agent that introduces a new domain term)
+**Skill:** [plan](../skills/planifest-plan/SKILL.md) (updated by any agent that introduces a new domain term)
 **Feature:** {{feature-id}}
 **Version:** {{semver}}
 

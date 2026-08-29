@@ -1,6 +1,6 @@
 ﻿# Cost Model - {{feature-name}}
 
-**Skill:** [spec-agent](../skills/spec-agent-SKILL.md)
+**Skill:** [plan](../skills/planifest-plan/SKILL.md)
 **Feature:** {{feature-id}}
 **Version:** {{semver}}
 

@@ -2,7 +2,7 @@
 
 > Every requirement must be traceable to a user story or acceptance criterion.
 
-**Skill:** [spec-agent](../skills/planifest-spec-agent/SKILL.md)
+**Skill:** [plan](../skills/planifest-plan/SKILL.md)
 **Feature:** {{feature-id}}
 **Wave:** {{wave-number}} (if waved)
 **Version:** {{semver}}

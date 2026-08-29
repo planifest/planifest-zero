@@ -6,7 +6,7 @@ version: "0.1.0"
 ---
 # Requirement: {{req-id}} - {{feature-name}}
 
-**Skill:** [spec-agent](../skills/planifest-spec-agent/SKILL.md)
+**Skill:** [plan](../skills/planifest-plan/SKILL.md)
 **Feature:** {{feature-id}}
 **Source:** {{user story ID from design.md, e.g. US-001}}
 **Priority:** must-have | should-have

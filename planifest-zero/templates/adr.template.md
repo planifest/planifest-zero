@@ -6,7 +6,7 @@ version: "0.1.0"
 ---
 # ADR-{{NNN}} - {{title}}
 
-**Skill:** [adr-agent](../skills/adr-agent-SKILL.md)
+**Skill:** [plan](../skills/planifest-plan/SKILL.md)
 **Feature:** {{feature-id}}
 **Component:** {{component-id}} (if scoped to one)
 **Date:** {{ISO-8601}}

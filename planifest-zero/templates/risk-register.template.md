@@ -6,7 +6,7 @@ version: "0.1.0"
 ---
 # Risk Register - {{feature-name}}
 
-**Skill:** [spec-agent](../skills/spec-agent-SKILL.md) (updated by any agent that identifies a new risk)
+**Skill:** [plan](../skills/planifest-plan/SKILL.md) (updated by any agent that identifies a new risk)
 **Feature:** {{feature-id}}
 **Version:** {{semver}}
 **Overall Risk Level:** low | medium | high | critical
