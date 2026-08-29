@@ -8,6 +8,7 @@
 ## Prerequisites
 
 - Claude Code
+- Node (the hooks and scripts run as `node` scripts)
 - A terminal with Bash (macOS/Linux) or PowerShell (Windows)
 
 ---
@@ -16,31 +17,30 @@
 
 ### 1. Add the framework
 
-Copy the `planifest-zero/` folder into your repository root. This is the only thing you need — it contains the skills, templates, standards, and setup scripts.
+Copy the `planifest-zero/` folder into your repository root. This folder is all you need. It contains the skills, templates, standards, hooks, and setup scripts.
 
 ### 2. Create the project structure
 
 ```
-mkdir plan plan/changelog src docs
+mkdir -p plan/current plan/changelog plan/backlog src docs
 ```
 
 These are the core working directories:
-- `plan/` — The current change being planned.
-  - `plan/current/design.md` — Confirmed design and build plan.
-  - `plan/current/feature-brief.md` — The initiating human-authored brief.
-  - `plan/current/build-log.md` — Working telemetry file maintained throughout the pipeline run.
-  - `plan/current/iteration-log.md` — Audit trail of the pipeline run.
-  - `plan/_archive/` — Historical plans filed here after merge.
-  - `plan/changelog/` — A record of all changes (`{feature-id}-{YYYY-MM-DD}.md`).
-- `src/` — Component source code, tests, and component manifests (`component.yml`).
-- `docs/` — Living repository documentation (always current). Includes component registry and dependency graph.
-- `planifest-overrides/` — Your team's customisations: override library standards, add permanent capability skills, or add project-specific instructions. Never overwritten by setup scripts. → See [project-operations.md → Customising](project-operations.md#customising-with-planifest-overrides).
+
+- `plan/` holds the change in progress and its records.
+  - `plan/current/` is the change in progress: `feature-brief.md`, `design.md`, `build-log.md`, and the plan artifacts.
+  - `plan/_archive/` holds completed runs, filed at ship.
+  - `plan/changelog/` holds one change record per feature (`{feature-id}-{YYYY-MM-DD}.md`).
+  - `plan/backlog/` holds deferred items.
+- `src/` holds component source code, tests, and component manifests (`component.yml`).
+- `docs/` holds the living repository documentation, always current. It includes the component registry and dependency graph.
+- `planifest-overrides/` holds your customisations: project instructions, capability skills, setup config, and library standards. Setup never overwrites it. See [project-operations.md, Customising](project-operations.md#customising-with-planifest-overrides).
 
 See [feature-structure.md](../plan/feature-structure.md) for the full layout.
 
 ### 3. Run the setup script
 
-This copies skills into the directory your agentic tool expects.
+Claude Code is the only tool target.
 
 #### Basic setup
 
@@ -55,13 +55,15 @@ chmod +x planifest-zero/setup.sh
 .\planifest-zero\setup.ps1 claude-code
 ```
 
-Installs:
-- Skill folders with YAML frontmatter (auto-discovered by your tool)
-- Supporting files (templates, standards, schemas)
-- The `CLAUDE.md` boot file
-- Git guardrails and the orchestrator sentinel (activated automatically)
+Setup installs:
 
-#### Option: Structured Telemetry
+- Skill folders with YAML frontmatter into `.claude/skills/`, auto-discovered by Claude Code. Retired skills are pruned.
+- Supporting files (templates, standards, schemas) bundled per skill.
+- Enforcement hooks wired into `.claude/settings.json`.
+- The `CLAUDE.md` boot file.
+- Git hooks and the orchestrator sentinel machinery, activated automatically.
+
+#### Option: structured telemetry
 
 Requires [structured-telemetry-mcp](https://github.com/anthropics/structured-telemetry-mcp) to be running, then pass `--structured-telemetry-mcp`:
 
@@ -72,8 +74,6 @@ Requires [structured-telemetry-mcp](https://github.com/anthropics/structured-tel
 ```powershell
 .\planifest-zero\setup.ps1 claude-code --structured-telemetry-mcp
 ```
-
-See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expects.
 
 → **Git guardrails and the orchestrator sentinel** are activated automatically by setup. See [project-operations.md](project-operations.md) for how they work and how to enable strict mode.
 
@@ -87,18 +87,20 @@ cp planifest-zero/templates/feature-brief.template.md plan/current/feature-brief
 
 Fill it in. The [feature brief guide](templates/feature-brief-guide.md) walks you through each section.
 
-Every agent response begins with a phase prefix (`P0:`, `P1:`, …) so you always know where you are in the pipeline. → See [pipeline-reference.md → Phase Indicators](pipeline-reference.md#phase-indicators) for the full table.
+Every agent response begins with a phase prefix (`D:`, `PL:`, `IM:`, `VA:`, `SH:`), so you always know where you are in the pipeline. See [pipeline-reference.md, Phase indicators](pipeline-reference.md#phase-indicators) for the full table.
 
 ### 5. Start the orchestrator
 
-Open your agentic tool. The orchestrator skill is now auto-discovered. Tell it:
+Open Claude Code in the project. The auto-trigger hook loads the orchestrator skill at the start of the session. Tell it:
 
 ```
-Execute the confirmed design Agentic Iteration Loop.
+Run the Planifest pipeline.
 Feature brief: plan/current/feature-brief.md
 ```
 
-The orchestrator will assess your brief, coach you through any gaps, produce a confirmed design, then ask whether you want per-phase confirmation or a continuous run before executing the pipeline.
+The orchestrator runs discovery: it assesses your brief, coaches you through any gaps, and produces a confirmed design. It then asks whether you want per-phase confirmation or a continuous run before executing the rest of the pipeline.
+
+Every change takes this route. A small change is a small run, not a different pipeline.
 
 ---
 
@@ -112,6 +114,5 @@ The orchestrator will assess your brief, coach you through any gaps, produce a c
 | Updating the framework | [project-operations.md](project-operations.md#updating-the-framework) |
 | What to commit | [project-operations.md](project-operations.md#what-to-commit) |
 | Retrofit an existing project | [project-operations.md](project-operations.md#retrofit-an-existing-project) |
-| Trivial fixes (Fast Path) | [pipeline-reference.md](pipeline-reference.md#trivial-fixes--fast-path) |
-| Targeted changes (Change Pipeline) | [pipeline-reference.md](pipeline-reference.md#change-pipeline) |
 | Phase mechanics and confirmation gates | [pipeline-reference.md](pipeline-reference.md) |
+| The 12 skills and who dispatches whom | [pipeline-reference.md, Skills](pipeline-reference.md#skills) |
