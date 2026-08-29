@@ -67,6 +67,10 @@ The signal was read from the source tree rather than from the installed markers.
 
 **Skills inbox.** Empty.
 
+P0 exchange (backlog pickup): Q: pull-in / leave / discard for entries 0000075-0000084, presented as one batch since the human filed and reviewed all ten earlier the same day / A: pull in 0000075, 0000076, 0000077, 0000078, 0000079, 0000080, 0000081, 0000082, 0000083. Leave 0000084 open. Folders for the nine deleted in the pull-in commit; their content folds into this feature's requirements.
+
+P0 exchange (decomposition): Q: recommended splitting into waves given five contract-level items plus nine folded entries / A: human decided one run, no waves. Codegen subagent dispatches to use Fable 5 (claude-fable-5).
+
 ---
 
 ## Summary (filled at P7)
