@@ -98,16 +98,6 @@ echo "=== (f) req-002: regenerated CLAUDE.md is context-mode free ==="
 assert_equals "0" "$(grep_count "context-mode" "$WS/CLAUDE.md")" \
   "(f): zero 'context-mode' occurrences in generated CLAUDE.md"
 
-# ── (g) req-002: opt-in --context-mode-mcp path untouched ───────────────────
-
-echo ""
-echo "=== (g) req-002: install_context_mode_hooks still present in setup.sh ==="
-
-assert_equals "yes" "$(grep_has "install_context_mode_hooks" "$FRAMEWORK/setup.sh")" \
-  "(g): install_context_mode_hooks function still exists (out of scope, untouched)"
-assert_equals "yes" "$(grep_has "context-mode-mcp" "$FRAMEWORK/setup.sh")" \
-  "(g): --context-mode-mcp flag still parsed (out of scope, untouched)"
-
 # ── (h) req-003: repo-local git-permission override wording ─────────────────
 
 echo ""

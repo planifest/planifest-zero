@@ -17,7 +17,7 @@ Telemetry is gated by a single condition: `--structured-telemetry-mcp` was passe
 
 For agent-driven `emit_event` calls specifically, there is a second, separate condition: the tool must be loaded/callable in the current session. Hook-driven emission has no equivalent "tool availability" condition: it posts directly via HTTP from the hook subprocess.
 
-Prior to 0000018, hook wiring additionally required the unrelated `--context-mode-mcp` flag: an accidental coupling that silently left the hooks unwired for projects passing `--structured-telemetry-mcp` alone. That coupling is removed: the sentinel and the hook wiring remain technically distinct mechanisms but are now always set together by the single flag above, never independently.
+The sentinel and the hook wiring remain technically distinct mechanisms. The single flag above means they are always set together, never independently.
 
 ---
 

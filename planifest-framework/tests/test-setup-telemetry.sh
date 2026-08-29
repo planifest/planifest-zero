@@ -87,11 +87,11 @@ rm -rf "$WS"
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== REQ-010: hook installed with both flags ==="
+echo "=== REQ-010: hook installed with the telemetry flag ==="
 
 WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp >/dev/null 2>&1
-assert_exit_zero $? "setup exits 0 with both flags"
+bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp >/dev/null 2>&1
+assert_exit_zero $? "setup exits 0 with the telemetry flag"
 [ -f ".claude/hooks/telemetry/context-pressure.mjs" ] \
   && assert_equals "0" "0" "REQ-010: context-pressure.mjs installed" \
   || assert_equals "1" "0" "REQ-010: context-pressure.mjs installed"
@@ -100,10 +100,10 @@ rm -rf "$WS"
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== REQ-008: PostToolUse entry wired in settings.json with both flags ==="
+echo "=== REQ-008: PostToolUse entry wired in settings.json ==="
 
 WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp >/dev/null 2>&1
+bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp >/dev/null 2>&1
 PT=$(get_posttooluse_json ".claude/settings.json")
 assert_contains "context-pressure" "$PT" "REQ-008: PostToolUse references context-pressure.mjs"
 assert_contains "localhost:3741"    "$PT" "REQ-008: default backend URL present"
@@ -116,7 +116,7 @@ echo ""
 echo "=== REQ-002: --backend-url overrides URL in settings.json ==="
 
 WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp \
+bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp \
   --backend-url http://localhost:9999 >/dev/null 2>&1
 PT=$(get_posttooluse_json ".claude/settings.json")
 assert_contains "localhost:9999" "$PT" "REQ-002: custom URL embedded in command"
@@ -128,8 +128,8 @@ echo ""
 echo "=== REQ-001: idempotency — re-run produces exactly one PostToolUse entry ==="
 
 WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp >/dev/null 2>&1
-bash planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp >/dev/null 2>&1
+bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp >/dev/null 2>&1
+bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp >/dev/null 2>&1
 COUNT=$(count_context_pressure_entries ".claude/settings.json")
 assert_equals "1" "$COUNT" "REQ-001: exactly one context-pressure entry after two runs"
 rm -rf "$WS"

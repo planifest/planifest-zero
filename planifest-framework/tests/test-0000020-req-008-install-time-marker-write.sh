@@ -74,38 +74,16 @@ echo ""
 echo "=== (b): setup.sh claude-code with all flags records them all ==="
 
 WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp \
+bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp \
   --strict-orchestrator --backend-url http://example.test:9999 >/dev/null 2>&1
 assert_exit_zero $? "(b): setup exits 0 with all flags"
 
 FLAGS_JSON="$(read_json_field ".claude/.planifest-setup-flags" "flags")"
-assert_contains "--context-mode-mcp" "$FLAGS_JSON" "(b): --context-mode-mcp recorded"
 assert_contains "--structured-telemetry-mcp" "$FLAGS_JSON" "(b): --structured-telemetry-mcp recorded"
 assert_contains "--strict-orchestrator" "$FLAGS_JSON" "(b): --strict-orchestrator recorded"
 
 assert_equals '"http://example.test:9999"' "$(read_json_field ".claude/.planifest-setup-flags" "backendUrl")" \
   "(b): custom --backend-url value recorded"
-
-cd "$SCRIPT_DIR"
-rm -rf "$WS"
-
-# ── (c): marker lives under the target tool's own directory, not just .claude/ ──
-
-echo ""
-echo "=== (c): setup.sh cursor writes .cursor/.planifest-setup-flags, not .claude/ ==="
-
-WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh cursor >/dev/null 2>&1
-assert_exit_zero $? "(c): setup exits 0 for cursor"
-
-assert_equals "yes" "$(file_exists ".cursor/.planifest-setup-flags")" \
-  "(c): marker written under .cursor/ for the cursor tool"
-
-assert_equals "no" "$(file_exists ".claude/.planifest-setup-flags")" \
-  "(c): no marker written under .claude/ when only cursor was set up"
-
-assert_equals '"cursor"' "$(read_json_field ".cursor/.planifest-setup-flags" "tool")" \
-  "(c): tool field is cursor"
 
 cd "$SCRIPT_DIR"
 rm -rf "$WS"

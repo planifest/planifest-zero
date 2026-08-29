@@ -28,8 +28,6 @@ When `Build target: docker` is declared in `plan/current/design.md`:
 
 **Precision Reading Protocol:** scope your context by navigating precisely: do not read the entire `plan/` directory unconditionally.
 
-> **Context-Mode Protocol:** when available, use `ctx_execute_file` for analysis-only reads and `ctx_execute(language:"shell")` for grepping across `src/`; use `Read` only when editing.
-
 - Component Manifest at `src/{component-id}/component.yml` - read the YAML frontmatter first to determine if the body is needed.
 - Execution Plan at `plan/current/execution-plan.md` - read for architecture overview.
 - Individual Features at `plan/current/requirements/*.md` - **ONLY** read the specific requirement file you are actively implementing.

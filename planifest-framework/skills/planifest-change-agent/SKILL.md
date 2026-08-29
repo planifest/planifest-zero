@@ -24,8 +24,6 @@ bundle_standards: [code-quality-standards.md, telemetry-standards.md]
 
 Before changing anything, read:
 
-> **Context-Mode Protocol:** when available, run the domain context reads and blast radius analysis as a single `ctx_batch_execute` call rather than sequential reads.
-
 **Precision Reading Protocol:**
 Do not exhaust token limits by loading all files. Read top-down selectively:
 1. `src/{component-id}/component.yml` - read the frontmatter first. Only read the body if relevant.

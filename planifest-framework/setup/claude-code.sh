@@ -12,10 +12,6 @@ TOOL_BOOT_FILE="CLAUDE.md"
 
 TOOL_BOOT_TEMPLATE="planifest-framework/templates/standard-boot.md"
 
-# context-mode enforcement hooks — installed when --context-mode-mcp is passed
-# Source scripts live here (within the framework); copied to TOOL_HOOKS_DIR at setup time
-TOOL_HOOKS_SRC="hooks/context-mode"
-TOOL_HOOKS_DIR=".claude/hooks/context-mode"
 TOOL_SETTINGS_FILE=".claude/settings.json"
 
 # structured telemetry hooks — installed when --structured-telemetry-mcp is passed (0000018 req-001)

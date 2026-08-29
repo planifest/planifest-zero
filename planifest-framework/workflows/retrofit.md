@@ -16,7 +16,7 @@ Onboard an existing codebase into the confirmed design framework.
 ## Steps
 
 1. **Load the orchestrator skill**
-2. **Read the codebase** - the orchestrator runs this structured scan (when `ctx_batch_execute` is available, run all six steps as a single batch call):
+2. **Read the codebase** - the orchestrator runs this structured scan:
    1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — reveal the stack
    2. **Identify components:** each directory with its own build/test configuration is a candidate component; create a `component.yml` for each
    3. **Map data ownership:** find database connections, ORM configurations, migration files; determine which component owns which tables/collections

@@ -8,7 +8,7 @@
  * PLACEMENT: hooks/telemetry/. All callers are telemetry hooks, so this module
  * only needs to exist wherever hooks/telemetry/ exists. setup.sh's Tier 1
  * telemetry glob was widened from emit-phase-*.mjs to *.mjs (req-002) so that
- * Cursor, Windsurf and Cline installs receive this file alongside the two
+ * Installs receive this file alongside the two
  * emit-phase hooks that import it.
  */
 

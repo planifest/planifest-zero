@@ -9,4 +9,4 @@ Remove-Item -Path "$repoDir\CLAUDE.md" -EA SilentlyContinue
 
 # Re-add Claude
 Set-Location $repoDir
-.\planifest-framework\setup.ps1 claude-code --context-mode-mcp --structured-telemetry-mcp --include-full-skill-library
+.\planifest-framework\setup.ps1 claude-code --structured-telemetry-mcp

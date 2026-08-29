@@ -107,18 +107,6 @@ assert_contains "additionalContext"             "$CHECK" "req-008: additionalCon
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== req-009: copilot adapter ==="
-
-COPILOT="$FRAMEWORK/hooks/adapters/copilot.mjs"
-assert_file_exists "$COPILOT"                                "req-009: copilot.mjs exists"
-COPILOT_CONTENT=$(cat "$COPILOT")
-assert_contains "prompt_submit"                 "$COPILOT_CONTENT" "req-009: handles prompt_submit"
-assert_contains "pre_tool_use"                  "$COPILOT_CONTENT" "req-009: handles pre_tool_use"
-assert_contains "gate-write"                    "$COPILOT_CONTENT" "req-009: wires gate-write logic"
-
-# -----------------------------------------------------------------------
-
-echo ""
 echo "=== req-010: capability skill intake ==="
 
 assert_contains "skills-inbox"                  "$ORCH" "req-010: skills-inbox referenced in orchestrator"

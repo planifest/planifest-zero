@@ -7,7 +7,7 @@
 
 ## Prerequisites
 
-- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, Windsurf, Cline, or OpenCode
+- Claude Code
 - A terminal with Bash (macOS/Linux) or PowerShell (Windows)
 
 ---
@@ -47,37 +47,19 @@ This copies skills into the directory your agentic tool expects.
 ```bash
 # macOS / Linux
 chmod +x planifest-framework/setup.sh
-./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, windsurf, cline, opencode, all
+./planifest-framework/setup.sh claude-code
 ```
 
 ```powershell
 # Windows (PowerShell)
-.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, windsurf, cline, opencode, all
+.\planifest-framework\setup.ps1 claude-code
 ```
 
 Installs:
 - Skill folders with YAML frontmatter (auto-discovered by your tool)
 - Supporting files (templates, standards, schemas)
-- A boot file for your tool (e.g. `CLAUDE.md`, `AGENTS.md`)
+- The `CLAUDE.md` boot file
 - Git guardrails and the orchestrator sentinel (activated automatically)
-
-#### Option: Context-Mode (recommended)
-
-[context-mode](https://github.com/mksglu/context-mode) routes large output — search results, file analysis, web fetches — into a sandboxed knowledge base. Only summaries enter the context window, so the agent stays fast and focused on large codebases.
-
-Install context-mode first, then pass `--context-mode-mcp` during setup:
-
-```bash
-# macOS / Linux
-./planifest-framework/setup.sh claude-code --context-mode-mcp
-```
-
-```powershell
-# Windows (PowerShell)
-.\planifest-framework\setup.ps1 claude-code --context-mode-mcp
-```
-
-See [docs/context-mode.md](../docs/context-mode.md) for prerequisites.
 
 #### Option: Structured Telemetry
 

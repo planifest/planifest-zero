@@ -97,14 +97,13 @@ echo ""
 echo "=== (b): setup.sh claude-code with flags — tracked file and marker agree ==="
 
 WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp \
+bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp \
   --strict-orchestrator --backend-url http://example.test:9999 >/dev/null 2>&1
 assert_exit_zero $? "(b): setup exits 0 with all flags"
 
 CONFIG_FLAGS="$(read_config_field "planifest-overrides/setup-config/claude-code.md" "flags")"
 MARKER_FLAGS="$(read_marker_field ".claude/.planifest-setup-flags" "flags")"
 
-assert_contains "--context-mode-mcp" "$CONFIG_FLAGS" "(b): tracked file records --context-mode-mcp"
 assert_contains "--structured-telemetry-mcp" "$CONFIG_FLAGS" "(b): tracked file records --structured-telemetry-mcp"
 assert_contains "--strict-orchestrator" "$CONFIG_FLAGS" "(b): tracked file records --strict-orchestrator"
 
@@ -145,27 +144,6 @@ assert_contains "planifest-overrides/setup-config/claude-code.md" "$STATUS_LINE"
 STATUS_MARKER_LINE="$(git status --porcelain -- .claude/.planifest-setup-flags 2>/dev/null)"
 assert_equals "" "$STATUS_MARKER_LINE" \
   "(c): gitignored marker does not appear in git status (unlike the tracked file)"
-
-cd "$SCRIPT_DIR"
-rm -rf "$WS"
-
-# ── (d): per-tool naming — a second tool gets its own file, doesn't clobber ──
-
-echo ""
-echo "=== (d): setup.sh cursor writes setup-config/cursor.md, not claude-code.md ==="
-
-WS=$(make_workspace); cd "$WS"
-bash planifest-framework/setup.sh cursor >/dev/null 2>&1
-assert_exit_zero $? "(d): setup exits 0 for cursor"
-
-assert_equals "yes" "$(file_exists "planifest-overrides/setup-config/cursor.md")" \
-  "(d): tracked config file written under cursor.md"
-
-assert_equals "no" "$(file_exists "planifest-overrides/setup-config/claude-code.md")" \
-  "(d): no claude-code.md written when only cursor was set up"
-
-assert_equals '"cursor"' "$(read_config_field "planifest-overrides/setup-config/cursor.md" "tool")" \
-  "(d): tool field is cursor"
 
 cd "$SCRIPT_DIR"
 rm -rf "$WS"

@@ -217,16 +217,9 @@ Hooks status:
 Reading feature brief…
 ```
 
-Detect the tool by checking:
-1. `CLAUDE_CODE_*` env vars → Claude Code
-2. `.cursor/` directory exists → Cursor
-3. `WINDSURF_*` env vars or `.windsurf/` directory → Windsurf
-4. `.clinerules` file exists → Cline
-5. `OPENAI_*` env vars and `.agents/` directory → Codex
-6. `.opencode/` directory → OpenCode
-7. Otherwise: "unknown"
+Detect the tool by checking for `CLAUDE_CODE_*` env vars or a `.claude/` directory. Claude Code is the only supported tool. Report "unknown" if neither signal is present.
 
-Check hook registration by looking for `gate-write` in `.claude/settings.json` (Claude Code) or the tool-appropriate hooks config.
+Check hook registration by looking for `gate-write` in `.claude/settings.json`.
 
 ---
 

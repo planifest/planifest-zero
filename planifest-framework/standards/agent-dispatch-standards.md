@@ -33,11 +33,6 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 | Tool | Primary tier | Cheaper tier |
 |------|-------------|-------------|
 | Claude Code | claude-sonnet-4-6 (or latest Sonnet) | claude-haiku-4-5 (or latest Haiku) |
-| Cursor | gpt-4o | gpt-4o-mini |
-| Codex (OpenAI) | o1 | o1-mini |
-| GitHub Copilot | gpt-4o | gpt-4o-mini |
-| Windsurf | claude-sonnet-4-6 | claude-haiku-4-5 |
-| Cline | (inherits from host tool) | (inherits from host tool) |
 
 **How to apply:** Before calling `Agent(...)`, look up the task in the table. Pass `model: {resolved model name}` as a parameter. Record the tier in the build log for P8.
 
@@ -52,7 +47,7 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 | Pattern | Example |
 |---------|---------|
 | Multiple independent codebase searches | Grepping for hook files + scanning skill dirs simultaneously |
-| Web research across independent tools/sources | Hook support for Windsurf + Hook support for Cline, same request, different sources |
+| Web research across independent sources | Two vendors' hook documentation, same question, different sources |
 | Independent document reads | Reading 3 skill files that do not reference each other |
 | Background test runner while writing docs | Run `run-tests.sh` in background while docs-agent produces output |
 | Multi-component security reviews (no shared state) | Reviewing component A and component B in parallel |
