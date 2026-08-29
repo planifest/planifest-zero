@@ -1,8 +1,8 @@
 # Data Contract - Guide
 
-> How the codegen-agent defines schema ownership and how migration proposals work.
+> How the implement phase defines schema ownership and how migration proposals work.
 
-*Related: [Codegen Agent Skill](../skills/codegen-agent-SKILL.md) | [Component Guide](component-guide.md)*
+*Related: [Implement Skill](../skills/planifest-implement/SKILL.md) | [Component Guide](component-guide.md)*
 
 ---
 
@@ -14,7 +14,7 @@ The Data Contract is the authoritative schema definition for a component's data.
 
 ## Who Writes It
 
-The **codegen-agent** creates it during Phase 3 when building data-owning components. It's updated exclusively through **migration proposals** - never by directly editing the schema.
+The **implement skill** creates it during the implement phase (P3) when building data-owning components. It's updated exclusively through **migration proposals** - never by directly editing the schema.
 
 ---
 
@@ -67,7 +67,7 @@ Every schema change is recorded here. The migration proposal process:
 
 ## Common Mistakes
 
-1. **Direct schema edits.** Never modify the data contract directly during codegen. Always go through a migration proposal.
+1. **Direct schema edits.** Never modify the data contract directly during implementation. Always go through a migration proposal.
 2. **Missing invariants.** If the data has rules (uniqueness, referential integrity, value ranges), they must be here - not just in application code.
 3. **Shared ownership.** If two components "need" to own the same data, the architecture is wrong. One owns it; the other consumes it via API.
 4. **No migration history.** Every change, no matter how small, gets a migration entry. This is the audit trail for schema evolution.

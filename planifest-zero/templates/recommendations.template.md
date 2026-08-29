@@ -1,6 +1,6 @@
 ﻿# Recommendations - {{feature-name}}
 
-**Skill:** [docs-agent](../skills/docs-agent-SKILL.md) (or any agent that identifies improvements)
+**Skill:** [implement](../skills/planifest-implement/SKILL.md) (or any agent that identifies improvements)
 **Feature:** {{feature-id}}
 **Version:** {{semver}}
 

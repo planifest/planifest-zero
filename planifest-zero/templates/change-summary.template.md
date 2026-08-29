@@ -6,7 +6,7 @@ version: "0.1.0"
 ---
 # Change Summary - {{change-title}}
 
-**Skill:** [change-agent](../skills/change-agent-SKILL.md)
+**Skill:** [implement](../skills/planifest-implement/SKILL.md)
 **Feature:** {{feature-id}}
 **Component:** {{component-id}}
 **Date:** {{ISO-8601}}

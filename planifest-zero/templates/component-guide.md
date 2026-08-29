@@ -10,11 +10,11 @@
 
 The `component.yml` is created at **two points** in the lifecycle:
 
-1. **Pre-seeded by the human** (or orchestrator) before the pipeline runs - with stack decisions, feature mode, and domain knowledge path. Purpose, contract, and data sections are left empty or minimal. This gives the codegen-agent its constraints.
+1. **Pre-seeded by the human** (or orchestrator) before the pipeline runs - with stack decisions, feature mode, and domain knowledge path. Purpose, contract, and data sections are left empty or minimal. This gives the implement phase its constraints.
 
-2. **Completed by the codegen-agent** after the implementation is built - the agent fills in purpose, contract, data ownership, risk, scope, and quality sections based on what was actually implemented.
+2. **Completed by the implement skill** after the implementation is built - the agent fills in purpose, contract, data ownership, risk, scope, and quality sections based on what was actually implemented.
 
-From that point forward, every change-agent reads it before modifying the component.
+From that point forward, every agent reads it before modifying the component.
 
 ---
 
@@ -53,7 +53,7 @@ The most important section. This is what prevents agents from building overlappi
 
 ### Stack
 
-Pre-seeded by the human or orchestrator. The codegen-agent reads this - it does not choose the stack.
+Pre-seeded by the human or orchestrator. The implement phase reads this - it does not choose the stack.
 
 | Field | Required | Description |
 |---|---|---|
@@ -77,7 +77,7 @@ Describes the component's interface - what it accepts, what it produces, who dep
 
 | Field | Required | Written by | Description |
 |---|---|---|---|
-| `contract.apiSpec` | Yes | Agent | Path to the OpenAPI spec (from project root). The spec-agent writes this to `plan/{feature-id}/openapi-spec.yaml` (if the component serves an API). |
+| `contract.apiSpec` | Yes | Agent | Path to the OpenAPI spec (from project root). The plan phase writes this to `plan/{feature-id}/openapi-spec.yaml` (if the component serves an API). |
 | `contract.inputs` | Yes | Agent | Array of inputs (HTTP endpoints, events, queues) the component accepts. |
 | `contract.outputs` | Yes | Agent | Array of outputs the component produces. |
 | `contract.consumedBy` | Yes | Agent | Array of component IDs that depend on this component. Updated as the system grows. |
@@ -86,7 +86,7 @@ Describes the component's interface - what it accepts, what it produces, who dep
 
 ### Data
 
-Components that own data declare it here. This is what the `change-agent` reads before proposing any schema migration.
+Components that own data declare it here. This is what any agent changing the component reads before proposing a schema migration.
 
 | Field | Required | Written by | Description |
 |---|---|---|---|
@@ -98,7 +98,7 @@ Components that own data declare it here. This is what the `change-agent` reads 
 
 ### Risk
 
-Populated by the security-agent and updated by any agent that identifies a risk.
+Populated by the security review in the validate-and-accept phase and updated by any agent that identifies a risk.
 
 | Field | Required | Written by | Description |
 |---|---|---|---|
@@ -117,7 +117,7 @@ Mirrors the feature brief's scope boundaries, narrowed to this component.
 
 ### Quality
 
-Living record of the component's quality posture. Updated by the validate-agent.
+Living record of the component's quality posture. Updated by the validate-and-accept phase.
 
 | Field | Required | Written by | Description |
 |---|---|---|---|
@@ -143,7 +143,7 @@ Operational metadata used by the CI/CD pipeline and template stamping system.
 | `metadata.updatedAt` | Yes | Agent | ISO 8601 timestamp. Updated on every change. |
 | `metadata.createdBy` | Yes | System | `agent` or `human`. |
 | `metadata.lastModifiedBy` | Yes | System | `agent` or `human`. |
-| `metadata.skill` | Yes | Agent | Which skill produced or last modified this manifest (e.g., `codegen-agent`, `change-agent`). |
+| `metadata.skill` | Yes | Agent | Which skill produced or last modified this manifest (e.g., `planifest-implement`). |
 | `metadata.tool` | Yes | Agent | Which agentic tool was used (`claude-code`). |
 | `metadata.model` | Yes | Agent | Which model produced the output (e.g., `claude-sonnet-4-20250514`). |
 

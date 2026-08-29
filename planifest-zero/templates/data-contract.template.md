@@ -6,7 +6,7 @@ version: "0.1.0"
 ---
 # Data Contract - {{component-name}}
 
-**Skill:** [codegen-agent](../skills/codegen-agent-SKILL.md) (updated via migration proposals)
+**Skill:** [implement](../skills/planifest-implement/SKILL.md) (updated via migration proposals)
 **Component:** {{component-id}}
 **Feature:** {{feature-id}}
 **Owner:** {{component-id}}

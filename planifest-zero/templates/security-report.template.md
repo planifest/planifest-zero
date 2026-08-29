@@ -1,6 +1,6 @@
 ﻿# Security Report - {{feature-name}}
 
-**Skill:** [security-agent](../skills/security-agent-SKILL.md)
+**Skill:** [validate-and-accept](../skills/planifest-validate-and-accept/SKILL.md)
 **Feature:** {{feature-id}}
 **Wave:** {{wave-number}} (if waved)
 **Version:** {{semver}}
