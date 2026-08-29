@@ -4,7 +4,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 ---
 # Build Log - {{feature-id}}
 
-> Created at P0. Appended by the orchestrator at each phase boundary. Survives session changes.
+> Created at discovery (P1). Appended by the orchestrator at each phase boundary. Survives session changes.
 
 ## Header
 
@@ -20,7 +20,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ## Phase Log
 
-### P0: Assess & Coach
+### P1: Discovery
 
 | Field | Value |
 |-------|-------|
@@ -35,9 +35,11 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
-<!-- Copy and fill in this block at each phase boundary:
+<!-- Copy and fill in this block at each phase boundary. Headings use the form
+     "### P<n>: {Phase Name}" with n from 2 to 5 and the phase names
+     P2: Plan, P3: Implement, P4: Validate and Accept, P5: Ship.
 
-### Px: {Phase Name}
+### P<n>: {Phase Name}
 
 | Field | Value |
 |-------|-------|
@@ -54,7 +56,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
-## Summary (filled at P7)
+## Summary (filled at ship, P5)
 
 | Metric | Value |
 |--------|-------|
