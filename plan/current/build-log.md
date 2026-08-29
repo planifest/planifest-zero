@@ -120,6 +120,9 @@ Gate accepted: P1 (2026-08-30, continuous run)
 | Telemetry | emitted |
 | Notes | Four independent decisions, four parallel drafters: five-phase contract and skill consolidation, rename and product identity, single-route pipeline, present-state docs policy. No stack-choice ADR needed beyond these: the stack is unchanged from the design. |
 
+Gate: P2 complete. Four ADRs: five-phase contract, rename and product identity, single route, present-state docs. Continuous run: proceeding to P3 without stopping. Skill-consolidation map (R-005 mitigation) dispatched to a Fable 5 subagent, lands before P3 codegen begins.
+Gate accepted: P2 (2026-08-30, continuous run)
+
 ---
 
 ## Summary (filled at P7)
