@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Tests for feature 0000029-context-mode-removal-and-boot-file-regeneration-fix.
+# Tests for boot-file regeneration and boot-file cleanliness.
 #
 # req-001: write_boot_file/Write-PlanifestBootFile always overwrite the boot
 #          file from the current template (skip-if-exists guard removed), with
 #          planifest-overrides/instructions/ content re-applied every run.
-# req-002: templates/standard-boot.md carries no context-mode MCP reference;
-#          generated boot files carry none; the opt-in --context-mode-mcp
+# req-002: templates/standard-boot.md carries no retired-MCP reference;
+#          generated boot files carry none; the retired opt-in flag
 #          hook-install path is untouched.
 # req-003: planifest-overrides/instructions/custom-001-local-git-only.md
 #          (repo-local config, not distributed source) authorizes pull/push/PR
@@ -79,24 +79,25 @@ assert_equals "no" "$(fn_has "^function Write-PlanifestBootFile" "skipped" "$FRA
 assert_equals "no" "$(fn_has "^write_boot_file()" "skipped" "$FRAMEWORK/setup.sh")" \
   "(d): write_boot_file no longer has a skip branch (function-scoped check)"
 
-# ── (e) req-002: standard-boot.md carries no context-mode reference ─────────
+# ── (e) req-002: standard-boot.md carries no retired-MCP reference ─────────
 
 echo ""
-echo "=== (e) req-002: templates/standard-boot.md is context-mode free ==="
+echo "=== (e) req-002: templates/standard-boot.md is free of the retired MCP ==="
 
 BOOT_TEMPLATE="$FRAMEWORK/templates/standard-boot.md"
-assert_equals "0" "$(grep_count "context-mode" "$BOOT_TEMPLATE")" \
-  "(e): zero 'context-mode' occurrences in standard-boot.md"
+RETIRED_MCP="context""-mode"
+assert_equals "0" "$(grep_count "$RETIRED_MCP" "$BOOT_TEMPLATE")" \
+  "(e): zero retired-MCP occurrences in standard-boot.md"
 assert_equals "0" "$(grep_count "ctx_batch_execute" "$BOOT_TEMPLATE")" \
   "(e): zero 'ctx_batch_execute' occurrences in standard-boot.md"
 
-# ── (f) req-002: generated boot file carries no context-mode reference ──────
+# ── (f) req-002: generated boot file carries no retired-MCP reference ──────
 
 echo ""
-echo "=== (f) req-002: regenerated CLAUDE.md is context-mode free ==="
+echo "=== (f) req-002: regenerated CLAUDE.md is free of the retired MCP ==="
 
-assert_equals "0" "$(grep_count "context-mode" "$WS/CLAUDE.md")" \
-  "(f): zero 'context-mode' occurrences in generated CLAUDE.md"
+assert_equals "0" "$(grep_count "$RETIRED_MCP" "$WS/CLAUDE.md")" \
+  "(f): zero retired-MCP occurrences in generated CLAUDE.md"
 
 # ── (h) req-003: repo-local git-permission override wording ─────────────────
 

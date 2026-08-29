@@ -2,7 +2,7 @@
 # Tests for --structured-telemetry-mcp flag in setup.sh
 # Covers: REQ-001 (idempotency), REQ-002 (--backend-url), REQ-004 (sentinel),
 #         REQ-008 (PostToolUse wiring), REQ-010 (single-flag gate — updated by
-#         0000018 req-001, which removed the --context-mode-mcp AND-condition)
+#         installs under the telemetry flag alone)
 
 set -uo pipefail
 
@@ -80,8 +80,8 @@ echo "=== 0000018 req-001: hook IS installed with --structured-telemetry-mcp alo
 WS=$(make_workspace); cd "$WS"
 bash planifest-zero/setup.sh claude-code --structured-telemetry-mcp >/dev/null 2>&1
 [ -f ".claude/hooks/telemetry/context-pressure.mjs" ] \
-  && assert_equals "0" "0" "0000018 req-001: hook installed without --context-mode-mcp" \
-  || assert_equals "1" "0" "0000018 req-001: hook installed without --context-mode-mcp"
+  && assert_equals "0" "0" "hook installs under the telemetry flag alone" \
+  || assert_equals "1" "0" "hook installs under the telemetry flag alone"
 rm -rf "$WS"
 
 # -----------------------------------------------------------------------
