@@ -19,7 +19,7 @@ hooks:
 - Feature brief at `plan/current/feature-brief.md`
 - Existing domain knowledge at `plan/` (if retrofit or change)
 
-If `adoption_mode: retrofit`, follow the structured scan in `planifest-zero/workflows/retrofit.md`. The execution plan must describe the system as it exists and what is changing, not the change in isolation.
+If the adoption mode is retrofit, work from the retrofit scan recorded in `plan/current/discovery.md`. The execution plan must describe the system as it exists and what is changing, not the change in isolation.
 
 ## Artifacts
 
