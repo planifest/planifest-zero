@@ -123,6 +123,19 @@ Gate accepted: P1 (2026-08-30, continuous run)
 Gate: P2 complete. Four ADRs: five-phase contract, rename and product identity, single route, present-state docs. Continuous run: proceeding to P3 without stopping. Skill-consolidation map (R-005 mitigation) dispatched to a Fable 5 subagent, lands before P3 codegen begins.
 Gate accepted: P2 (2026-08-30, continuous run)
 
+### P3: Code Generation (codegen)
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-30T00:05:00Z` |
+| Model tier | primary orchestration, Fable 5 codegen dispatches |
+| Skills loaded | planifest-codegen-agent, planifest-test-writer (pattern), planifest-implementer (pattern) |
+| Agents spawned | `tbd, updated at gate` |
+| MCP calls | `0` |
+| Parallel task batches | `tbd` |
+| Telemetry | emitted |
+| Notes | NFR-001 baseline captured: 2,895 lines across 21 SKILL.md files. Target for the new 12-skill set: at or below 1,447. Sequence: RED test suites first, then the rename (held until the consolidation-map agent finishes reading skills/), then parallel skill rewrites, then enum, setup, docs, purge. |
+
 ---
 
 ## Summary (filled at P7)
