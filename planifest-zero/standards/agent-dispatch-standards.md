@@ -25,8 +25,8 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 | Security review | Primary | Adversarial reasoning, high-stakes |
 | Architecture decisions (ADR writing) | Primary | Consequential, requires judgement |
 | Requirements writing (spec) | Primary | Ambiguity resolution, domain reasoning |
-| Phase 0 coaching | Primary | Dialogue, gap assessment |
-| Build assessment (P8) | Cheaper | Read-only summarisation from a structured log |
+| Discovery coaching | Primary | Dialogue, gap assessment |
+| Build assessment (ship phase) | Cheaper | Read-only summarisation from a structured log |
 
 **Tier-to-model mapping by tool** (update when tools release new models):
 
@@ -34,7 +34,7 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 |------|-------------|-------------|
 | Claude Code | claude-sonnet-4-6 (or latest Sonnet) | claude-haiku-4-5 (or latest Haiku) |
 
-**How to apply:** Before calling `Agent(...)`, look up the task in the table. Pass `model: {resolved model name}` as a parameter. Record the tier in the build log for P8.
+**How to apply:** Before calling `Agent(...)`, look up the task in the table. Pass `model: {resolved model name}` as a parameter. Record the tier in the build log for the ship phase's build assessment.
 
 ---
 
@@ -49,7 +49,7 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 | Multiple independent codebase searches | Grepping for hook files + scanning skill dirs simultaneously |
 | Web research across independent sources | Two vendors' hook documentation, same question, different sources |
 | Independent document reads | Reading 3 skill files that do not reference each other |
-| Background test runner while writing docs | Run `run-tests.sh` in background while docs-agent produces output |
+| Background test runner while writing docs | Run `run-tests.sh` in background while planifest-implement produces doc output |
 | Multi-component security reviews (no shared state) | Reviewing component A and component B in parallel |
 | Independent requirement files (no cross-references) | Writing req-001 through req-008 in a single parallel batch |
 | Independent new test files closing a coverage gap | 2+ new test files, each testing independent, non-cross-referencing sections, dispatched in a single parallel batch instead of written one after another |
@@ -60,12 +60,12 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 | Pattern | Reason |
 |---------|--------|
 | Phase N work before Phase N-1 artifacts exist | Hard phase dependency |
-| ADR writing before requirements are complete | ADR content depends on spec output |
-| Codegen before ADRs are accepted | ADRs may constrain implementation choices |
-| P8 before P7 archive is confirmed | Report needs the archive path |
+| ADR writing before requirements are complete | ADR content depends on the requirements output |
+| Implementation before the plan gate passes | ADRs may constrain implementation choices |
+| Build assessment before the ship-phase archive is confirmed | Report needs the archive path |
 | Tasks where B reads A's output | Sequential by definition |
 
-**Record in build log:** After each phase, record the parallel task batch count. If it is 0 for a phase where parallelism was possible, the P8 efficiency observation will flag it.
+**Record in build log:** After each phase, record the parallel task batch count. If it is 0 for a phase where parallelism was possible, the ship phase's efficiency observation will flag it.
 
 ---
 
@@ -87,8 +87,8 @@ Agent({ description: "Implement REQ-002: {one-liner}", subagent_type: "general-p
 
 **Model tier for spawned agents:** see the Model Tier Decision Table above.
 
-**Out-of-scope discovery filing (0000027-req-003):** if a dispatched subagent discovers an out-of-scope bug or gap while doing its task, it MUST file `plan/backlog/{id}-{slug}/entry.md` directly, per `templates/backlog-entry.template.md`, with `Deferral source: discovered mid-flight`, `Source feature` set to the active feature ID, and `Source phase` set to the phase active at discovery. It must NOT report the discovery back for the dispatching agent to relay through a host-tool side channel (e.g. a task-spawning tool), and must NOT silently drop it.
+**Out-of-scope discovery filing:** if a dispatched subagent discovers an out-of-scope bug or gap while doing its task, it MUST file `plan/backlog/{id}-{slug}/entry.md` directly, per `templates/backlog-entry.template.md`, with `Deferral source: discovered mid-flight`, `Source feature` set to the active feature ID, and `Source phase` set to the phase active at discovery. It must NOT report the discovery back for the dispatching agent to relay through a host-tool side channel (e.g. a task-spawning tool), and must NOT silently drop it.
 
-The **dispatching agent** (orchestrator or phase skill placing the `Agent()` call) pre-computes the next available backlog ID before dispatch, per the Backlog ID sequence convention (`planifest-orchestrator/SKILL.md` Phase 0 Start Actions, backlog pickup step: highest ID ever allocated, including picked-up and discarded entries, plus one), and passes it explicitly in the subagent's prompt as the ID to use if a discovery needs filing. Subagent self-lookup of `plan/backlog/` at file-time is rejected: picked-up entries are deleted from `plan/backlog/` once folded into a design, so a subagent scanning only that directory would systematically undercount the true high-water mark and risk reusing a retired ID.
+The **dispatching agent** (orchestrator or phase skill placing the `Agent()` call) pre-computes the next available backlog ID before dispatch, per the Backlog ID sequence convention (`planifest-orchestrator/SKILL.md` discovery start actions, backlog pickup step: highest ID ever allocated, including picked-up and discarded entries, plus one), and passes it explicitly in the subagent's prompt as the ID to use if a discovery needs filing. Subagent self-lookup of `plan/backlog/` at file-time is rejected: picked-up entries are deleted from `plan/backlog/` once folded into a design, so a subagent scanning only that directory would systematically undercount the true high-water mark and risk reusing a retired ID.
 
 When dispatching multiple subagents in a single parallel batch, each MUST receive a distinct pre-assigned backlog ID (or a reserved contiguous block, one per subagent); no two subagents may independently file under the same ID.

@@ -4,7 +4,7 @@ version: "1.0.0"
 ---
 # Framework Update Policy
 
-Canonical definition of how a `planifest-zero/` dependency update is detected, confirmed, and trusted. This is the document backlog entries `0000040`/`0000041` (and any future entry) mean when they reference "the Framework Update Policy": until this file existed, that reference resolved to nothing.
+Canonical definition of how a `planifest-zero/` dependency update is detected, confirmed, and trusted. This is the document backlog entries mean when they reference "the Framework Update Policy".
 
 ---
 
@@ -12,11 +12,11 @@ Canonical definition of how a `planifest-zero/` dependency update is detected, c
 
 Distinguishes "the `planifest-zero/` folder is being updated to a newer version" from "unrecognised code is being pushed from an unknown source." The two look identical at the file-diff level, both touch files under `planifest-zero/`, but only the first is a trusted, provenance-tracked update, and only the first should be treated as such without question.
 
-This policy is unrelated in scope to `planifest-migrator`: that skill owns the narrower "read one pending migration file, present findings, apply confirmed changes, archive it" flow, and continues to be invoked from the same P0 area when a migration file happens to exist. This policy's detection-and-confirmation step runs first and independently, whether or not any migration accompanies the update.
+This policy is unrelated in scope to `planifest-migrator`: that skill owns the narrower "read one pending migration file, present findings, apply confirmed changes, archive it" flow, and continues to be invoked from the same discovery area when a migration file happens to exist. This policy's detection-and-confirmation step runs first and independently, whether or not any migration accompanies the update.
 
 ## Where this runs
 
-At the orchestrator's Resume Detection step (`planifest-orchestrator/SKILL.md`), positioned alongside the existing migration-scan step, before any other Phase 0 work, including ordinary feature-brief coaching Q&A. It is surfaced as its own distinct decision: never silently applied, and never conflated with that coaching flow.
+At the orchestrator's Resume Detection step (`planifest-orchestrator/SKILL.md`), positioned alongside the existing migration-scan step, before any other discovery work, including ordinary feature-brief coaching Q&A. It is surfaced as its own distinct decision: never silently applied, and never conflated with that coaching flow.
 
 ## Detection signal
 
@@ -39,7 +39,7 @@ Confirmation requires the human to affirm both of the following, as two separate
 1. **That this is in fact a `planifest-zero/` update**: as opposed to an arbitrary, unrelated code push that happens to touch the same paths.
 2. **Its provenance**: the specific source release, commit, or migration identifier that produced the arriving files. The human must confirm a specific, named origin, not simply agree that an update is happening.
 
-Record the outcome, confirmed with its stated provenance, or rejected, in `plan/current/build-log.md` before Phase 0 proceeds. If rejected, the arriving `planifest-zero/` files are treated as untrusted: do not act on them silently, and ask the human how to proceed.
+Record the outcome, confirmed with its stated provenance, or rejected, in `plan/current/build-log.md` before discovery proceeds. If rejected, the arriving `planifest-zero/` files are treated as untrusted: do not act on them silently, and ask the human how to proceed.
 
 ## Relationship to `planifest-migrator`
 
@@ -47,5 +47,4 @@ Unchanged by this policy. `planifest-migrator` continues to own reading a single
 
 ## Related
 
-- `plan/current/adr/ADR-002-framework-update-policy-p0-step.md`: the decision this policy documents (mechanism choice: new P0 step, not a `planifest-migrator` extension or a new standalone skill).
-- `planifest-orchestrator/SKILL.md` Resume Detection: the P0 step invoking this policy.
+- `planifest-orchestrator/SKILL.md` Resume Detection: the discovery step invoking this policy.
