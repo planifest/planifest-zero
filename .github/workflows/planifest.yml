@@ -28,7 +28,7 @@ jobs:
           echo "✅ Planifest pipeline passed."
 
   # This job is specific to this repository's own self-description and is
-  # deliberately NOT mirrored into planifest-framework/hooks/planifest.yml
+  # deliberately NOT mirrored into planifest-zero/hooks/planifest.yml
   # (the copy setup.sh ships to consumer repos) — a consuming repo's README
   # doesn't have this repository's "## Repository structure" / "## The
   # framework" sections to validate against. See ADR-001 (feature 0000019).
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Verify README matches repository structure
-        run: node planifest-framework/scripts/self-description-check.mjs .
+        run: node planifest-zero/scripts/self-description-check.mjs .
 
   validate-telemetry-schema:
     runs-on: ubuntu-latest

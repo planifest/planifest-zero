@@ -6,7 +6,7 @@
 
 ## What this repo is
 
-This repo is the Planifest framework itself. It holds one component, `planifest-framework`, which other projects install into their working tree.
+This repo is the Planifest framework itself. It holds one component, `planifest-zero`, which other projects install into their working tree.
 
 The framework is not a service. It has no runtime of its own. It ships four things:
 
@@ -20,7 +20,7 @@ The framework is not a service. It has no runtime of its own. It ships four thin
 ## Install flow
 
 ```
-planifest-framework/          setup.sh claude-code          target project
+planifest-zero/          setup.sh claude-code          target project
 ├── skills/          ──────────────────────────────────▶   .claude/skills/
 ├── templates/       ── bundled per skill frontmatter ──▶   .claude/skills/*/assets/
 ├── standards/       ── bundled per skill frontmatter ──▶   .claude/skills/*/references/

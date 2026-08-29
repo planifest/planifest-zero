@@ -1,0 +1,20 @@
+# Claude Code - tool configuration
+# https://docs.anthropic.com/en/docs/claude-code
+#
+# Skills:    .claude/skills/{name}/SKILL.md      (auto-discovered)
+# Workflows: .claude/commands/{name}.md           (becomes /name slash command)
+# Boot file: CLAUDE.md                            (project root)
+
+@{
+    SkillsDir    = '.claude\skills'
+    WorkflowsDir = '.claude\commands'
+    BootFile     = 'CLAUDE.md'
+    BootTemplate   = "planifest-zero/templates/standard-boot.md"
+    SettingsFile   = '.claude/settings.json'
+    # structured telemetry hooks — installed when --structured-telemetry-mcp is passed (0000018 req-001)
+    TelemetryHooksSrc = 'hooks/telemetry'
+    TelemetryHooksDir = '.claude/hooks/telemetry'
+    # planifest enforcement hooks — always installed (gate-write, check-design)
+    EnforcementHooksSrc = 'hooks/enforcement'
+    EnforcementHooksDir = '.claude/hooks/enforcement'
+}

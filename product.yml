@@ -7,10 +7,10 @@
 #
 # components[] holds {id, path} pointers to each component's own
 # component.yml, not a cached version. Versions are read live at derivation
-# time by `node planifest-framework/scripts/product-version.mjs`, so this list
+# time by `node planifest-zero/scripts/product-version.mjs`, so this list
 # only needs editing when a component is added or removed.
 
-id: "planifest-framework"
+id: "planifest-zero"
 name: "Planifest Framework"
 version: "0.1.0"
 feature: "0000030-framework-cut-down"
@@ -18,5 +18,5 @@ feature: "0000030-framework-cut-down"
 versionPolicy: "max-component-version"
 
 components:
-  - id: "planifest-framework"
-    path: "planifest-framework/component.yml"
+  - id: "planifest-zero"
+    path: "planifest-zero/component.yml"

@@ -9,7 +9,7 @@
 
 ```mermaid
 graph TD
-    subgraph "planifest-framework (component-pack)"
+    subgraph "planifest-zero (component-pack)"
         SKILLS["skills/ (orchestrator + phase agents)"]
         STANDARDS["standards/, templates/, schemas/"]
         SETUP["setup.sh / setup.ps1"]

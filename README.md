@@ -40,7 +40,7 @@ Every artifact follows a template, so output stays consistent across sessions an
 
 ```
 repo/
-├── planifest-framework/   ← The framework. Drop in, don't modify per-project.
+├── planifest-zero/   ← The framework. Drop in, don't modify per-project.
 │   ├── skills/            ← Agent instructions: orchestrator and phase skills
 │   ├── templates/         ← File format templates for every artifact
 │   ├── schemas/           ← JSON Schema validation definitions
@@ -62,22 +62,22 @@ repo/
                              the docs agent, read by agents and humans.
 ```
 
-A typical feature produces five Phase 1 artifacts by default: execution plan, requirements, scope, risk register, and domain glossary. OpenAPI spec, cost model, SLO definitions, and operational model arrive only when their trigger condition applies. See [feature-pipeline.md](planifest-framework/workflows/feature-pipeline.md).
+A typical feature produces five Phase 1 artifacts by default: execution plan, requirements, scope, risk register, and domain glossary. OpenAPI spec, cost model, SLO definitions, and operational model arrive only when their trigger condition applies. See [feature-pipeline.md](planifest-zero/workflows/feature-pipeline.md).
 
 ---
 
 ## Getting started
 
-See [getting-started.md](planifest-framework/getting-started.md) for step-by-step setup.
+See [getting-started.md](planifest-zero/getting-started.md) for step-by-step setup.
 
 Quick start:
 
 ```bash
 # macOS or Linux
-./planifest-framework/setup.sh claude-code
+./planifest-zero/setup.sh claude-code
 
 # Windows
-.\planifest-framework\setup.ps1 claude-code
+.\planifest-zero\setup.ps1 claude-code
 ```
 
 The setup script copies skills into `.claude/skills/`, adds YAML frontmatter, wires the enforcement hooks, and writes the `CLAUDE.md` boot file.
@@ -109,17 +109,17 @@ Two optional flags:
 
 | Folder | Contents |
 |--------|----------|
-| [skills/](planifest-framework/skills/) | The orchestrator and every phase and sub-agent skill |
-| [templates/](planifest-framework/templates/) | File format templates for every pipeline artifact, each with a guide where applicable |
-| [schemas/](planifest-framework/schemas/) | Shared type definitions and the domain document envelope |
-| [standards/](planifest-framework/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, and testing standards |
-| [setup/](planifest-framework/setup/) | The Claude Code tool config, as a `.sh` and `.ps1` pair |
-| [hooks/](planifest-framework/hooks/) | Enforcement and telemetry hooks, git hooks, and the CI workflow |
-| [workflows/](planifest-framework/workflows/) | Route definitions: fast-path, feature-pipeline, change-pipeline, retrofit |
-| [scripts/](planifest-framework/scripts/) | Consistency checks, version derivation, regression promotion |
-| [tests/](planifest-framework/tests/) | Per-feature test scripts plus the promoted regression pack |
-| [migrations/](planifest-framework/migrations/) | Pending and completed framework migrations, applied by the `planifest-migrator` skill |
-| [skills-inbox/](planifest-framework/skills-inbox/) | Drop-in intake for a new capability skill, processed at the next Phase 0 |
+| [skills/](planifest-zero/skills/) | The orchestrator and every phase and sub-agent skill |
+| [templates/](planifest-zero/templates/) | File format templates for every pipeline artifact, each with a guide where applicable |
+| [schemas/](planifest-zero/schemas/) | Shared type definitions and the domain document envelope |
+| [standards/](planifest-zero/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, and testing standards |
+| [setup/](planifest-zero/setup/) | The Claude Code tool config, as a `.sh` and `.ps1` pair |
+| [hooks/](planifest-zero/hooks/) | Enforcement and telemetry hooks, git hooks, and the CI workflow |
+| [workflows/](planifest-zero/workflows/) | Route definitions: fast-path, feature-pipeline, change-pipeline, retrofit |
+| [scripts/](planifest-zero/scripts/) | Consistency checks, version derivation, regression promotion |
+| [tests/](planifest-zero/tests/) | Per-feature test scripts plus the promoted regression pack |
+| [migrations/](planifest-zero/migrations/) | Pending and completed framework migrations, applied by the `planifest-migrator` skill |
+| [skills-inbox/](planifest-zero/skills-inbox/) | Drop-in intake for a new capability skill, processed at the next Phase 0 |
 
 ---
 
@@ -163,7 +163,7 @@ Issues and pull requests are welcome. Agent skills and templates are the areas m
 
 ## Documentation
 
-`planifest-docs` holds the human documentation: architecture notes, research, and the roadmap. Agents do not need these. They work from the skills and templates in `planifest-framework/`. It is available as a [git repository](https://github.com/planifest/planifest-docs) and a [GitHub Pages site](https://planifest.github.io/planifest-docs/).
+`planifest-docs` holds the human documentation: architecture notes, research, and the roadmap. Agents do not need these. They work from the skills and templates in `planifest-zero/`. It is available as a [git repository](https://github.com/planifest/planifest-docs) and a [GitHub Pages site](https://planifest.github.io/planifest-docs/).
 
 | Document | Purpose |
 |----------|---------|
