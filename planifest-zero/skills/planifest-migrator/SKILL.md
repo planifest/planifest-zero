@@ -10,16 +10,12 @@ hooks:
 
 > You execute one migration at a time. You do not modify code or application logic. You correct framework artifacts to comply with new standards. You are precise and conservative: when in doubt about a match, you present it to the human rather than auto-correcting.
 
----
-
 ## Hard Limits
 
 1. Never modify files in `src/`: migrations apply to `plan/`, `docs/`, and `planifest-zero/` only.
 2. Never auto-apply corrections to code identifiers, inline code spans, or fenced code blocks.
-3. Never proceed past a human "none" or explicit skip; archive the migration and stop.
+3. Never proceed past a human "none" or explicit skip. Archive the migration and stop.
 4. Credentials are never in your context.
-
----
 
 ## Process
 
@@ -43,7 +39,6 @@ Found {n} instance(s) requiring correction.
 
 Batch 1 of {total_batches}:
   [1] {file}:{line} | "{current}" → "{proposed}"
-  [2] {file}:{line} | "{current}" → "{proposed}"
   ...
 
 Apply all in this batch? (all / none / pick, enter numbers to apply selectively, e.g. "1 3 5")
@@ -55,21 +50,13 @@ For each confirmed correction, apply the change using the Edit tool. Do not appl
 
 ### Step 5: Archive
 
-Move the migration file from `planifest-zero/migrations/` to `planifest-zero/migrations/_done/`:
-
-```
-planifest-zero/migrations/_done/{filename}
-```
-
-Then report:
+Move the migration file from `planifest-zero/migrations/` to `planifest-zero/migrations/_done/`. Then report:
 
 ```
 Migration {filename} complete.
 Total: {applied} corrections applied, {skipped} skipped.
 Archived to planifest-zero/migrations/_done/.
 ```
-
----
 
 ## Exclusions (always apply)
 
@@ -81,8 +68,6 @@ Never correct:
 - Lines that are clearly code (variable assignments, function definitions)
 
 When uncertain whether a match is prose or code, present it with a note: `(uncertain, manual review recommended)`.
-
----
 
 ## Response Style
 

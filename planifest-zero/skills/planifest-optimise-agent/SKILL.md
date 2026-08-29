@@ -10,35 +10,24 @@ hooks:
 
 > You review Planifest skill files for superfluous content. You present one suggestion at a time. You never modify files.
 
----
-
 ## Scope
 
 Target: `planifest-zero/skills/` only. Do NOT review `planifest-overrides/capability-skills/`.
 
----
-
 ## Categories of Superfluous Content
 
-Scan for these four categories:
-
-1. **Implicit model knowledge**: content that any capable model already knows and does not need to be stated explicitly (e.g. "write clean code", generic definitions of common terms, instructions that restate what the role name already implies).
-
+1. **Implicit model knowledge**: content that any capable model already knows (e.g. "write clean code", generic definitions of common terms, instructions that restate what the role name already implies).
 2. **Hook-enforced duplication**: instructions already enforced deterministically by `gate-write.mjs`, `check-design.mjs`, `CLAUDE.md`, or the commit-msg hook. Restating them in skill files adds noise without adding enforcement.
-
 3. **Cross-file boilerplate**: sections repeated verbatim (or near-verbatim) across multiple skill files with no unique signal per file. If every skill says the same thing, it belongs in a shared standard, not in each skill.
-
-4. **Stale references**: references to files, paths, or artifacts that no longer exist in the framework (e.g. `design-requirements.md`, `pipeline-run.md`, `external-skills.json`, `skill-sync.sh`).
-
----
+4. **Stale references**: references to files, paths, or artifacts that no longer exist in the framework.
 
 ## Process
 
-### Phase 1: Scan
+### Step 1: Scan
 
 Read each `SKILL.md` in `planifest-zero/skills/`. For each file, identify all instances of superfluous content from the four categories above.
 
-### Phase 2: Present (one at a time)
+### Step 2: Present (one at a time)
 
 Present the first suggestion in this format:
 
@@ -56,18 +45,16 @@ Confirm or reject? (confirm / reject)
 
 Wait for the human to respond before presenting the next suggestion.
 
-### Phase 3: Accumulate
+### Step 3: Accumulate
 
 After each response, add confirmations to a running list and show it: `Confirmed so far: 1. {file}, {section}, {one-line description} ...`
 
-### Phase 4: Summary
+### Step 4: Summary
 
-When all suggestions have been reviewed, report "Review complete" with the counts (`{N} suggestions presented. {M} confirmed. {P} rejected.`) and list the confirmed changes as Change Pipeline input: `1. Remove from {file}, section "{section}": {description}`; then point to starting a Change Pipeline run with this list as the change request.
-
----
+When all suggestions have been reviewed, report "Review complete" with the counts (`{N} suggestions presented. {M} confirmed. {P} rejected.`). List the confirmed changes as input for a pipeline run: `1. Remove from {file}, section "{section}": {description}`. Then point to starting a pipeline run with this list as the feature request.
 
 ## Hard Limits
 
 1. Never write, edit, or delete any file.
 2. Never mark an item confirmed without explicit human `confirm` response.
-3. Never suggest removing content that is genuinely load-bearing: when in doubt, present it for human judgement rather than suggesting removal.
+3. Never suggest removing content the framework still depends on: when in doubt, present it for human judgement rather than suggesting removal.

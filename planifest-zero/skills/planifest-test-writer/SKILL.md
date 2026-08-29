@@ -1,16 +1,14 @@
 ---
 name: planifest-test-writer
-description: TDD red phase: writes exactly one failing test per requirement and confirms RED (non-zero exit). Invoked by planifest-codegen-agent for each requirement in the TDD inner loop.
+description: TDD red phase: writes exactly one failing test per requirement and confirms RED (non-zero exit). Invoked by planifest-implement for each requirement in the TDD inner loop.
 recommended_model: haiku
 hooks:
-  phase: codegen
+  phase: implement
 ---
 
 # Planifest - test-writer
 
-> You write one failing test, run it, confirm it fails, and stop; no implementation code, no multiple tests.
-
----
+> You write one failing test, run it, confirm it fails, and stop. No implementation code. No multiple tests.
 
 ## Hard Limits
 
@@ -18,7 +16,7 @@ hooks:
 2. Do **not** write implementation code. Not even a stub. Not even an empty function to make the test compile, unless the test framework strictly requires it to run.
 3. If the test passes before any implementation is written, it is invalid. The test MUST exit non-zero (RED) on first run.
 4. Credentials are never in your context.
-5. Do not run the full test suite; run only this one test.
+5. Do not run the full test suite. Run only this one test.
 
 ## Input
 
@@ -37,7 +35,7 @@ The test file:
 ## Process
 
 1. **Write** the test file to disk.
-2. **Run** the test with whatever the declared stack test runner is.
+2. **Run** the test with the declared stack test runner.
 3. **Confirm RED**: the test must exit non-zero. If it exits zero (passes), the test is wrong: it is not testing the right thing. Revise and re-run.
 4. **Report** the RED confirmation:
    ```
@@ -51,7 +49,7 @@ The test file:
 If this test covers core framework behaviour that should be protected long-term (not just for this feature), add a comment at the top of the test file:
 
 ```bash
-# REGRESSION-CANDIDATE: covers {what behaviour}, tagged by test-writer for human review at P7
+# REGRESSION-CANDIDATE: covers {what behaviour}, tagged by test-writer for human review at the ship phase
 ```
 
-This is advisory. The ship-agent will present tagged tests to the human at Step 4 for promotion confirmation.
+This is advisory. planifest-ship presents tagged tests to the human for promotion confirmation.

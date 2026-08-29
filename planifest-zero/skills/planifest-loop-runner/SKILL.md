@@ -9,18 +9,16 @@ hooks:
 
 # Planifest - loop-runner
 
-> You define how every loop in the pipeline behaves. Loops iterate; you make sure they iterate *boundedly*, *observably*, and *recoverably*. Any skill that loops (P0 completeness, design-critic, reversal protocol, verify-by-execution, cross-model review, P4 validate) loads this skill for its mechanics and defines only its own rubric and pass condition.
-
----
+> You define how every loop in the pipeline behaves. Loops iterate. You make sure they iterate *boundedly*, *observably*, and *recoverably*. Any phase agent that runs a loop loads this skill for the mechanics and defines only its own rubric and pass condition.
 
 ## Hard Limits
 
 1. **Every loop has an armed stop rule before its first iteration.** No cap, no loop.
-2. **Agents write `plan/current/.ratchet-approve` only on explicit human instruction, never on their own initiative.** The human must state the path, the reason, and the go-ahead in the same turn (0000017 ADR-001, superseding ADR-004's blanket prohibition). The line format is `path | reason | timestamp` with the human's exact reason text transcribed verbatim; note that a reason containing a `|` character invalidates the line (strict 3-field parse, fails closed). The write is committed immediately, in its own dedicated commit, before any further work proceeds: the hook's same-uncommitted-changeset backstop blocks the guarded edit with an explicit message if this step is skipped. Writing the marker without that explicit in-the-moment instruction remains a violation, not a workaround.
-3. **Budget counters are never reset by an agent.** They live in the loop-state file, are git-tracked, and survive interrupt/resume (ADR-007).
+2. **Agents write `plan/current/.ratchet-approve` only on explicit human instruction, never on their own initiative.** The human must state the path, the reason, and the go-ahead in the same turn. The line format is `path | reason | timestamp` with the human's exact reason text transcribed verbatim. A reason containing a `|` character invalidates the line (strict 3-field parse, fails closed). Commit the write immediately, in its own dedicated commit, before any further work proceeds: the hook's same-uncommitted-changeset backstop blocks the guarded edit if this step is skipped. Writing the marker without that explicit in-the-moment instruction is a violation, not a workaround.
+3. **Budget counters are never reset by an agent.** They live in the loop-state file, are git-tracked, and survive interrupt/resume.
 4. **Run-log records are append-only.** Never rewrite a prior iteration's record.
 
-## Toggle Protocol (ADR-003)
+## Toggle Protocol
 
 Before arming any loop, read `planifest-overrides/loop-toggles.yml` (see `templates/loop-toggles.template.yml`):
 
@@ -28,13 +26,13 @@ Before arming any loop, read `planifest-overrides/loop-toggles.yml` (see `templa
 - `report-only` → run the loop, write findings/verdicts, block nothing, mutate nothing.
 - `on` → verdicts gate progression per the owning skill's rules.
 
-The framework never creates `planifest-overrides/loop-toggles.yml`; enabling a loop is always a deliberate human act.
+The framework never creates `planifest-overrides/loop-toggles.yml`. Enabling a loop is always a deliberate human act.
 
 ## Loop State (per instance)
 
-Create `plan/current/loop-state-{loop-id}.md` from `templates/loop-state.template.md` when the loop arms. Update and **commit after every iteration**: the state file is how an interrupted session resumes mid-loop (`Px: Resuming…` convention), and how budget counters survive resume.
+Create `plan/current/loop-state-{loop-id}.md` from `templates/loop-state.template.md` when the loop arms. Update and **commit after every iteration**: the state file is how an interrupted session resumes mid-loop (the `{phase-prefix}: Resuming` convention), and how budget counters survive resume.
 
-While any loop-state file has `status: active`, the `ratchet-check.mjs` hook is armed for `plan/current/` artifact writes. Set `status: done` or `status: escalated` when the loop exits; never leave a dead loop armed.
+While any loop-state file has `status: active`, the `ratchet-check.mjs` hook is armed for `plan/current/` artifact writes. Set `status: done` or `status: escalated` when the loop exits. Never leave a dead loop armed.
 
 ## The Iteration Cycle
 
@@ -55,18 +53,17 @@ Armed on every loop, checked at every DECIDE:
 | Rule | Trigger | Action |
 |------|---------|--------|
 | Pass | The owning skill's pass condition is met | `done`: set state, disarm |
-| Iteration cap | iteration == cap (default **3**; P4 validate keeps its existing **5**; a skill may declare its own) | `escalate` |
+| Iteration cap | iteration == cap (default **3**, the validate-and-accept CI loop keeps **5**, a skill may declare its own) | `escalate` |
 | no-progress | The same gap/finding survives **2 consecutive iterations** without measurable change | `escalate`: do not spend the remaining cap restating the problem |
-| Budget | The relevant budget counter (e.g. reversal budget 2/feature) is exhausted | `escalate`: always to the human, regardless of run mode |
 
-Caps and budgets are enforced by orchestrator control flow reading the state file, not by this text (ADR-007).
+Caps and budgets are enforced by orchestrator control flow reading the state file, not by this text.
 
 ## Escalation Format
 
-On `escalate`, populate the state file's Escalation Context section (stop rule hit, outstanding finding, attempts summary, recommended next step) and emit:
+On `escalate`, populate the state file's Escalation Context section (stop rule hit, outstanding finding, attempts summary, recommended next step) and emit, using the owning phase's prefix (D, PL, IM, VA, or SH):
 
 ```
-Px: Blocked ({loop-id}): {one-line outstanding finding}
+{phase-prefix}: Blocked ({loop-id}): {one-line outstanding finding}
 Escalation context: plan/current/loop-state-{loop-id}.md
 ```
 
