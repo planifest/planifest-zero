@@ -2,7 +2,7 @@
 
 > How to write the scope document that keeps agents within boundaries.
 
-*Related: [Spec Agent Skill](../skills/spec-agent-SKILL.md) | [design requirements Guide](design-spec-guide.md)*
+*Related: [Plan Skill](../skills/planifest-plan/SKILL.md) | [design requirements Guide](design-spec-guide.md)*
 
 ---
 
@@ -16,7 +16,7 @@ All three sections must be present. If nothing is deferred, state "Nothing defer
 
 ## Who Writes It
 
-The **spec-agent** produces this during Phase 1, derived from the Feature Brief's scope boundaries. The human seeds the scope in the brief; the spec-agent formalises it.
+The **plan skill** produces this during the plan phase (P2), derived from the Feature Brief's scope boundaries. The human seeds the scope in the brief, and the plan skill formalises it.
 
 ---
 

@@ -1,8 +1,8 @@
 # ADR - Guide
 
-> How the adr-agent writes Architecture Decision Records, and how to read them.
+> How the plan phase writes Architecture Decision Records, and how to read them.
 
-*Related: [ADR Agent Skill](../skills/adr-agent-SKILL.md) | [design requirements Guide](design-spec-guide.md)*
+*Related: [Plan Skill](../skills/planifest-plan/SKILL.md) | [design requirements Guide](design-spec-guide.md)*
 
 ---
 
@@ -14,7 +14,7 @@ An ADR captures a single architectural decision - the context that demanded it, 
 
 ## Who Writes It
 
-The **adr-agent** produces ADRs during Phase 2 of the pipeline. It reads the Execution Plan and OpenAPI Specification (if applicable) as input. Each significant decision gets its own ADR.
+The **plan skill** produces ADRs during the plan phase (P2). It reads the Execution Plan and OpenAPI Specification (if applicable) as input. Each significant decision gets its own ADR.
 
 ---
 

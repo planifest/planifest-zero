@@ -2,20 +2,20 @@
 
 > How risks are identified, assessed, and tracked throughout a feature.
 
-*Related: [Spec Agent Skill](../skills/spec-agent-SKILL.md) | [Scope Guide](scope-guide.md)*
+*Related: [Plan Skill](../skills/planifest-plan/SKILL.md) | [Scope Guide](scope-guide.md)*
 
 ---
 
 ## Purpose
 
-The Risk Register is a living document. The spec-agent seeds it during Phase 1. Any agent that identifies a new risk during any phase adds to it. It tracks specific, actionable risks - not generic hand-wringing.
+The Risk Register is a living document. The plan skill seeds it during the plan phase (P2). Any agent that identifies a new risk during any phase adds to it. It tracks specific, actionable risks - not generic hand-wringing.
 
 ---
 
 ## Who Writes It
 
-- **spec-agent** creates it during Phase 1
-- **Any agent** can add risks during their phase (codegen-agent discovers a library limitation, security-agent finds a vulnerability pattern, etc.)
+- **The plan skill** creates it during the plan phase (P2)
+- **Any agent** can add risks during their phase (the implement phase discovers a library limitation, the security review finds a vulnerability pattern, and so on)
 - The `lastModifiedBy` fields in the header track who last updated it
 
 ---

@@ -2,7 +2,7 @@
 
 > How to maintain the ubiquitous language that keeps agents and humans aligned.
 
-*Related: [Spec Agent Skill](../skills/spec-agent-SKILL.md) | [Code Quality Standards](../standards/code-quality-standards.md)*
+*Related: [Plan Skill](../skills/planifest-plan/SKILL.md) | [Code Quality Standards](../standards/code-quality-standards.md)*
 
 ---
 
@@ -16,7 +16,7 @@ This is not optional. Domain confusion is one of the most common sources of bugs
 
 ## Who Writes It
 
-- **spec-agent** creates it during Phase 1, extracting terms from the Feature Brief and Design Requirements
+- **The plan skill** creates it during the plan phase (P2), extracting terms from the Feature Brief and Design Requirements
 - **Any agent** that introduces a new domain term must add it to the glossary before using it in code
 
 ---
@@ -53,7 +53,7 @@ The agent should use the **Term**, never the alias. If existing code uses an ali
 
 ## The Used In Column
 
-Track which components use each term. This helps the change-agent understand ripple effects - if "Order" changes meaning, every component that uses it needs updating.
+Track which components use each term. This helps any later change trace ripple effects - if "Order" changes meaning, every component that uses it needs updating.
 
 ---
 

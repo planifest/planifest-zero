@@ -1,27 +1,27 @@
 ﻿# Execution Plan - Guide
 
-> How the spec-agent produces requirements, and how to read one.
+> How the plan phase produces requirements, and how to read one.
 
-*Related: [Spec Agent Skill](../skills/spec-agent-SKILL.md) | [Feature Brief Guide](feature-brief-guide.md)*
+*Related: [Plan Skill](../skills/planifest-plan/SKILL.md) | [Feature Brief Guide](feature-brief-guide.md)*
 
 ---
 
 ## Purpose
 
-The Execution Plan translates the Feature Brief into **specific, testable requirements**. It is the contract between what the human asked for and what the codegen-agent will build. Every requirement traces back to a user story or acceptance criterion - if it doesn't trace, it shouldn't exist.
+The Execution Plan translates the Feature Brief into **specific, testable requirements**. It is the contract between what the human asked for and what the implement phase will build. Every requirement traces back to a user story or acceptance criterion - if it doesn't trace, it shouldn't exist.
 
 ---
 
 ## Who Writes It
 
-The **spec-agent** produces this document during the Requirements step of the Agentic Iteration Loop. It reads the confirmed design and the original Feature Brief as input. It does not invent requirements - it derives them.
+The **plan skill** produces this document during the plan phase (P2). It reads the confirmed design and the original Feature Brief as input. It does not invent requirements - it derives them.
 
 ---
 
 ## When It's Produced
 
-- **After** the orchestrator confirms the design (end of Phase 0)
-- **Before** ADRs are generated (Phase 2 reads this as input)
+- **After** the orchestrator confirms the design (end of discovery)
+- **Before** ADRs are written (they read it as input)
 - **One per feature**, or one per wave if the feature is waved (`execution-plan-wave-2.md`)
 
 ---
@@ -54,7 +54,7 @@ Entities, their owner components, and relationships. This feeds into the data co
 
 ### Open Questions
 
-Material gaps the spec-agent couldn't resolve from the brief. These are **not** filled by assumption - they're reported to the orchestrator, which surfaces them to the human.
+Material gaps the plan skill could not resolve from the brief. These are **not** filled by assumption - they're reported to the orchestrator, which surfaces them to the human.
 
 ---
 
@@ -75,7 +75,7 @@ Feature Brief -> Execution Plan -> ADRs -> Code
               -> Data Model â”€â”€-> Data Contract
 ```
 
-The execution plan is the central artifact. ADRs explain HOW to implement the requirements. The codegen-agent reads both.
+The execution plan is the central artifact. ADRs explain HOW to implement the requirements. The implement phase reads both.
 
 ---
 
