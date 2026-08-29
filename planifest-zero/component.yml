@@ -1,13 +1,13 @@
 # Planifest Component Manifest
 id: "planifest-zero"
 name: "Planifest Framework"
-feature: "0000030-framework-cut-down"
-version: "0.1.0"
+feature: "0000031-five-phase-planifest-zero"
+version: "0.2.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
 summary: "Core standards, skills, hooks, and setup scripts that enforce the Planifest confirmed-design pipeline."
-systemContext: "Installed into a Claude Code project via setup.sh or setup.ps1. Provides enforcement hooks, structured standards, and the agent skills that drive the P0 to P9 pipeline."
+systemContext: "Installed into a Claude Code project via setup.sh or setup.ps1. Provides enforcement hooks, structured standards, and the agent skills that drive the five-phase pipeline."
 
 responsibilities:
   - "Enforce the confirmed-design gate: block writes outside declared component scope"
@@ -17,18 +17,18 @@ responsibilities:
   - "Provide formatting standards: date format (DD MMM YYYY), locale (British English), verbosity"
   - "Supply migration files for propagating standards changes across existing repos"
   - "Register and sync capability skills from planifest-overrides/"
-  - "Maintain the build log throughout a pipeline run for P8 build assessment"
+  - "Maintain the build log throughout a pipeline run for the ship-phase build assessment"
   - "Direct model tier selection for all spawned subagents"
   - "Enforce parallelism directives across all phase skills"
   - "Centralise the telemetry envelope and emission gate in telemetry-standards.md"
   - "Track installed skill directories via .planifest-manifest for safe re-runs"
-  - "Detect and recommend adoption mode at P0"
-  - "Suggest and confirm the version number at P0 based on pipeline track"
-  - "Run the Scope Lock Challenge before design confirmation"
+  - "Detect and recommend adoption mode at discovery"
+  - "Suggest and confirm the version number at discovery"
+  - "Run the Scope Lock Challenge before design confirmation, drafted inline"
   - "Enforce one question at a time across all phase skills"
 
 exceptions:
-  - "Does not generate application code. That is planifest-codegen-agent's job."
+  - "Does not generate application code. That is the implement phase's job in consumer projects."
   - "Does not configure CI for consumer projects."
   - "Supports Claude Code only. No other agentic tool target exists."
 
@@ -80,16 +80,15 @@ scope:
     - "Capability skill intake via planifest-overrides/capability-skills/"
     - "Migration infrastructure for standards propagation"
     - "setup.sh and setup.ps1 for Claude Code registration"
-    - "The 21 pipeline skills, P0 through P9"
+    - "The 12 pipeline skills across the five phases"
     - "Templates, schemas, and standards bundled into each skill at install time"
     - "scripts/: consistency-check.mjs, product-version.mjs, self-description-check.mjs, verify-telemetry-hooks.mjs, promote-to-regression.sh, refresh-delete-boot-files"
     - "tests/ and tests/regression/ for the framework's own behaviour"
   outOfScope:
-    - "Application-level code generation (handled by planifest-codegen-agent)"
+    - "Application-level code generation (handled by the implement phase in consumer projects)"
     - "CI pipeline configuration for consumer projects"
     - "Any agentic tool other than Claude Code"
-  deferred:
-    - "Trimming the 21 pipeline skills down to the phases this framework keeps"
+  deferred: []
 
 risk:
   level: "low"
@@ -101,7 +100,7 @@ risk:
     - "Retry classifies AbortError as network-level, so a slow but live backend can receive the same event up to 3 times. The envelope is byte-identical across attempts, so a listener can deduplicate on (session_id, phase, event, timestamp). No explicit idempotency key exists."
     - "Worst-case telemetry hook wall time on the failure path is 9.6s against a blackholing host, not the 600ms sleep budget alone."
     - "The em dash guard's bypass sentinel matches anywhere in the payload, so any document explaining the rule exempts itself from it."
-    - "setup.sh copies hook modules but never prunes, so a module deleted upstream leaves a stale copy in .claude/hooks/."
+    - "setup.sh prunes retired skills but not hook modules, so a hook module deleted upstream leaves a stale copy in .claude/hooks/."
 
 quality:
   testCoverage:
@@ -111,13 +110,13 @@ quality:
   techDebt:
     - "getSessionId() keeps 4 copies across context-pressure.mjs, emit-phase-start.mjs, emit-phase-end.mjs, and resolve-phase.mjs, spanning 3 genuinely different behaviour profiles. Each copy carries a comment naming its profile."
     - "resolve-phase.mjs's endDedupFlag() sits beside the shared get-flag-path.mjs and builds a similar-looking but different filename for a different purpose. Merging the two would break phase_end dedup."
-    - "The test suite still asserts against paths and flags removed in 0000030. It needs a sweep."
+    - "The test suite mixes per-feature suites with regression copies. Consolidation is future work."
   quirks:
     - "resolve-phase.mjs infers the active phase from the Skill tool's tool_input.skill field via a PreToolUse(Skill) hook, then re-execs emit-phase-start.mjs. A Stop hook re-execs emit-phase-end.mjs using a session marker file, cleared after use."
     - "context-pressure fill% is a proxy metric based on transcript file size, not actual token count"
     - "gate-write component path matching is prefix-based, so very short prefixes may over-permit"
     - "ratchet-check treats a reworded criterion as remove plus add and blocks it. The .ratchet-approve marker is the intended path for legitimate rewording."
-    - "ratchet-check cannot verify who wrote .ratchet-approve. Marker forgery is audit-detected via ratchet-log.md and P8, not prevented."
+    - "ratchet-check cannot verify who wrote .ratchet-approve. Marker forgery is audit-detected via ratchet-log.md and the ship-phase build assessment, not prevented."
     - "product-version.mjs parses only the constrained product.template.yml shape, not arbitrary YAML"
     - "readProductId() extracts product.yml's top-level id field via a constrained regex, not a full YAML parser"
     - "read-stdin.mjs and phase-enum.mjs live in hooks/enforcement/ and are imported cross-directory by hooks/telemetry/ callers. enforcement/ installs unconditionally and telemetry/ only under --structured-telemetry-mcp, so the always-present tree holds any helper with an enforcement caller."
@@ -125,20 +124,14 @@ quality:
 
 pipeline:
   templateVersion: "1.0.0"
-  featureMode: "retrofit"
+  featureMode: "standard-iterative"
   domainKnowledgePath: "plan/current"
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-08-22"
-  # Rewritten by 0000030 (change-agent): the manifest had accumulated 288
-  # lines of per-feature history describing a nine-tool framework with three
-  # components. This feature reduced it to one Claude Code component, so the
-  # manifest was rewritten to describe what exists rather than patched.
-  # Version reset from 0.28.1 to 0.1.0 under an explicit human override,
-  # recorded in the archived design.md for this feature.
+  updatedAt: "2026-08-30"
   createdBy: "agent"
   lastModifiedBy: "agent"
-  skill: "planifest-change-agent"
+  skill: "planifest-implement"
   tool: "claude-code"
   model: "claude-opus-5"
