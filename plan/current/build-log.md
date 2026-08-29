@@ -73,6 +73,8 @@ P0 exchange (decomposition): Q: recommended splitting into waves given five cont
 
 P0 exchange (phase mapping): Q: proposed the ten-to-five mapping: discovery=P0, plan=P1+P2, implement=P3+P6 (docs move in with code), validate-and-accept=P4+P5 plus human acceptance as the gate, ship=P7+P8+P9 / A: confirmed as proposed.
 
+P0 exchange (skill fates): Q: proposed 21 skills becoming 12: five-phase core (orchestrator, plan, implement, validate-and-accept, ship), TDD trio plus loop-runner plus three standalone utilities survive, nine die with content merged upward. Change-pipeline, fast-path, and retrofit workflows die; feature-pipeline.md is the sole workflow / A: confirmed as proposed.
+
 ---
 
 ## Summary (filled at P7)
