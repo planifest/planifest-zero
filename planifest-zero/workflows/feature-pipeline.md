@@ -1,56 +1,92 @@
-﻿---
+---
 name: feature-pipeline
-description: Execute the full Planifest pipeline - from feature brief to production-ready PR. Use this when starting a new feature.
+description: Run the Planifest pipeline from feature brief to merged PR. The single route for every change.
 ---
 
 # Feature Pipeline
 
-Execute the full Planifest pipeline for a new feature.
+The single route through Planifest. Every change runs this pipeline.
+
+## Every change is a feature change
+
+There is one route. A small change is a small run: fewer requirements, a
+shorter plan, and a quicker pass through the same five gates. It is not a
+different route.
 
 ## Prerequisites
 
-- A feature brief at `plan/current/feature-brief.md`
-- Use the [feature brief template](../templates/feature-brief.template.md) if you don't have one yet
+- A feature brief at `plan/current/feature-brief.md`.
+- If you don't have one, use the
+  [feature brief template](../templates/feature-brief.template.md).
 
-## Steps
+## Phases
 
-1. **Load the orchestrator skill** - it drives the entire pipeline
-2. **Phase 0 - Assess and Coach**
-   - Read the feature brief
-   - Assess against the three layers: Product, Architecture, Engineering
-   - Coach the human through gaps - one question at a time, in priority order
-   - Produce the validated design at `plan/current/design.md`
-   - **Gate:** Human confirms the design before proceeding
-3. **Phase 1 - Requirements** (invoke spec-agent)
-   - Produce, always (the minimal default Phase 1 artifact set — ADR-004): execution plan, functional requirements (`plan/current/requirements/`), scope, risk register, domain glossary
-   - Produce, conditionally, each gated on an explicit, checkable trigger declared in the feature brief or inferred from a stated property in the confirmed design — never from feature size or user-story count alone:
-     - OpenAPI Specification — the component acts as an API provider
-     - Operational Model — the feature introduces or modifies a deployed runtime service
-     - SLO Definitions — the feature introduces or modifies a deployed runtime service with a latency/availability/throughput target stated in the confirmed design's Architecture Layer
-     - Cost Model — the feature introduces new compute, storage, or third-party service spend, or materially changes existing spend
-   - Absent a stated or inferable trigger, produce only the minimal five — do not generate empty/N/A placeholder files for the conditional three
-   - Write to `plan/`
-   - **Gate:** All always-produced artifacts exist; each conditional artifact is present iff its trigger condition holds; OpenAPI spec (if applicable) covers every endpoint
-4. **Phase 2 - Architecture Decisions** (invoke adr-agent)
-   - Produce ADRs for every significant decision
-   - Write to `plan/current/adr/`
-   - **Gate:** ADR exists for every significant decision
-5. **Phase 3 - Code Generation** (invoke codegen-agent)
-   - Check for relevant capability skills for the declared stack
-   - Produce full implementation at `src/{component-id}/`
-   - **Gate:** Implementation exists and matches the requirements
-6. **Phase 4 - Validate** (invoke validate-agent)
-   - Run CI checks: lint, typecheck, test, build
-   - Self-correct up to 5 times
-   - **Gate:** CI passes
-7. **Phase 5 - Security** (invoke security-agent)
-   - Produce security report
-   - **Gate:** Report produced, critical/high findings flagged
-8. **Phase 6 - Documentation and Ship** (invoke docs-agent)
-   - Produce living per-component docs, registry, and dependency graph at `docs/`
-   - Produce a change log entry (`plan/changelog/{feature-id}-<YYYY-MM-DD>.md`)
-   - **Gate:** All living artifacts produced, ready for human review
-9. **Phase 7 - Human Review and Filing** (Post-Review Action)
-   - The human reviews the changes and the active plan.
-   - Upon acceptance, the active plan (brief, requirements, ADRs) is moved from `plan/current/` to `plan/_archive/{feature-id}/` for historical tracking.
+The pipeline has five phases. The orchestrator owns discovery and drives the
+run. Each later phase is owned by its own skill, which the orchestrator
+invokes in order.
 
+| # | Phase | Owner | Produces |
+|---|-------|-------|----------|
+| 1 | Discovery | planifest-orchestrator | `plan/current/discovery.md`, confirmed `plan/current/design.md` |
+| 2 | Plan | planifest-plan | Requirements at `plan/current/requirements/`, ADRs at `plan/current/adr/` |
+| 3 | Implement | planifest-implement | Code, tests, and docs at `src/{component-id}/` |
+| 4 | Validate and accept | planifest-validate-and-accept | Passing CI, security review, verified acceptance criteria |
+| 5 | Ship | planifest-ship | Archive, build assessment, changelog, tag, PR |
+
+### 1. Discovery
+
+The orchestrator reads the brief, coaches the human through gaps one question
+at a time, picks up backlog entries, locks scope, and writes the design.
+
+**Gate: design confirmation.** The human confirms `plan/current/design.md`.
+That confirmation ends discovery. No later phase starts without it.
+
+### 2. Plan
+
+planifest-plan produces one artifact set: the execution plan, functional
+requirements, scope, risk register, glossary, and an ADR for every
+significant decision.
+
+**Gate: the plan gate.** One gate for the whole artifact set. Requirements
+and ADRs are confirmed together, not separately.
+
+### 3. Implement
+
+planifest-implement builds the feature through a TDD loop per requirement.
+Code, tests, and docs land together. Code never ships without its
+documentation.
+
+**Gate: the implement gate.** Every requirement has code, tests, and docs,
+and the implementation matches the confirmed plan.
+
+### 4. Validate and accept
+
+planifest-validate-and-accept runs CI (lint, typecheck, test, build),
+self-corrects up to 5 times, performs the security review, and verifies
+acceptance criteria by running the software.
+
+**Gate: human acceptance.** The human accepts the working feature. This gate
+always stops, in every run mode.
+
+### 5. Ship
+
+planifest-ship archives `plan/current/` to `plan/_archive/{feature-id}/`,
+files the build assessment, writes the changelog entry, tags the release,
+and raises the PR.
+
+**Gate: the ship gate.** The human confirms the shipped result and merges
+the PR. This gate always stops, in every run mode.
+
+## Run modes
+
+The orchestrator asks for a run mode during discovery and records it in
+`plan/.run-mode`.
+
+- **Interactive** (default): the pipeline stops at every gate and waits for
+  the human.
+- **Continuous**: the pipeline proceeds through the plan and implement gates
+  on its own self-checks, reporting rather than waiting.
+
+Two stops hold in both modes: human acceptance and the ship gate. Continuous
+mode never bypasses them. Design confirmation also always involves the
+human, because the run mode is chosen at that conversation.
