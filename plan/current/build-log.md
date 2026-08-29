@@ -30,7 +30,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Agents spawned | `0` |
 | MCP calls | `0` |
 | Parallel task batches | `0` |
-| Telemetry | confirmed-disabled |
+| Telemetry | emitted |
 | Notes | See below. |
 
 **Route:** Feature Pipeline. The request changes the pipeline contract itself, so
@@ -40,13 +40,25 @@ the Change Pipeline and Fast Path both fail their gates.
 0000030 merge. Human confirmed all prior PRs are merged. Branch
 `feat/0000031-five-phase-planifest-zero` created from `main` at `8e45613`.
 
+**Installed-tree insulation.** `.claude/settings.json` carries zero
+`planifest-framework/` path references. Every hook command resolves under
+`.claude/hooks/`, and the 21 skills are copies under `.claude/skills/`. The
+running session is therefore unaffected by any change to the source folder,
+including the rename, until `setup.sh` re-runs. The old pipeline stays available
+while the new one is built.
+
 **Context reset (start action -1).** Not performed. This tool has no context clear
 I can invoke, and the requirements for this feature arrived in the live session.
 Clearing would discard them. Flagged to the human rather than executed.
 
-**Telemetry.** `--structured-telemetry-mcp` state read from the installed tree.
-No failure markers under `plan/.telemetry-failures/`. Recorded as
-confirmed-disabled pending the unified-signal check at the P0 gate.
+**Telemetry.** The unified signal is active. `.planifest-setup-flags` records
+`--structured-telemetry-mcp` against backend `http://localhost:3741`, the
+`.claude/telemetry-enabled` marker is present, and the installed hook commands
+carry `PLANIFEST_TELEMETRY_URL`. No failure markers under
+`plan/.telemetry-failures/`. Recorded as emitted.
+
+**Correction.** This block first recorded `confirmed-disabled`. That was wrong.
+The signal was read from the source tree rather than from the installed markers.
 
 **Migrations.** None pending in `planifest-framework/migrations/`.
 

@@ -39,7 +39,7 @@ summary: "Raw P0 discovery-pass findings: what the orchestrator knew before coac
 
 Recorded here because they size the requested work and were read before coaching began.
 
-- **Rename blast radius.** The literal `planifest-framework` appears 387 times across 93 files. Heaviest: `planifest-framework/tests/` (28 files), `planifest-framework/skills/` (16), `plan/backlog/` (9), `planifest-framework/migrations/` (6), `plan/_archive/` (5). It also appears in `product.yml`, the root `README.md`, `refresh-planifest-framework-dir.ps1`, and the hook commands inside the gitignored `.claude/settings.json`.
+- **Rename blast radius.** The literal `planifest-framework` appears 387 times across 93 files. Heaviest: `planifest-framework/tests/` (28 files), `planifest-framework/skills/` (16), `plan/backlog/` (9), `planifest-framework/migrations/` (6), `plan/_archive/` (5). It also appears in `product.yml`, the root `README.md`, and `refresh-planifest-framework-dir.ps1`. It does **not** appear in `.claude/settings.json`: the installed hook commands all resolve under `.claude/hooks/`, so the live session is insulated from the rename until `setup.sh` re-runs.
 
 - **Phase contract.** `hooks/enforcement/phase-enum.mjs` holds seven values: spec, adr, codegen, validate, security, docs, ship. P0 has no enum value by design. Three consumers derive from it: `check-telemetry-receipts.mjs`, `resolve-phase.mjs`, and `emit-event-receipt.mjs`. `standards/telemetry-standards.md` is the stated source of truth for the values.
 
@@ -61,3 +61,5 @@ Recorded here because they size the requested work and were read before coaching
 - **Pending migrations:** none. `planifest-framework/migrations/` holds only `_done/` and the two archive-dirname scripts.
 
 - **Telemetry failure markers:** none under `plan/.telemetry-failures/`.
+
+- **Telemetry signal:** active. `.planifest-setup-flags` records `--structured-telemetry-mcp` with backend `http://localhost:3741`, written 2026-08-22. The `.claude/telemetry-enabled` marker is present and the installed hook commands carry `PLANIFEST_TELEMETRY_URL`.
