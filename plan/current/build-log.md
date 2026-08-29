@@ -130,11 +130,13 @@ Gate accepted: P2 (2026-08-30, continuous run)
 | Start | `2026-08-30T00:05:00Z` |
 | Model tier | primary orchestration, Fable 5 codegen dispatches |
 | Skills loaded | planifest-codegen-agent, planifest-test-writer (pattern), planifest-implementer (pattern) |
-| Agents spawned | `tbd, updated at gate` |
+| Agents spawned | `13` |
 | MCP calls | `0` |
-| Parallel task batches | `tbd` |
+| Parallel task batches | `3` |
 | Telemetry | emitted |
 | Notes | NFR-001 baseline captured: 2,895 lines across 21 SKILL.md files. Target for the new 12-skill set: at or below 1,447. Sequence: RED test suites first, then the rename (held until the consolidation-map agent finishes reading skills/), then parallel skill rewrites, then enum, setup, docs, purge. |
+
+P3 progress: rename green (78 live files swept, plan/ and decisions-index.md exempt as records). Five-value enum landed with receipt-checker regex accepting colon headings. CI single-route and five-phase schema guard landed in both workflow copies. Ten parallel rewrite agents produced the 12-skill roster (1,313 lines against the 1,447 budget), workflows, standards, templates, setup pruning, and the living-docs rewrite. Thirteen skill folders retired. context-pressure.mjs kept as genuine telemetry with its stale flag reference removed. All six req suites green. Two agents sweeping the legacy suites.
 
 ---
 
