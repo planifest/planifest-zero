@@ -47,16 +47,16 @@ import { join } from "node:path";
 import { PHASE_NUMBER_TO_ENUM } from "./phase-enum.mjs";
 import { readStdin } from "./read-stdin.mjs";
 
-// Parse build-log.md's phase blocks: heading "### P<n> — ..." followed
+// Parse build-log.md's phase blocks: heading "### P<n>: ..." followed
 // (somewhere before the next "###" heading) by a "| Telemetry | <state> |"
-// table row. The template's own placeholder block ("### Px — {Phase Name}")
+// table row. The template's own placeholder block ("### Px: {Phase Name}")
 // never matches \d and is skipped naturally.
 function parsePhaseBlocks(content) {
   const lines = content.split(/\r?\n/);
   const blocks = [];
   let current = null;
 
-  const headingRe = /^###\s+P(\d+)\s+—/;
+  const headingRe = /^###\s+P(\d+)\s*[:—]/;
   const telemetryRe = /^\|\s*Telemetry\s*\|\s*([^|]+?)\s*\|/;
 
   for (const line of lines) {
