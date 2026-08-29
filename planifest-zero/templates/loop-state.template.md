@@ -5,18 +5,17 @@ status: "active | done | escalated"
 ---
 # Loop State: {{loop-id}}
 
-> Path: `plan/current/loop-state-{loop-id}.md`. Git-tracked; committed after every
-> update so budget/iteration counters survive interrupt/resume (ADR-007). Resume
-> convention: see `pause.template.md`. While a loop-state file has `status: active`, the
+> Path: `plan/current/loop-state-{loop-id}.md`. Git-tracked, and committed after
+> every update so iteration counters survive interrupt/resume. Resume convention:
+> see `pause.template.md`. While a loop-state file has `status: active`, the
 > ratchet hook is armed for `plan/current/` artifact writes.
 
 | Field | Value |
 |-------|-------|
-| Loop id | `{{p0_completeness \| design_critic \| reversal_protocol \| verify_by_execution \| cross_model_review}}` |
-| Owning phase | `{{P0–P6}}` |
+| Loop id | `{{discovery_completeness \| verify_by_execution}}` |
+| Owning phase | `{{P1–P4}}` |
 | Toggle level | `{{report-only \| on}}` |
-| Iteration | `{{n}}` of cap `{{3 (default); P4 validate keeps 5}}` |
-| Reversal budget remaining | `{{2 − grants this feature}}` (shared across all loops; feature-wide) |
+| Iteration | `{{n}}` of cap `{{3 (default); the P4 self-correct loop keeps 5}}` |
 | Last decision | `{{continue \| done \| escalate}}` |
 | Last updated | `{{ISO-8601 UTC}}` |
 
@@ -37,7 +36,7 @@ Append-only: one record per iteration. Never rewrite a prior record.
 
 Populated only when `status: escalated`.
 
-- **Stop rule hit:** {{iteration cap | no-progress (same finding 2 consecutive iterations) | budget exhausted}}
+- **Stop rule hit:** {{iteration cap | no-progress (same finding 2 consecutive iterations)}}
 - **Outstanding gap/finding:** {{exact statement}}
 - **What was attempted:** {{summary across iterations}}
 - **Recommended next step:** {{for the human}}
