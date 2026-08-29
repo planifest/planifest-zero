@@ -15,24 +15,22 @@
  * reads "emitted", verify at least one receipt exists for that phase under
  * plan/.telemetry-receipts/. A block claiming "emitted" with zero matching
  * receipts is flagged — this is the exact failure mode that motivated
- * req-004: feature 0000025's P0-P2 run, where the orchestrator marked a
- * build-log field "emitted" without ever having called `emit_event`, and
- * nothing caught it until a human did.
+ * this check: a run where the orchestrator marked a build-log field
+ * "emitted" without ever having called `emit_event`, and nothing caught it
+ * until a human did.
  *
  * "failed-with-recorded-choice" and "confirmed-disabled" are the template's
  * other two Telemetry states (templates/build-log.template.md) — neither
  * claims a call happened, so neither is checked against receipts here.
  *
  * Phase-heading -> phase-enum mapping: build-log.md headings read
- * "### P<n> — {Phase Name}" (free text); the phase enum used throughout
+ * "### P<n>: {Phase Name}" (free text); the phase enum used throughout
  * telemetry-standards.md and by resolve-phase.mjs's PHASE_SKILLS table is
- * spec/adr/codegen/validate/security/docs/ship. P0 (Assess & Coach) has no
- * enum of its own (excluded from the phase_start/phase_end enum per
- * telemetry-standards.md) and is skipped; P7/P8/P9 all map to "ship" (the
- * ship-agent owns all three sub-phases).
+ * discovery/plan/implement/validate-and-accept/ship, numbered P1..P5 in
+ * pipeline order.
  *
- * PHASE_NUMBER_TO_ENUM is imported from ./phase-enum.mjs (req-002, folding
- * backlog 0000057) rather than declared here, so it cannot drift from
+ * PHASE_NUMBER_TO_ENUM is imported from ./phase-enum.mjs rather than
+ * declared here, so it cannot drift from
  * resolve-phase.mjs's PHASE_SKILLS or emit-event-receipt.mjs's KNOWN_PHASES.
  *
  * Deliberately read-only and advisory, like check-telemetry-failures.mjs:
@@ -113,7 +111,7 @@ try {
   for (const block of blocks) {
     if (block.telemetry !== "emitted") continue;
     const phase = PHASE_NUMBER_TO_ENUM[block.phaseNumber];
-    if (!phase) continue; // P0 (assess) has no phase_start/phase_end enum.
+    if (!phase) continue; // Unknown phase number: nothing to check against.
     if (!receiptExistsForPhase(receiptsDir, phase)) {
       gaps.push({ phaseNumber: block.phaseNumber, phase });
     }
