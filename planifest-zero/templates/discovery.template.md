@@ -1,12 +1,12 @@
 ---
 title: "Discovery - {{feature-id}}"
-summary: "Raw P0 discovery-pass findings: what the orchestrator knew before coaching began."
+summary: "Raw discovery-pass findings: what the orchestrator knew before coaching began."
 ---
 # Discovery - {{feature-id}}
 
-> Created at the start of P0, before the first coaching question, in every adoption mode.
-> Raw findings only; decisions belong in `design.md`, the Q&A audit trail in `build-log.md`.
-> Unreadable signal: say so; coaching proceeds.
+> Created at the start of discovery (P1), before the first coaching question, in every adoption mode.
+> Raw findings only. Decisions belong in `design.md`, the Q&A audit trail in `build-log.md`.
+> Unreadable signal: say so, and coaching proceeds.
 
 ## Header (all modes)
 
@@ -19,7 +19,7 @@ summary: "Raw P0 discovery-pass findings: what the orchestrator knew before coac
 
 ## Mode Findings
 
-<!-- Populate the subsection for the confirmed adoption mode; delete the others.
+<!-- Populate the subsection for the confirmed adoption mode and delete the others.
      External Anchor keeps its own subsection PLUS whichever underlying mode's
      subsection applies to what else is present in the repo. -->
 

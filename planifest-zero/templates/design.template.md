@@ -4,7 +4,7 @@
 - Problem: {one-line problem statement}
 - Adoption mode: greenfield | standard-iterative | retrofit | external-anchor
 - Feature ID: {0000000}-{kebab-case-name}
-- Discovery: see `plan/current/discovery.md` (raw P0 findings; do not embed them here; this document records confirmed decisions only)
+- Discovery: see `plan/current/discovery.md` (raw discovery findings. Do not embed them here. This document records confirmed decisions only)
 
 ## Product Layer
 - User stories:
