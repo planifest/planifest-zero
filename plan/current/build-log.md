@@ -71,6 +71,8 @@ P0 exchange (backlog pickup): Q: pull-in / leave / discard for entries 0000075-0
 
 P0 exchange (decomposition): Q: recommended splitting into waves given five contract-level items plus nine folded entries / A: human decided one run, no waves. Codegen subagent dispatches to use Fable 5 (claude-fable-5).
 
+P0 exchange (phase mapping): Q: proposed the ten-to-five mapping: discovery=P0, plan=P1+P2, implement=P3+P6 (docs move in with code), validate-and-accept=P4+P5 plus human acceptance as the gate, ship=P7+P8+P9 / A: confirmed as proposed.
+
 ---
 
 ## Summary (filled at P7)
