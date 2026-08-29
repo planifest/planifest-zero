@@ -110,6 +110,26 @@ copy_skills() {
   done
 }
 
+prune_retired_skills() {
+  # Removes any folder in the tool's skills directory whose name is absent
+  # from the skills/ source set, so retired skills vanish on regeneration.
+  # Scoped to subfolders of the skills directory only. Capability skills from
+  # planifest-overrides/ are copied back in after this prune runs.
+  local target_dir="$1"
+
+  [ -d "$target_dir" ] || return 0
+
+  for dest_dir in "$target_dir"/*/; do
+    [ -d "$dest_dir" ] || continue
+    local name
+    name="$(basename "$dest_dir")"
+    if [ ! -d "$SKILLS_SRC/$name" ]; then
+      rm -rf "$dest_dir"
+      echo "  - pruned retired skill: $name"
+    fi
+  done
+}
+
 write_boot_file() {
   # Boot files are disposable build outputs (0000029 ADR-001): always
   # regenerate from the current template so template fixes propagate on every
@@ -620,7 +640,7 @@ initialize_repo() {
 
 Components live here. Each component is a subfolder with a `component.yml` manifest.
 
-See [planifest/spec/feature-structure.md](../planifest/spec/feature-structure.md) for the canonical layout.
+See [plan/feature-structure.md](../plan/feature-structure.md) for the canonical layout.
 EOF
     echo "  + src/README.md (created)"
   fi
@@ -673,7 +693,7 @@ repo/
 This folder is the Planifest framework itself. It is the same across every project. You do not modify it per-feature Ã¢â‚¬â€ you update it when the framework evolves.
 
 ```
-planifest/
+planifest-zero/
 Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ skills/           Ã¢â€ Â Agent instructions (orchestrator + phase skills)
 Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ templates/        Ã¢â€ Â File format templates for every artifact
 Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ schemas/          Ã¢â€ Â JSON Schema validation definitions
@@ -781,7 +801,7 @@ The relationship is bidirectional:
 
 If the repo already has code:
 
-1. Drop `planifest/` into the repo root
+1. Drop `planifest-zero/` into the repo root
 2. Create `plan/` for the first feature
 3. Move existing components under `src/` (or leave them if they're already there)
 4. Add a `component.yml` to each existing component
@@ -789,7 +809,7 @@ If the repo already has code:
 
 ---
 
-*Templates for each file are in [planifest/templates/](../templates/). Skills reference these paths.*
+*Templates for each file are in [planifest-zero/templates/](../planifest-zero/templates/). Skills reference these paths.*
 EOF
     echo "  + plan/feature-structure.md (created)"
   fi
@@ -847,6 +867,9 @@ setup_tool() {
 
   # Copy skills (now automatically bundles supporting files)
   copy_skills "$skills_dir"
+
+  # Prune folders that no longer exist in the skills/ source set
+  prune_retired_skills "$skills_dir"
 
   # Copy permanent capability skills from planifest-overrides/ (REQ-008)
   copy_capability_skills "$skills_dir"

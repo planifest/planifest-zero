@@ -150,6 +150,24 @@ function Copy-PlanifestSkills {
     }
 }
 
+function Remove-RetiredSkills {
+    # Removes any folder in the tool's skills directory whose name is absent
+    # from the skills/ source set, so retired skills vanish on regeneration.
+    # Scoped to subfolders of the skills directory only. Capability skills from
+    # planifest-overrides/ are copied back in after this prune runs.
+    param($TargetDir)
+
+    if (-not (Test-Path $TargetDir)) { return }
+
+    Get-ChildItem -Path $TargetDir -Directory | ForEach-Object {
+        $srcDir = Join-Path $SkillsSrc $_.Name
+        if (-not (Test-Path $srcDir)) {
+            Remove-Item -Path $_.FullName -Recurse -Force
+            Write-Host "  - pruned retired skill: $($_.Name)"
+        }
+    }
+}
+
 function Write-PlanifestBootFile {
     # Boot files are disposable build outputs (0000029 ADR-001): always
     # regenerate from the current template so template fixes propagate on
@@ -567,7 +585,7 @@ function Initialize-PlanifestRepo {
 
 Components live here. Each component is a subfolder with a `component.yml` manifest.
 
-See [planifest/spec/feature-structure.md](../planifest/spec/feature-structure.md) for the canonical layout.
+See [plan/feature-structure.md](../plan/feature-structure.md) for the canonical layout.
 '@ -Encoding UTF8
         Write-Host "  + src/README.md (created)"
     }
@@ -622,7 +640,7 @@ repo/
 This folder is the Planifest framework itself. It is the same across every project. You do not modify it per-feature - you update it when the framework evolves.
 
 ```
-planifest/
+planifest-zero/
 +-- skills/           <- Agent instructions (orchestrator + phase skills)
 +-- templates/        <- File format templates for every artifact
 +-- schemas/          <- JSON Schema validation definitions
@@ -730,7 +748,7 @@ The relationship is bidirectional:
 
 If the repo already has code:
 
-1. Drop `planifest/` into the repo root
+1. Drop `planifest-zero/` into the repo root
 2. Create `plan/` for the first feature
 3. Move existing components under `src/` (or leave them if they're already there)
 4. Add a `component.yml` to each existing component
@@ -738,7 +756,7 @@ If the repo already has code:
 
 ---
 
-*Templates for each file are in [planifest/templates/](../templates/). Skills reference these paths.*
+*Templates for each file are in [planifest-zero/templates/](../planifest-zero/templates/). Skills reference these paths.*
 '@ -Encoding UTF8
         Write-Host "  + plan/feature-structure.md (created)"
     }
@@ -865,6 +883,9 @@ function Invoke-PlanifestSetup {
 
     # Copy skills (now automatically bundles supporting files)
     Copy-PlanifestSkills -TargetDir $skillsDir
+
+    # Prune folders that no longer exist in the skills/ source set
+    Remove-RetiredSkills -TargetDir $skillsDir
 
     # Copy permanent capability skills from planifest-overrides/ (ADR-006)
     Copy-CapabilitySkills -TargetDir $skillsDir
