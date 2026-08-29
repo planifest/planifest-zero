@@ -91,6 +91,22 @@ P0 exchange (design confirmation): Q: confirm design.md as drafted / A: confirme
 
 Gate accepted: P0 (2026-08-30)
 
+### P1: Requirements (spec)
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-29T23:15:00Z` |
+| Model tier | primary orchestration, cheaper drafting |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | `6` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Telemetry | emitted |
+| Notes | Six requirement files dispatched in parallel, one per user story. Execution plan, scope, risk register, and glossary written inline. OpenAPI, operational model, SLO, cost model, and data contract all correctly omitted: no API, no runtime service, no new spend, no database. Component manifest deviation: this repo's component manifest lives at the framework folder root, not src/; it is rewritten at implement rather than drafted fresh here. |
+
+Gate: P1 complete. Six requirement files, execution plan, scope, risk register, glossary. OpenAPI and runtime artifacts correctly omitted. Continuous run: proceeding to P2 without stopping.
+Gate accepted: P1 (2026-08-30, continuous run)
+
 ---
 
 ## Summary (filled at P7)
