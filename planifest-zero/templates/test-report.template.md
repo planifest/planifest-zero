@@ -3,7 +3,7 @@
 **Feature:** {{feature-name}}
 **Plan date:** {{YYYY-MM-DD}}
 
-## 1. Tests Run This Plan (P4 Results)
+## 1. Tests Run This Plan (Validate and Accept, P4)
 
 Every functional requirement must appear here.
 
@@ -37,7 +37,7 @@ The following regression tests failed. These must be triaged before archiving.
 
 ## 3. Newly Promoted Tests (This Feature)
 
-Promoted during Step R of this P7 run.
+Promoted during this run's ship phase (P5).
 
 | Test file | Promoted by | Decision rationale |
 |-----------|-------------|-------------------|

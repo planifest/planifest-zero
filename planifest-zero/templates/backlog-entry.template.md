@@ -1,6 +1,6 @@
 ---
 title: "Backlog Entry: {{id}} - {{short-title}}"
-summary: "A discovered-but-out-of-scope item deferred for pickup at a future P0."
+summary: "A discovered-but-out-of-scope item deferred for pickup at a future discovery run."
 status: "open"
 ---
 # Backlog Entry: {{id}} - {{short-title}}
@@ -21,7 +21,7 @@ status: "open"
 > during a run use `discovered mid-flight`.
 
 **Source feature:** {{feature-id that discovered this}}
-**Source phase:** {{P0–P9 phase active when discovered}}
+**Source phase:** {{P1–P5 phase active when discovered}}
 **Deferral source:** {{discovered mid-flight | deliberate scope decision | tech debt}}
 **Date filed:** {{ISO-8601 date}}
 
@@ -29,7 +29,7 @@ status: "open"
 
 ## Problem
 
-{{What was discovered. Specific enough that a future P0 (with no memory of this
+{{What was discovered. Specific enough that a future discovery run (with no memory of this
 session) can judge whether to pull it in. Name files/paths where relevant.}}
 
 ## Suggested Action
