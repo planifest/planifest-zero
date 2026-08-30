@@ -58,7 +58,7 @@ INPUT_A=$(cat << EOF
 {
   "cwd": "$WS_A",
   "tool_name": "mcp__structured-telemetry-mcp__emit_event",
-  "tool_input": { "envelope": { "schema_version": "1.0", "event": "adr_decision", "phase": "adr", "product_id": "demo" } },
+  "tool_input": { "envelope": { "schema_version": "1.0", "event": "adr_decision", "phase": "plan", "product_id": "demo" } },
   "tool_response": { "ok": true }
 }
 EOF
@@ -67,13 +67,13 @@ printf '%s' "$INPUT_A" | node "$RECEIPT_HOOK" >/tmp/receipt_out_a.txt 2>&1
 EXIT_A=$?
 assert_exit_zero "$EXIT_A" "req-004: emit-event-receipt.mjs exits 0 on a successful call"
 
-RECEIPT_A=$(find "$WS_A/plan/.telemetry-receipts" -name "adr-adr_decision-*.marker" 2>/dev/null | head -1)
+RECEIPT_A=$(find "$WS_A/plan/.telemetry-receipts" -name "plan-adr_decision-*.marker" 2>/dev/null | head -1)
 assert_equals "yes" "$([ -n "$RECEIPT_A" ] && echo yes || echo no)" \
-  "req-004: receipt file written for phase=adr, event_type=adr_decision"
+  "req-004: receipt file written for phase=plan, event_type=adr_decision"
 
 if [ -n "$RECEIPT_A" ]; then
   assert_contains "adr_decision" "$(cat "$RECEIPT_A")" "req-004: receipt content records event_type"
-  assert_contains "\"adr\"" "$(cat "$RECEIPT_A")" "req-004: receipt content records phase"
+  assert_contains "\"plan\"" "$(cat "$RECEIPT_A")" "req-004: receipt content records phase"
 fi
 
 rm -rf "$WS_A" /tmp/receipt_out_a.txt
@@ -182,7 +182,7 @@ mkdir -p "$WS_D/plan/current"
 cat > "$WS_D/plan/current/build-log.md" << 'EOF'
 # Build Log
 
-### P2 — Architecture Decisions
+### P2: Plan
 
 | Field | Value |
 |-------|-------|
@@ -197,7 +197,7 @@ assert_exit_zero "$EXIT_D" "req-004: check-telemetry-receipts.mjs exits 0 (advis
 CTX_D="$(get_additional_context "$OUTPUT_D")"
 assert_equals "yes" "$([ -n "$CTX_D" ] && echo yes || echo no)" \
   "req-004: additionalContext non-empty when a phase claims 'emitted' with no receipts"
-assert_contains "adr" "$CTX_D" "req-004: flagged phase (adr) named in the reminder"
+assert_contains "plan" "$CTX_D" "req-004: flagged phase (plan) named in the reminder"
 
 rm -rf "$WS_D"
 
@@ -213,14 +213,14 @@ mkdir -p "$WS_E/plan/current" "$WS_E/plan/.telemetry-receipts"
 cat > "$WS_E/plan/current/build-log.md" << 'EOF'
 # Build Log
 
-### P2 — Architecture Decisions
+### P2: Plan
 
 | Field | Value |
 |-------|-------|
 | Telemetry | emitted |
 EOF
-cat > "$WS_E/plan/.telemetry-receipts/adr-adr_decision-2026-08-08T00-00-00.000Z.marker" << 'EOF'
-{ "phase": "adr", "event_type": "adr_decision" }
+cat > "$WS_E/plan/.telemetry-receipts/plan-adr_decision-2026-08-08T00-00-00.000Z.marker" << 'EOF'
+{ "phase": "plan", "event_type": "adr_decision" }
 EOF
 
 INPUT_E="{\"cwd\":\"$WS_E\"}"
@@ -245,13 +245,13 @@ mkdir -p "$WS_F/plan/current"
 cat > "$WS_F/plan/current/build-log.md" << 'EOF'
 # Build Log
 
-### P5 — Security Review
+### P4: Validate and Accept
 
 | Field | Value |
 |-------|-------|
 | Telemetry | confirmed-disabled |
 
-### P6 — Documentation
+### P3: Implement
 
 | Field | Value |
 |-------|-------|

@@ -228,13 +228,12 @@ echo "=== req-002: the phase enum has one definition, all lookups derived ==="
 
 PHASE_CHECK=$(node --input-type=module -e "
   import { PHASE_ENUM, KNOWN_PHASES, PHASE_NUMBER_TO_ENUM, PHASE_SKILLS } from '$ENF/phase-enum.mjs';
-  const expectedEnum = ['spec','adr','codegen','validate','security','docs','ship'];
+  const expectedEnum = ['discovery','plan','implement','validate-and-accept','ship'];
   // Values the three hooks encoded independently before extraction.
-  const expectedNumbers = {1:'spec',2:'adr',3:'codegen',4:'validate',5:'security',6:'docs',7:'ship',8:'ship',9:'ship'};
+  const expectedNumbers = {1:'discovery',2:'plan',3:'implement',4:'validate-and-accept',5:'ship'};
   const expectedSkills = {
-    'planifest-spec-agent':'spec','planifest-adr-agent':'adr','planifest-codegen-agent':'codegen',
-    'planifest-validate-agent':'validate','planifest-security-agent':'security',
-    'planifest-docs-agent':'docs','planifest-ship-agent':'ship'};
+    'planifest-orchestrator':'discovery','planifest-plan':'plan','planifest-implement':'implement',
+    'planifest-validate-and-accept':'validate-and-accept','planifest-ship':'ship'};
   const errs = [];
   if (JSON.stringify(PHASE_ENUM) !== JSON.stringify(expectedEnum)) errs.push('enum');
   if (JSON.stringify(PHASE_NUMBER_TO_ENUM) !== JSON.stringify(expectedNumbers)) errs.push('numbers');
@@ -301,10 +300,10 @@ else
   assert_equals "0" "0" "req-002: telemetry tree is absent without --structured-telemetry-mcp"
 fi
 mkdir -p "$WS/plan/current"
-printf '### P3 — Codegen\n\n| Telemetry | emitted |\n' > "$WS/plan/current/build-log.md"
+printf '### P3: Implement\n\n| Telemetry | emitted |\n' > "$WS/plan/current/build-log.md"
 RECEIPT_OUT=$(printf '{"cwd":"%s"}' "$WS" | node "$WS/.claude/hooks/enforcement/check-telemetry-receipts.mjs" 2>&1)
 assert_exit_zero $? "req-002: check-telemetry-receipts exits 0 with telemetry uninstalled"
-assert_contains "P3 (phase: codegen)" "$RECEIPT_OUT" \
+assert_contains "P3 (phase: implement)" "$RECEIPT_OUT" \
   "req-002: check-telemetry-receipts resolves the phase enum with hooks/telemetry/ absent"
 cd /; rm -rf "$WS"
 
