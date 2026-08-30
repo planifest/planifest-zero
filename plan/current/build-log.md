@@ -159,6 +159,22 @@ P4 results: every check green first attempt, zero self-corrections this phase. S
 Deviation noted (non-blocking): consistency-check flags all six requirements for exceeding 3 acceptance criteria. The human confirmed the six-story single-run design at discovery, and this run executed under the installed contract where the check is not a gate. Recorded for the changelog rather than re-splitting a green build.
 Gate accepted: P4 (2026-08-30, continuous run, first-attempt pass exception)
 
+### P5: Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-30T01:45:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Review scope: the feature diff. New execution surfaces: setup pruning, rewritten refresh script, CI telemetry loop. |
+
+P5 results: risk low. One low finding, LOW-001 symlink-following in skill pruning, fixed in-run in both setup scripts and re-verified by execution. Zero critical, high, or medium findings. Report at plan/current/security-report.md.
+Gate accepted: P5 (2026-08-30, continuous run, low-risk exception)
+
 ---
 
 ## Summary (filled at P7)

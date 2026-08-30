@@ -160,6 +160,9 @@ function Remove-RetiredSkills {
     if (-not (Test-Path $TargetDir)) { return }
 
     Get-ChildItem -Path $TargetDir -Directory | ForEach-Object {
+        # Never follow a planted symlink or junction: deleting through it
+        # would reach outside the skills directory.
+        if ($_.LinkType) { return }
         $srcDir = Join-Path $SkillsSrc $_.Name
         if (-not (Test-Path $srcDir)) {
             Remove-Item -Path $_.FullName -Recurse -Force

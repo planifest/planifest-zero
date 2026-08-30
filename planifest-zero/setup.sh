@@ -121,6 +121,9 @@ prune_retired_skills() {
 
   for dest_dir in "$target_dir"/*/; do
     [ -d "$dest_dir" ] || continue
+    # Never follow a planted symlink: deleting through it would reach outside
+    # the skills directory.
+    [ -L "${dest_dir%/}" ] && continue
     local name
     name="$(basename "$dest_dir")"
     if [ ! -d "$SKILLS_SRC/$name" ]; then
