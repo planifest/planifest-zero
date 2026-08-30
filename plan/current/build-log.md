@@ -138,6 +138,9 @@ Gate accepted: P2 (2026-08-30, continuous run)
 
 P3 progress: rename green (78 live files swept, plan/ and decisions-index.md exempt as records). Five-value enum landed with receipt-checker regex accepting colon headings. CI single-route and five-phase schema guard landed in both workflow copies. Ten parallel rewrite agents produced the 12-skill roster (1,313 lines against the 1,447 budget), workflows, standards, templates, setup pruning, and the living-docs rewrite. Thirteen skill folders retired. context-pressure.mjs kept as genuine telemetry with its stale flag reference removed. All six req suites green. Two agents sweeping the legacy suites.
 
+P3 gate: complete. All six requirement suites green. Legacy sweep finished inline after the sweep subagents hit the session limit mid-run: 20 suites amended, 5 deleted with their regression copies, 3 manifest entries removed, promotion floor lowered to 70 with a recorded reason. Full suite: 52 feature and 17 regression, zero failures. Three compressed rules restored to skills during the sweep (orchestrator push cadence, ship version derivation via product-version.mjs, plan commit phrasing).
+Gate accepted: P3 (2026-08-30, continuous run)
+
 ---
 
 ## Summary (filled at P7)
