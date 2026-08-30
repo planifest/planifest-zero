@@ -2,15 +2,13 @@
 # Tests for feature 0000025, req-005: backlog unification for deferred items.
 #
 # Confirms:
-#   1. planifest-zero/templates/backlog-entry.template.md gains a
-#      "Deferral source" field distinguishing discovered mid-flight /
-#      deliberate scope decision / tech debt.
-#   2. planifest-docs-agent/SKILL.md's recommendations.md generation step is
-#      extended to also file each Deferred Items and Tech Debt row as its own
-#      plan/backlog/{id}-{slug}/entry.md, tagged with Source feature/phase,
-#      pointing back at the originating feature's docs instead of duplicating
-#      rationale, using the existing highest-id+1 allocation convention, and
-#      applying only going forward (no backfill of already-archived features).
+#   1. planifest-zero/templates/backlog-entry.template.md carries the
+#      "Deferral source" field distinguishing discovered mid-flight,
+#      deliberate scope decision, and tech debt.
+#   2. Backlog mechanics (monotonic id sequence, pull-in/leave/discard
+#      pickup) live in the orchestrator's discovery text.
+#   3. Subagent out-of-scope filing routes through
+#      standards/agent-dispatch-standards.md with a pre-assigned id.
 
 set -uo pipefail
 
@@ -20,12 +18,13 @@ source "$SCRIPT_DIR/helpers/assert.sh"
 FRAMEWORK="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TEMPLATE="$FRAMEWORK/templates/backlog-entry.template.md"
-DOCS_SKILL="$FRAMEWORK/skills/planifest-docs-agent/SKILL.md"
+ORCHESTRATOR="$FRAMEWORK/skills/planifest-orchestrator/SKILL.md"
+DISPATCH="$FRAMEWORK/standards/agent-dispatch-standards.md"
 
 grep_has() { grep -q "$1" "$2" 2>/dev/null && echo "yes" || echo "no"; }
 
 echo ""
-echo "=== req-005: backlog-entry.template.md gains a Deferral source field ==="
+echo "=== req-005: backlog-entry.template.md has a Deferral source field ==="
 
 assert_equals "yes" "$(grep_has '\*\*Deferral source:\*\*' "$TEMPLATE")" \
   "req-005: template has a Deferral source field"
@@ -37,45 +36,37 @@ assert_equals "yes" "$(grep_has 'tech debt' "$TEMPLATE")" \
   "req-005: template's Deferral source field names tech debt"
 
 echo ""
-echo "=== req-005: template retains pre-existing fields ==="
+echo "=== req-005: template retains source and id-allocation fields ==="
 
 assert_equals "yes" "$(grep_has '\*\*Source feature:\*\*' "$TEMPLATE")" \
   "req-005: template still has Source feature field"
 assert_equals "yes" "$(grep_has '\*\*Source phase:\*\*' "$TEMPLATE")" \
   "req-005: template still has Source phase field"
 assert_equals "yes" "$(grep_has 'highest ever allocated' "$TEMPLATE")" \
-  "req-005: template still documents the highest-id+1 allocation convention"
+  "req-005: template still documents the highest-id-plus-one allocation convention"
 
 echo ""
-echo "=== req-005: docs-agent SKILL.md files Deferred Items/Tech Debt rows to plan/backlog/ ==="
+echo "=== req-005: backlog mechanics live in the orchestrator's discovery text ==="
 
-assert_equals "yes" "$(grep_has 'plan/backlog/{id}-{slug}/entry.md' "$DOCS_SKILL")" \
-  "req-005: docs-agent rule names the plan/backlog/{id}-{slug}/entry.md target path"
-assert_equals "yes" "$(grep_has 'Deferred Items and Tech Debt' "$DOCS_SKILL")" \
-  "req-005: docs-agent rule names Deferred Items and Tech Debt as the source tables"
-assert_equals "yes" "$(grep_has 'Deferral.*source.*deliberate scope decision' "$DOCS_SKILL")" \
-  "req-005: docs-agent rule tags Deferred Items rows as deliberate scope decision"
-assert_equals "yes" "$(grep_has 'tech debt.*for a row filed from the Tech Debt table' "$DOCS_SKILL")" \
-  "req-005: docs-agent rule tags Tech Debt rows as tech debt"
-
-echo ""
-echo "=== req-005: docs-agent SKILL.md applies going forward only (no backfill) ==="
-
-assert_equals "yes" "$(grep_has 'going forward only' "$DOCS_SKILL")" \
-  "req-005: docs-agent rule states going-forward-only scope"
-assert_equals "yes" "$(grep_has 'Do not backfill' "$DOCS_SKILL")" \
-  "req-005: docs-agent rule explicitly forbids backfilling already-archived features"
+assert_equals "yes" "$(grep_has 'Backlog pickup' "$ORCHESTRATOR")" \
+  "req-005: discovery has a backlog pickup start action"
+assert_equals "yes" "$(grep_has 'pull-in / leave / discard' "$ORCHESTRATOR")" \
+  "req-005: pickup offers pull-in / leave / discard per entry"
+assert_equals "yes" "$(grep_has 'own monotonic sequence' "$ORCHESTRATOR")" \
+  "req-005: backlog ids come from their own monotonic sequence"
+assert_equals "yes" "$(grep_has 'highest ever allocated plus one, including spent ids' "$ORCHESTRATOR")" \
+  "req-005: next id is highest ever allocated plus one, including spent ids"
 
 echo ""
-echo "=== req-005: docs-agent SKILL.md points at originating docs instead of duplicating rationale ==="
+echo "=== req-005: subagent filing routes through the dispatch standards ==="
 
-assert_equals "yes" "$(grep_has 'rather than duplicating that rationale' "$DOCS_SKILL")" \
-  "req-005: docs-agent rule points backlog entries at originating rationale instead of duplicating it"
-
-echo ""
-echo "=== req-005: docs-agent SKILL.md follows the existing id allocation convention ==="
-
-assert_equals "yes" "$(grep_has 'highest.*ever allocated (including picked-up and discarded entries), plus one' "$DOCS_SKILL")" \
-  "req-005: docs-agent rule reuses the existing highest-id+1 backlog convention"
+assert_equals "yes" "$(grep_has 'plan/backlog/{id}-{slug}/entry.md' "$DISPATCH")" \
+  "req-005: dispatch standards name the plan/backlog/{id}-{slug}/entry.md target path"
+assert_equals "yes" "$(grep_has 'Deferral source: discovered mid-flight' "$DISPATCH")" \
+  "req-005: mid-flight discoveries are tagged discovered mid-flight"
+assert_equals "yes" "$(grep_has 'backlog-entry.template.md' "$DISPATCH")" \
+  "req-005: filings follow the backlog entry template"
+assert_equals "yes" "$(grep_has 'pre-computes the next available backlog ID' "$DISPATCH")" \
+  "req-005: the dispatching agent pre-computes the backlog id"
 
 print_summary

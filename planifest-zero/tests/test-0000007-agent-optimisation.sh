@@ -54,13 +54,13 @@ assert_contains "ci-only"            "$BRIEF" "req-001: 'ci-only' is an allowed 
 echo ""
 echo "=== req-002: build target agent guidance ==="
 
-CODEGEN=$(cat "$SKILLS/planifest-codegen-agent/SKILL.md")
-assert_contains "Build target: docker"        "$CODEGEN" "req-002: codegen-agent has Build target: docker section"
-assert_contains "check host-installed runtimes" "$CODEGEN" "req-002: codegen-agent instructs never check host runtimes"
-assert_contains "docker build"                "$CODEGEN" "req-002: codegen-agent references docker build"
-assert_contains "build-target-standards.md"   "$CODEGEN" "req-002: codegen-agent bundles build-target-standards.md"
+CODEGEN=$(cat "$SKILLS/planifest-implement/SKILL.md")
+assert_contains "Build target: docker"        "$CODEGEN" "req-002: implement skill has Build target: docker section"
+assert_contains "check host-installed runtimes" "$CODEGEN" "req-002: implement instructs never check host runtimes"
+assert_contains "docker build"                "$CODEGEN" "req-002: implement skill references docker build"
+assert_contains "build-target-standards.md"   "$CODEGEN" "req-002: implement skill bundles build-target-standards.md"
 
-VALIDATE=$(cat "$SKILLS/planifest-validate-agent/SKILL.md")
+VALIDATE=$(cat "$SKILLS/planifest-validate-and-accept/SKILL.md")
 assert_contains "Build target: docker"        "$VALIDATE" "req-002: validate-agent has Build target: docker section"
 assert_contains "host toolchain"              "$VALIDATE" "req-002: validate-agent instructs never run host toolchain"
 assert_contains "docker build"                "$VALIDATE" "req-002: validate-agent references docker build"
@@ -108,23 +108,21 @@ echo "=== req-004: skill boilerplate removal ==="
 TELEMETRY_POINTER="telemetry-standards.md"
 
 # Phase skills that emit telemetry events — must reference telemetry-standards.md
-for skill in planifest-adr-agent planifest-spec-agent planifest-security-agent \
-             planifest-docs-agent planifest-validate-agent planifest-change-agent \
-             planifest-codegen-agent planifest-ship-agent; do
+for skill in planifest-plan planifest-implement \
+             planifest-validate-and-accept planifest-ship; do
   SKILL_CONTENT=$(cat "$SKILLS/$skill/SKILL.md")
   assert_contains "$TELEMETRY_POINTER" "$SKILL_CONTENT" "req-004: $skill references telemetry-standards.md"
   assert_contains "bundle_standards" "$SKILL_CONTENT" "req-004: $skill has bundle_standards in frontmatter"
 done
 
 # Sub-agent skills (footer-only removal) — verify skill files still exist and are valid
-for skill in planifest-test-writer planifest-implementer planifest-refactor planifest-build-assessment-agent; do
+for skill in planifest-test-writer planifest-implementer planifest-refactor; do
   assert_file_exists "$SKILLS/$skill/SKILL.md" "req-004: $skill SKILL.md exists after footer removal"
 done
 
-# Hard Limits section should be absent from phase skills (not ship-agent which retains Hard Limits)
-for skill in planifest-adr-agent planifest-spec-agent planifest-security-agent \
-             planifest-docs-agent planifest-validate-agent planifest-change-agent \
-             planifest-codegen-agent; do
+# Hard Limits section should be absent from downstream phase skills (the orchestrator holds them)
+for skill in planifest-plan planifest-implement \
+             planifest-validate-and-accept; do
   SKILL_CONTENT=$(cat "$SKILLS/$skill/SKILL.md")
   assert_not_contains "## Hard Limits" "$SKILL_CONTENT" "req-004: $skill has no Hard Limits section"
 done
@@ -150,24 +148,24 @@ assert_contains "orchestrator"      "$TELEM" "req-005: telemetry-standards docum
 echo ""
 echo "=== req-006: stale reference cleanup ==="
 
-for skill in planifest-adr-agent planifest-spec-agent planifest-security-agent \
-             planifest-docs-agent planifest-validate-agent planifest-orchestrator; do
+for skill in planifest-plan planifest-implement \
+             planifest-validate-and-accept planifest-orchestrator; do
   SKILL_CONTENT=$(cat "$SKILLS/$skill/SKILL.md")
   assert_not_contains "design-requirements.md" "$SKILL_CONTENT" "req-006: $skill has no reference to design-requirements.md"
 done
 
-for skill in planifest-validate-agent planifest-orchestrator planifest-ship-agent; do
+for skill in planifest-validate-and-accept planifest-orchestrator planifest-ship; do
   SKILL_CONTENT=$(cat "$SKILLS/$skill/SKILL.md")
   assert_not_contains "pipeline-run.md" "$SKILL_CONTENT" "req-006: $skill has no reference to pipeline-run.md"
 done
 
-for skill in planifest-orchestrator planifest-ship-agent; do
+for skill in planifest-orchestrator planifest-ship; do
   SKILL_CONTENT=$(cat "$SKILLS/$skill/SKILL.md")
   assert_not_contains "external-skills.json" "$SKILL_CONTENT" "req-006: $skill has no reference to external-skills.json"
   assert_not_contains "skill-sync.sh" "$SKILL_CONTENT" "req-006: $skill has no reference to skill-sync.sh"
 done
 
-VALIDATE=$(cat "$SKILLS/planifest-validate-agent/SKILL.md")
+VALIDATE=$(cat "$SKILLS/planifest-validate-and-accept/SKILL.md")
 assert_contains "build-log.md" "$VALIDATE" "req-006: validate-agent references build-log.md (correct path)"
 
 # -----------------------------------------------------------------------
@@ -187,9 +185,9 @@ ORCH=$(cat "$SKILLS/planifest-orchestrator/SKILL.md")
 assert_contains "design.template.md" "$ORCH" "req-007: orchestrator JIT Loading table references design.template.md"
 assert_not_contains "## Design - {feature-id}" "$ORCH" "req-007: orchestrator has no inline design template block"
 
-DOCS=$(cat "$SKILLS/planifest-docs-agent/SKILL.md")
-assert_contains "iteration-log.template.md" "$DOCS" "req-007: docs-agent references iteration-log.template.md"
-assert_not_contains "# Iteration Log" "$DOCS" "req-007: docs-agent has no inline iteration log template block"
+DOCS=$(cat "$SKILLS/planifest-implement/SKILL.md")
+assert_contains "iteration-log.template.md" "$DOCS" "req-007: implement references iteration-log.template.md"
+assert_not_contains "# Iteration Log" "$DOCS" "req-007: implement has no inline iteration log template block"
 
 SETUP_SH=$(cat "$FRAMEWORK/setup.sh")
 assert_contains ".planifest-manifest" "$SETUP_SH" "req-007: setup.sh writes .planifest-manifest"

@@ -1,18 +1,14 @@
 #!/usr/bin/env bash
-# Tests for feature 0000025, req-003: subagent parallelism expansion
-# (validate-agent + agent-dispatch-standards.md portion).
+# Tests for feature 0000025, req-003: subagent parallelism expansion.
 #
 # Confirms:
-#   1. agent-dispatch-standards.md's MUST-parallelise table gains rows for
+#   1. agent-dispatch-standards.md's MUST-parallelise table has rows for
 #      (a) independent new-test-file authoring closing a coverage gap and
 #      (b) independent living-doc edits with no shared content.
-#   2. planifest-validate-agent/SKILL.md's Parallelism Directive table gains
-#      a MUST-parallelise row for 2+ independent new test files closing a
-#      coverage gap.
+#   2. The validate-and-accept phase skill keeps its own parallelism
+#      guidance (batching and hard sequencing) per the phase-skill
+#      parallelism convention.
 #   3. None of the pre-existing MUST/Cannot-parallelise rows were removed.
-#
-# Does not cover planifest-docs-agent/SKILL.md (P6 living-docs row) — that
-# portion of req-003 is implemented by a separate concurrent change.
 #
 # Checks the canonical tracked skill source (planifest-zero/skills/),
 # not the gitignored .claude/skills/ runtime sync copy.
@@ -25,7 +21,7 @@ source "$SCRIPT_DIR/helpers/assert.sh"
 FRAMEWORK="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 STANDARDS="$FRAMEWORK/standards/agent-dispatch-standards.md"
-VALIDATE_SKILL="$FRAMEWORK/skills/planifest-validate-agent/SKILL.md"
+VALIDATE_SKILL="$FRAMEWORK/skills/planifest-validate-and-accept/SKILL.md"
 
 grep_has() { grep -q "$1" "$2" 2>/dev/null && echo "yes" || echo "no"; }
 
@@ -58,31 +54,23 @@ assert_equals "yes" "$(grep_has 'ADR writing before requirements are complete' "
   "req-003: pre-existing Cannot-parallelise row (ADR sequencing) still present"
 
 echo ""
-echo "=== req-003: validate-agent SKILL.md Parallelism Directive gains coverage-gap row ==="
+echo "=== req-003: validate-and-accept keeps its own parallelism guidance ==="
 
-assert_equals "yes" "$(grep_has '2+ independent new test files closing a coverage gap' "$VALIDATE_SKILL")" \
-  "req-003: validate-agent Parallelism Directive table names new-test-file coverage-gap closure"
-
-echo ""
-echo "=== req-003: validate-agent SKILL.md retains existing Parallelism Directive rows ==="
-
-assert_equals "yes" "$(grep_has 'Lint + typecheck (no shared state)' "$VALIDATE_SKILL")" \
-  "req-003: pre-existing MUST-parallelise row (lint+typecheck) still present"
-assert_equals "yes" "$(grep_has 'Library audit + semantic correctness check' "$VALIDATE_SKILL")" \
-  "req-003: pre-existing MUST-parallelise row (library audit) still present"
-assert_equals "yes" "$(grep_has 'Independent component test suites' "$VALIDATE_SKILL")" \
-  "req-003: pre-existing MUST-parallelise row (component test suites) still present"
-assert_equals "yes" "$(grep_has 'Test before typecheck passes' "$VALIDATE_SKILL")" \
-  "req-003: pre-existing Cannot-parallelise row (test-before-typecheck) still present"
-assert_equals "yes" "$(grep_has 'Build before tests pass' "$VALIDATE_SKILL")" \
-  "req-003: pre-existing Cannot-parallelise row (build-before-tests) still present"
-assert_equals "yes" "$(grep_has 'Self-correct cycle N+1 before N' "$VALIDATE_SKILL")" \
-  "req-003: pre-existing Cannot-parallelise row (self-correct ordering) still present"
+assert_equals "yes" "$(grep_has '## Parallelism' "$VALIDATE_SKILL")" \
+  "req-003: validate-and-accept has a Parallelism section"
+assert_equals "yes" "$(grep_has 'Batch 1 (parallel): lint + typecheck' "$VALIDATE_SKILL")" \
+  "req-003: lint and typecheck run as a parallel batch"
+assert_equals "yes" "$(grep_has 'library audit + semantic check' "$VALIDATE_SKILL")" \
+  "req-003: library audit and semantic check run as a parallel batch"
 
 echo ""
 echo "=== req-003: hard sequencing unchanged ==="
 
-assert_equals "yes" "$(grep_has 'Batch 1 (parallel): lint + typecheck' "$VALIDATE_SKILL")" \
-  "req-003: existing P4 dispatch order (lint+typecheck before test before build) unchanged"
+assert_equals "yes" "$(grep_has 'Never run tests before typecheck passes' "$VALIDATE_SKILL")" \
+  "req-003: tests never run before typecheck passes"
+assert_equals "yes" "$(grep_has 'cycle N+1 before N' "$VALIDATE_SKILL")" \
+  "req-003: self-correct cycle ordering is sequential"
+assert_equals "yes" "$(grep_has 'File out-of-scope discoveries to .plan/backlog/. per .agent-dispatch-standards.md.' "$VALIDATE_SKILL")" \
+  "req-003: out-of-scope discoveries route to the backlog per the dispatch standards"
 
 print_summary

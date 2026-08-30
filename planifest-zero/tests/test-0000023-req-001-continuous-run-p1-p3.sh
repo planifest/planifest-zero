@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Tests for feature 0000023-framework-pipeline-fixes, req-001:
-# restore continuous_run exception for P1/P2/P3 STOP rules.
+# continuous run must be honoured at ordinary phase gates.
 #
-# Covers: the Phase Invocation Table's P1/P2/P3 rows used to hardcode
-# "No exception", silently overriding continuous_run (regression introduced
-# in commit 42ae808, feature 0000021 — see ADR-001). P4-P6/P9 must remain
-# untouched.
+# Covers: the orchestrator's Phase Invocation table. In the five-phase
+# pipeline the plan (P2) and implement (P3) gates carry a continuous-run
+# exception, while the acceptance gate (P4) and the final ship gate (P5)
+# always stop regardless of run mode.
 
 set -uo pipefail
 
@@ -23,39 +23,46 @@ fi
 CONTENT=$(cat "$SKILL")
 
 echo ""
-echo "=== req-001: P1/P2/P3 honor continuous_run ==="
+echo "=== req-001: P2/P3 gates honour continuous run ==="
 
-assert_contains "STOP, present requirement count/scope decisions/deferred items. Exception: \`continuous_run: true\` was set at P0." \
-  "$CONTENT" "req-001: P1 Requirements row has the continuous_run exception"
+TABLE_SECTION=$(printf '%s\n' "$CONTENT" | sed -n '/## Phase Invocation/,/^## Mid-Pipeline/p')
 
-assert_contains "STOP, present ADR list with one-line summaries. Exception: \`continuous_run: true\` was set at P0." \
-  "$CONTENT" "req-001: P2 Architecture Decisions row has the continuous_run exception"
+P2_ROW=$(printf '%s\n' "$TABLE_SECTION" | grep '| P2 Plan |')
+assert_contains "STOP for confirmation. Exception: continuous run." "$P2_ROW" \
+  "req-001: P2 Plan row has the continuous-run exception"
 
-assert_contains "STOP, present components built/tests produced/deviations. Exception: \`continuous_run: true\` was set at P0." \
-  "$CONTENT" "req-001: P3 Code Generation row has the continuous_run exception"
-
-echo ""
-echo "=== req-001: P4-P6/P9 unchanged ==="
-
-assert_contains "Exception: proceed without confirmation if all checks passed first-attempt with zero self-corrections." \
-  "$CONTENT" "req-001: P4 Validate row unchanged"
-
-assert_contains "Exception: proceed without confirmation if risk is Low with zero critical/high/medium findings." \
-  "$CONTENT" "req-001: P5 Security row unchanged"
-
-assert_contains "Exception: proceed without confirmation if zero drift and all expected artifacts present." \
-  "$CONTENT" "req-001: P6 Documentation row unchanged"
+P3_ROW=$(printf '%s\n' "$TABLE_SECTION" | grep '| P3 Implement |')
+assert_contains "STOP for confirmation. Exception: continuous run." "$P3_ROW" \
+  "req-001: P3 Implement row has the continuous-run exception"
 
 echo ""
-echo "=== req-001: no stray 'No exception' left in the Phase Invocation Table ==="
+echo "=== req-001: acceptance and ship gates always stop ==="
 
-TABLE_SECTION=$(printf '%s\n' "$CONTENT" | sed -n '/## Phase Invocation Table/,/^## /p')
+P4_ROW=$(printf '%s\n' "$TABLE_SECTION" | grep '| P4 Validate and Accept |')
+assert_contains "Acceptance ALWAYS stops. A continuous run does not bypass it." "$P4_ROW" \
+  "req-001: P4 acceptance gate always stops, continuous run does not bypass it"
+
+P5_ROW=$(printf '%s\n' "$TABLE_SECTION" | grep '| P5 Ship |')
+assert_contains "Final gate. Always stops." "$P5_ROW" \
+  "req-001: P5 ship gate always stops"
+
+echo ""
+echo "=== req-001: no stray 'No exception' left in the Phase Invocation table ==="
+
 if [[ "$TABLE_SECTION" == *"No exception"* ]]; then
-  echo "  FAIL: req-001: 'No exception' still present in the Phase Invocation Table"
+  echo "  FAIL: req-001: 'No exception' still present in the Phase Invocation table"
   ((FAIL++)) || true
 else
-  echo "  PASS: req-001: 'No exception' fully removed from the Phase Invocation Table"
+  echo "  PASS: req-001: 'No exception' fully removed from the Phase Invocation table"
   ((PASS++)) || true
 fi
+
+echo ""
+echo "=== req-001: run mode is captured and restored ==="
+
+assert_contains "Continuous run: proceed without phase confirmations" "$CONTENT" \
+  "req-001: the run-mode question offers a continuous run"
+assert_contains 'plan/.run-mode' "$CONTENT" \
+  "req-001: the answer is persisted to plan/.run-mode"
 
 print_summary

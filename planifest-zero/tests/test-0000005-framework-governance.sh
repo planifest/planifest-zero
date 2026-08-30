@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # Tests for feature 0000005-framework-governance
 # Covers: req-001 through req-016
+# Amended for the 0000030 framework cut-down. Retired agent skills
+# (codegen-agent, validate-agent, change-agent) are gone, so the wiring
+# assertions now point at the surviving phase skills that carry the
+# same rules (planifest-plan, planifest-implement,
+# planifest-validate-and-accept).
 
 set -uo pipefail
 
@@ -55,33 +60,45 @@ assert_file_exists "$STANDARDS/library-standards/go/test-frameworks.md"         
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== req-004: codegen-agent library-standards wiring ==="
+echo "=== req-004: implement-phase library-standards wiring ==="
 
-CODEGEN=$(cat "$SKILLS/planifest-codegen-agent/SKILL.md")
-assert_contains "formatting-standards.md"       "$CODEGEN" "req-004: formatting-standards.md in bundle_standards"
-assert_contains "library-standards/_version-policy.md" "$CODEGEN" "req-004: _version-policy.md in bundle_standards"
-assert_contains "Library Standards"              "$CODEGEN" "req-004: Library Standards section present"
-assert_contains "planifest-overrides/library-standards" "$CODEGEN" "req-004: references planifest-overrides path"
+# 0000030: codegen-agent is retired. Its library-standards wiring now
+# lives in planifest-implement. formatting-standards.md moved to the
+# planifest-plan bundle.
+IMPLEMENT=$(cat "$SKILLS/planifest-implement/SKILL.md")
+PLAN=$(cat "$SKILLS/planifest-plan/SKILL.md")
+assert_contains "formatting-standards.md"       "$PLAN" "req-004: formatting-standards.md in planifest-plan bundle_standards"
+assert_contains "library-standards/_version-policy.md" "$IMPLEMENT" "req-004: _version-policy.md in planifest-implement bundle_standards"
+assert_contains "prefer-avoid.md"                "$IMPLEMENT" "req-004: library audit references prefer-avoid.md"
+assert_contains "planifest-overrides/library-standards" "$IMPLEMENT" "req-004: references planifest-overrides path"
 
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== req-005: validate-agent library audit wiring ==="
+echo "=== req-005: validate-and-accept library audit wiring ==="
 
-VALIDATE=$(cat "$SKILLS/planifest-validate-agent/SKILL.md")
+# 0000030: validate-agent is retired. The library audit now lives in
+# planifest-validate-and-accept. _version-policy.md is bundled by
+# planifest-implement rather than the validate phase.
+VALIDATE=$(cat "$SKILLS/planifest-validate-and-accept/SKILL.md")
 assert_contains "formatting-standards.md"       "$VALIDATE" "req-005: formatting-standards.md in bundle_standards"
-assert_contains "library-standards/_version-policy.md" "$VALIDATE" "req-005: _version-policy.md in bundle_standards"
+assert_contains "library-standards/_version-policy.md" "$IMPLEMENT" "req-005: _version-policy.md bundled by planifest-implement"
 assert_contains "Library audit"                 "$VALIDATE" "req-005: Library audit step present"
-assert_contains "avoid list"                    "$VALIDATE" "req-005: avoid list check present"
+assert_contains "avoided library"               "$VALIDATE" "req-005: avoided library check present"
 
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== req-006: orchestrator wiring ==="
+echo "=== req-006: pipeline standards wiring ==="
 
+# 0000030: the orchestrator no longer bundles these standards. The
+# underlying rule, that both standards are wired into the pipeline,
+# now lives in the phase skills. planifest-plan bundles
+# formatting-standards.md and planifest-implement bundles
+# library-standards/_version-policy.md.
 ORCH=$(cat "$SKILLS/planifest-orchestrator/SKILL.md")
-assert_contains "formatting-standards.md"       "$ORCH" "req-006: formatting-standards.md in bundle_standards"
-assert_contains "library-standards/_version-policy.md" "$ORCH" "req-006: _version-policy.md in bundle_standards"
+assert_contains "formatting-standards.md"       "$PLAN" "req-006: formatting-standards.md in planifest-plan bundle_standards"
+assert_contains "library-standards/_version-policy.md" "$IMPLEMENT" "req-006: _version-policy.md in planifest-implement bundle_standards"
 
 # -----------------------------------------------------------------------
 
@@ -162,8 +179,9 @@ echo "=== req-015: British English rewrite ==="
 TESTING=$(cat "$STANDARDS/testing-standards.md")
 assert_contains "behaviour"                     "$TESTING" "req-015: behaviour (British) in testing-standards"
 
-CHANGE=$(cat "$SKILLS/planifest-change-agent/SKILL.md")
-assert_contains "behaviour"                     "$CHANGE" "req-015: behaviour (British) in change-agent"
+# 0000030: change-agent is retired. Check a surviving skill that uses
+# British English instead.
+assert_contains "behaviour"                     "$VALIDATE" "req-015: behaviour (British) in planifest-validate-and-accept"
 
 # -----------------------------------------------------------------------
 

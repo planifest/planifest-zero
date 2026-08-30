@@ -51,19 +51,19 @@ WS_A=$(mktemp -d -t planifest_resolve_a_XXXXXX)
 MARKER_A="$WS_A/marker.txt"
 STUB_A=$(make_stub "$MARKER_A")
 
-INPUT_A="{\"cwd\":\"$WS_A\",\"tool_name\":\"Skill\",\"tool_input\":{\"skill\":\"planifest-codegen-agent\"}}"
+INPUT_A="{\"cwd\":\"$WS_A\",\"tool_name\":\"Skill\",\"tool_input\":{\"skill\":\"planifest-implement\"}}"
 export PLANIFEST_STUB_MARKER="$MARKER_A"
 printf '%s' "$INPUT_A" | node "$RESOLVER" start "$STUB_A" >/dev/null 2>&1
 EXIT_A=$?
 assert_exit_zero "$EXIT_A" "resolve-phase start: exits 0 for a known phase skill"
 
 assert_equals "yes" "$([ -f "$MARKER_A" ] && echo yes || echo no)" \
-  "resolve-phase start: target script invoked for planifest-codegen-agent"
-[ -f "$MARKER_A" ] && assert_contains "codegen" "$(cat "$MARKER_A")" \
-  "resolve-phase start: target invoked with resolved phase 'codegen'"
+  "resolve-phase start: target script invoked for planifest-implement"
+[ -f "$MARKER_A" ] && assert_contains "implement" "$(cat "$MARKER_A")" \
+  "resolve-phase start: target invoked with resolved phase 'implement'"
 
-assert_equals "codegen" "$(cat "$WS_A/.claude/.planifest-active-phase" 2>/dev/null || echo MISSING)" \
-  "resolve-phase start: active-phase marker file records 'codegen'"
+assert_equals "implement" "$(cat "$WS_A/.claude/.planifest-active-phase" 2>/dev/null || echo MISSING)" \
+  "resolve-phase start: active-phase marker file records 'implement'"
 
 rm -rf "$WS_A" "$(dirname "$STUB_A")"
 
@@ -143,7 +143,7 @@ WS_E=$(mktemp -d -t planifest_resolve_e_XXXXXX)
 MARKER_E="$WS_E/marker.txt"
 STUB_E=$(make_stub "$MARKER_E")
 mkdir -p "$WS_E/.claude"
-printf 'validate' > "$WS_E/.claude/.planifest-active-phase"
+printf 'validate-and-accept' > "$WS_E/.claude/.planifest-active-phase"
 
 # Unique per-run session id — the dedup flag this exercises lives in the
 # shared OS tmpdir (planifest-telemetry/phase-end-emitted-<session>-<phase>),
@@ -156,8 +156,8 @@ EXIT_E=$?
 assert_exit_zero "$EXIT_E" "resolve-phase end: exits 0 with an active phase"
 assert_equals "yes" "$([ -f "$MARKER_E" ] && echo yes || echo no)" \
   "resolve-phase end: target invoked when a phase is active"
-[ -f "$MARKER_E" ] && assert_contains "validate" "$(cat "$MARKER_E")" \
-  "resolve-phase end: target invoked with resolved phase 'validate'"
+[ -f "$MARKER_E" ] && assert_contains "validate-and-accept" "$(cat "$MARKER_E")" \
+  "resolve-phase end: target invoked with resolved phase 'validate-and-accept'"
 assert_equals "no" "$([ -f "$WS_E/.claude/.planifest-active-phase" ] && echo yes || echo no)" \
   "resolve-phase end: active-phase marker cleared after emitting"
 
@@ -167,7 +167,7 @@ assert_equals "no" "$([ -f "$WS_E/.claude/.planifest-active-phase" ] && echo yes
 # tmpdir dedup flag from the first emission (keyed by session_id + phase,
 # mirroring emit-phase-start.mjs's own dedup guard) must still be in place.
 rm -f "$MARKER_E"
-printf 'validate' > "$WS_E/.claude/.planifest-active-phase"
+printf 'validate-and-accept' > "$WS_E/.claude/.planifest-active-phase"
 printf '%s' "$INPUT_E" | node "$RESOLVER" end "$STUB_E" >/dev/null 2>&1
 assert_equals "no" "$([ -f "$MARKER_E" ] && echo yes || echo no)" \
   "resolve-phase end: repeat Stop call for the same (session, phase) does not re-invoke the target (dedup flag holds)"

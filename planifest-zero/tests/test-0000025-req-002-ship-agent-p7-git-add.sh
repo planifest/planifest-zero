@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# Tests for feature 0000025, req-002: ship-agent P7 Step 7 git add explicitly
-# names plan/current/, so the archive commit no longer silently depends on
-# git's rename-detection heuristic to stage plan/current/'s deletion.
+# Tests for feature 0000025, req-002: the ship phase's archive commit stages
+# everything explicitly, so it never silently depends on git's
+# rename-detection heuristic and never leaves untracked artifacts behind.
+# The rule now lives in planifest-ship/SKILL.md's archive step.
 #
-# planifest-ship-agent/SKILL.md is a prose/template skill file, not
-# executable code — these are content-assertion tests against the actual
-# SKILL.md text (P7 Step 7), following the same sed/grep pattern used by
-# test-0000018-req-007-discovery-md-hard-limit.sh.
+# planifest-ship/SKILL.md is a prose skill file, not executable code, so
+# these are content-assertion tests against the SKILL.md text.
 
 set -uo pipefail
 
@@ -14,45 +13,33 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/helpers/assert.sh"
 
 FRAMEWORK="$(cd "$SCRIPT_DIR/.." && pwd)"
-SHIP_SKILL="$FRAMEWORK/skills/planifest-ship-agent/SKILL.md"
+SHIP_SKILL="$FRAMEWORK/skills/planifest-ship/SKILL.md"
 
-# Isolate Step 7 (from its heading to the next "## " heading).
-STEP7=$(sed -n '/^### Step 7: Commit archive/,/^## P8/p' "$SHIP_SKILL")
-
-# The documented git add command line itself.
-GIT_ADD_LINE=$(printf '%s\n' "$STEP7" | grep '^git add ')
+# Isolate the archive step (from its heading to the next "### " heading).
+ARCHIVE_STEP=$(sed -n '/^### Step 4: Archive/,/^### Step 5/p' "$SHIP_SKILL")
 
 echo ""
-echo "=== req-002: Step 7 git add explicitly names plan/current/ ==="
+echo "=== req-002: the archive step stages everything explicitly ==="
 
-assert_equals "yes" "$([ -n "$GIT_ADD_LINE" ] && echo yes || echo no)" \
-  "req-002: Step 7 documents a git add command"
-assert_contains "plan/current/" "$GIT_ADD_LINE" \
-  "req-002: git add command explicitly lists plan/current/ as a path argument"
-
-echo ""
-echo "=== req-002: the six pre-existing paths are still staged (unchanged) ==="
-
-assert_contains "plan/_archive/" "$GIT_ADD_LINE" "req-002: plan/_archive/ still staged"
-assert_contains "plan/changelog/" "$GIT_ADD_LINE" "req-002: plan/changelog/ still staged"
-assert_contains "docs/about.md" "$GIT_ADD_LINE" "req-002: docs/about.md still staged"
-assert_contains "plan/.orchestrator-active" "$GIT_ADD_LINE" "req-002: plan/.orchestrator-active still staged"
-assert_contains "plan/.orchestrator-ack" "$GIT_ADD_LINE" "req-002: plan/.orchestrator-ack still staged"
-assert_contains "plan/.run-mode" "$GIT_ADD_LINE" "req-002: plan/.run-mode still staged"
+assert_equals "yes" "$([ -n "$ARCHIVE_STEP" ] && echo yes || echo no)" \
+  "req-002: planifest-ship documents an archive step"
+assert_contains 'git add` everything: the archive, the deletions, and the link updates' \
+  "$ARCHIVE_STEP" "req-002: git add covers the archive, the deletions, and the link updates"
 
 echo ""
-echo "=== req-002: path count — exactly seven explicit path arguments ==="
+echo "=== req-002: untracked artifacts are never left behind ==="
 
-# git add <7 paths> — split on whitespace after the literal "git add " prefix.
-PATH_COUNT=$(printf '%s' "$GIT_ADD_LINE" | sed 's/^git add //' | wc -w | tr -d ' ')
-assert_equals "7" "$PATH_COUNT" \
-  "req-002: git add names exactly 7 explicit paths (6 pre-existing + plan/current/)"
+assert_contains "Untracked artifacts must not be left behind" "$ARCHIVE_STEP" \
+  "req-002: untracked artifacts are staged with the archive commit"
+assert_contains "git status --porcelain" "$ARCHIVE_STEP" \
+  "req-002: a git status --porcelain check runs before committing"
 
 echo ""
-echo "=== req-002: Step 6 archive mechanics untouched ==="
+echo "=== req-002: archive mechanics are copy-then-delete ==="
 
-STEP6=$(sed -n '/^### Step 6: Archive plan\/current\//,/^### Step 6b/p' "$SHIP_SKILL")
-assert_contains "Copy-then-delete" "$STEP6" \
-  "req-002: Step 6 still documents copy-then-delete archive mechanics"
+assert_contains 'Copy all of `plan/current/` to the archive path, then delete' "$ARCHIVE_STEP" \
+  "req-002: the archive copies plan/current/ before deleting its contents"
+assert_contains "Never use an atomic move" "$ARCHIVE_STEP" \
+  "req-002: an atomic move is forbidden"
 
 print_summary

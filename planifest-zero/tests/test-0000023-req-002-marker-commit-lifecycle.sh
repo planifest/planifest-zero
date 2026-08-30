@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Tests for feature 0000023-framework-pipeline-fixes, req-002:
-# marker commit lifecycle (creation-side: backlog 0000030; deletion-side:
-# backlog 0000028).
+# marker commit lifecycle.
 #
 # Covers: session markers (plan/.orchestrator-active, plan/.orchestrator-ack,
-# plan/.run-mode) must be committed at the point they are written (P0), and
-# their deletion at P7 must be staged atomically with the archive commit,
-# plus a P9 pre-flight backstop check.
+# plan/.run-mode) must be committed at the point they are written (discovery),
+# and the ship phase must clear them, stage the deletions, and confirm with
+# git ls-files that none remain tracked.
 
 set -uo pipefail
 
@@ -14,9 +13,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/helpers/assert.sh"
 
 ORCHESTRATOR="$SCRIPT_DIR/../skills/planifest-orchestrator/SKILL.md"
-SHIP_AGENT="$SCRIPT_DIR/../skills/planifest-ship-agent/SKILL.md"
+SHIP="$SCRIPT_DIR/../skills/planifest-ship/SKILL.md"
 
-for f in "$ORCHESTRATOR" "$SHIP_AGENT"; do
+for f in "$ORCHESTRATOR" "$SHIP"; do
   if [ ! -f "$f" ]; then
     echo "  FAIL: $f not found"
     ((FAIL++)) || true
@@ -25,37 +24,46 @@ for f in "$ORCHESTRATOR" "$SHIP_AGENT"; do
 done
 
 ORCH_CONTENT=$(cat "$ORCHESTRATOR")
-SHIP_CONTENT=$(cat "$SHIP_AGENT")
+SHIP_CONTENT=$(cat "$SHIP")
 
 echo ""
-echo "=== req-002: creation-side commit instructions (orchestrator P0) ==="
+echo "=== req-002: creation-side commit instructions (orchestrator discovery) ==="
 
 assert_contains "Write the sentinel" "$ORCH_CONTENT" \
-  "req-002: Step 1 (write the sentinel) still present"
-assert_contains "Include this file in the P0 commit." "$ORCH_CONTENT" \
-  "req-002: .orchestrator-active commit instruction present"
+  "req-002: the write-the-sentinel start action is present"
+assert_contains "Include in the discovery commit." "$ORCH_CONTENT" \
+  "req-002: .orchestrator-active is committed at the point it is written"
 
-assert_contains "Write strict-mode ack" "$ORCH_CONTENT" \
-  "req-002: Step 5 (write strict-mode ack) still present"
-assert_contains "include \`plan/.orchestrator-ack\` in the P0 commit" "$ORCH_CONTENT" \
-  "req-002: .orchestrator-ack commit instruction present"
+assert_contains "Strict-mode ack" "$ORCH_CONTENT" \
+  "req-002: the strict-mode ack start action is present"
+assert_contains "include it in the discovery commit" "$ORCH_CONTENT" \
+  "req-002: .orchestrator-ack is committed at the point it is written"
 
-echo ""
-echo "=== req-002: deletion-side atomic commit (ship-agent P7) ==="
-
-# String updated by feature 0000025, req-002: `plan/current/` is now staged
-# explicitly (no longer relying on git's rename-detection heuristic to pick
-# up the copy-then-delete when plan/_archive/ is staged).
-assert_contains "git add plan/current/ plan/_archive/ plan/changelog/ docs/about.md plan/.orchestrator-active plan/.orchestrator-ack plan/.run-mode" \
-  "$SHIP_CONTENT" "req-002: P7 Step 7 git add stages plan/current/ explicitly plus all three markers atomically"
+assert_contains 'write `plan/.run-mode`' "$ORCH_CONTENT" \
+  "req-002: the run-mode marker is written at design confirmation"
+assert_contains "Include it in the discovery commit." "$ORCH_CONTENT" \
+  "req-002: .run-mode is committed at the point it is written"
 
 echo ""
-echo "=== req-002: P9 pre-flight backstop check ==="
+echo "=== req-002: deletion-side clearing (ship phase) ==="
 
-assert_contains "git ls-files plan/.orchestrator-active plan/.orchestrator-ack plan/.run-mode" \
-  "$SHIP_CONTENT" "req-002: P9 pre-flight check runs git ls-files against all three markers"
+SENTINEL_STEP=$(printf '%s\n' "$SHIP_CONTENT" | sed -n '/^### Step 9: Clear sentinels/,/^### Step 10/p')
 
-assert_contains "Marker tracking pre-flight check" "$SHIP_CONTENT" \
-  "req-002: P9 pre-flight check section exists"
+assert_contains 'Delete `plan/.orchestrator-active`, `plan/.orchestrator-ack`, and `plan/.run-mode`' \
+  "$SENTINEL_STEP" "req-002: ship clears all three markers"
+assert_contains "Stage the deletions and commit." "$SENTINEL_STEP" \
+  "req-002: ship stages and commits the marker deletions"
+
+echo ""
+echo "=== req-002: tracked-marker backstop check ==="
+
+assert_contains 'git ls-files' "$SENTINEL_STEP" \
+  "req-002: ship confirms with git ls-files that no marker remains tracked"
+
+echo ""
+echo "=== req-002: interrupted-ship recovery ==="
+
+assert_contains "Interrupted-ship cleanup" "$ORCH_CONTENT" \
+  "req-002: the orchestrator detects a ship interrupted between archive and sentinel cleanup"
 
 print_summary

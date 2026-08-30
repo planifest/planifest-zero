@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Tests for feature 0000025, req-001: ship-agent PR footer default-off,
-# opt-in via planifest-overrides/instructions/ (ADR-001).
+# Tests for feature 0000025, req-001: PR bodies carry no AI attribution by
+# default. The rule now lives in the ship phase skill (planifest-ship),
+# which owns the PR step behind the always-stop final gate.
 #
-# planifest-ship-agent/SKILL.md is a prose/template skill file, not
-# executable code — these are content-assertion tests against the actual
-# SKILL.md text (P9 Step 10), following the same sed/grep pattern used by
-# test-0000018-req-007-discovery-md-hard-limit.sh.
+# planifest-ship/SKILL.md is a prose skill file, not executable code, so
+# these are content-assertion tests against the SKILL.md text.
 
 set -uo pipefail
 
@@ -13,73 +12,43 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/helpers/assert.sh"
 
 FRAMEWORK="$(cd "$SCRIPT_DIR/.." && pwd)"
-SHIP_SKILL="$FRAMEWORK/skills/planifest-ship-agent/SKILL.md"
+SHIP_SKILL="$FRAMEWORK/skills/planifest-ship/SKILL.md"
 
-FOOTER='🤖 Generated with [Planifest](https://github.com/planifest/framework) + Claude'
+SHIP_CONTENT=$(cat "$SHIP_SKILL")
 
-grep_has() { grep -qF "$1" "$2" 2>/dev/null && echo "yes" || echo "no"; }
-
-# Isolate Step 10 (from its heading to the next "### " heading).
-STEP10=$(sed -n '/^### Step 10: Push\/PR decision/,/^### Step 11/p' "$SHIP_SKILL")
-
-# ── AC: preamble scans planifest-overrides/instructions/ for the ADR-001
-#        keyword, mirroring the existing local-git-only scan ──────────────
+# Isolate the PR step (from its heading to the next "### " heading).
+PR_STEP=$(printf '%s\n' "$SHIP_CONTENT" | sed -n '/^### Step 8: PR/,/^### Step 9/p')
 
 echo ""
-echo "=== req-001: Step 10 preamble scans for restore-pr-attribution opt-in ==="
+echo "=== req-001: the PR step exists and offers both delivery paths ==="
 
-PREAMBLE=$(printf '%s\n' "$STEP10" | sed -n '1,/^Otherwise, ask the human/p')
-assert_contains "planifest-overrides/instructions/" "$PREAMBLE" \
-  "req-001: preamble references planifest-overrides/instructions/ for the new scan"
-assert_contains "restore-pr-attribution" "$PREAMBLE" \
-  "req-001: preamble scans for the exact ADR-001 keyword 'restore-pr-attribution'"
-assert_contains "local-git-only" "$PREAMBLE" \
-  "req-001: pre-existing local-git-only scan is still present (unchanged)"
-
-# ── AC: Option [2] template's fenced markdown block no longer ends with an
-#        unconditional bare footer line ─────────────────────────────────────
+assert_equals "yes" "$([ -n "$PR_STEP" ] && echo yes || echo no)" \
+  "req-001: planifest-ship documents a PR step"
+assert_contains "gh pr create" "$PR_STEP" \
+  "req-001: agent-pushes path uses gh pr create"
+assert_contains "give me the PR title and description" "$PR_STEP" \
+  "req-001: human-pushes path hands over title and description"
 
 echo ""
-echo "=== req-001: Option [2] template footer is not unconditional ==="
+echo "=== req-001: no AI attribution in PR bodies ==="
 
-OPT2_BLOCK=$(printf '%s\n' "$STEP10" | sed -n '/^```markdown$/,/^```$/p')
-LAST_CONTENT_LINE=$(printf '%s\n' "$OPT2_BLOCK" | sed '/^```/d' | sed -e :a -e '/^\s*$/{$d;N;ba' -e '}' | tail -n 1)
+assert_contains "PR bodies carry no AI attribution" "$PR_STEP" \
+  "req-001: the no-attribution rule is stated in the PR step"
 
-assert_equals "no" "$([ "$LAST_CONTENT_LINE" = "$FOOTER" ] && echo yes || echo no)" \
-  "req-001: fenced template's last line is NOT the bare unconditional footer"
-assert_contains "restore-pr-attribution" "$LAST_CONTENT_LINE" \
-  "req-001: the line that mentions the footer is gated on the restore-pr-attribution keyword"
-assert_contains "$FOOTER" "$OPT2_BLOCK" \
-  "req-001: the footer text itself is still documented (as the conditional opt-in payload)"
-
-# ── AC: with no matching override, either delivery path is footer-free by
-#        default — Option [1] shares the same template body as Option [2] ──
+if [[ "$SHIP_CONTENT" == *"Generated with"* ]]; then
+  echo "  FAIL: req-001: an attribution footer template survives in planifest-ship"
+  ((FAIL++)) || true
+else
+  echo "  PASS: req-001: no attribution footer template anywhere in planifest-ship"
+  ((PASS++)) || true
+fi
 
 echo ""
-echo "=== req-001: Option [1] shares the (now conditional) template ==="
+echo "=== req-001: local-git-only override scan is still present ==="
 
-OPT1_BLOCK=$(printf '%s\n' "$STEP10" | sed -n '/Option \[1\] (Agent pushes)/,/Option \[2\] (Human pushes)/p')
-assert_contains "PR description, see template below" "$OPT1_BLOCK" \
-  "req-001: Option [1]'s gh pr create --body still defers to the shared template"
-assert_equals "no" "$(grep_has "$FOOTER" <(echo "$OPT1_BLOCK"))" \
-  "req-001: Option [1]'s own code block does not hardcode the footer separately"
-
-# ── AC: other template sections are unchanged in content/order ─────────────
-
-echo ""
-echo "=== req-001: other Step 10 template sections unchanged ==="
-
-ORDER=$(printf '%s\n' "$OPT2_BLOCK" | grep -n '^## ' | sed 's/:.*##/ ##/' | tr -d '\n')
-assert_contains "## Summary" "$ORDER" "req-001: Summary section present"
-assert_contains "## Key Decisions" "$ORDER" "req-001: Key Decisions section present"
-assert_contains "## Security" "$ORDER" "req-001: Security section present"
-assert_contains "## Skipped Phases" "$ORDER" "req-001: Skipped Phases section present"
-assert_contains "## Test Plan" "$ORDER" "req-001: Test Plan section present"
-
-SUMMARY_LINE=$(printf '%s\n' "$OPT2_BLOCK" | grep -n '^## ' | grep -n '.' | head -n1)
-FIRST_HEADER=$(printf '%s\n' "$OPT2_BLOCK" | grep '^## ' | head -n1)
-LAST_HEADER=$(printf '%s\n' "$OPT2_BLOCK" | grep '^## ' | tail -n1)
-assert_equals "## Summary" "$FIRST_HEADER" "req-001: Summary is still the first section"
-assert_equals "## Test Plan" "$LAST_HEADER" "req-001: Test Plan is still the last named section (footer note trails it)"
+assert_contains "planifest-overrides/instructions/" "$PR_STEP" \
+  "req-001: the PR step checks planifest-overrides/instructions/ for a local-git-only override"
+assert_contains "local-git-only" "$PR_STEP" \
+  "req-001: the local-git-only override skips the push question"
 
 print_summary

@@ -28,7 +28,7 @@ STEP4=$(sed -n '/^## Step 4/,/^## Step 5/p' "$SKILL")
 STEP5=$(sed -n '/^## Step 5/,/^## Step 6/p' "$SKILL")
 STEP6=$(sed -n '/^## Step 6/,/^## Step 7/p' "$SKILL")
 STEP7=$(sed -n '/^## Step 7/,/^## Step 8/p' "$SKILL")
-STEP8=$(sed -n '/^## Step 8/,/^## Domain Terms/p' "$SKILL")
+STEP8=$(sed -n '/^## Step 8/,/^## What This Skill Never Does/p' "$SKILL")
 NEVER=$(sed -n '/^## What This Skill Never Does/,$p' "$SKILL")
 
 echo ""
@@ -55,7 +55,7 @@ assert_contains "Always required, in every run, regardless of confidence level" 
   "req-003: confirmation always required regardless of confidence"
 assert_contains "There is no bypass." "$STEP4" \
   "req-003: no bypass exists"
-assert_contains "halt here and take no further action" "$STEP4" \
+assert_contains "halt and take no further action" "$STEP4" \
   "req-003: rejection halts the skill"
 
 echo ""
@@ -73,7 +73,7 @@ echo "=== req-005: re-invoke setup with confirmed flags ==="
 
 assert_contains "Run the exact command shown and confirmed in Step 4" "$STEP7" \
   "req-005: re-invocation uses the exact confirmed command"
-assert_contains "setup.sh {tool} {flags...}\` on macOS/Linux, \`setup.ps1 {tool} {flags...}\` on Windows" "$STEP7" \
+assert_contains "or \`setup.ps1 {tool} {flags...}\` on Windows" "$STEP3" \
   "req-005: correct script chosen per platform"
 
 echo ""
@@ -83,7 +83,7 @@ assert_contains "Do not retry automatically, under any condition" "$STEP8" \
   "req-006: stops immediately on failure, no auto-retry"
 assert_contains "Investigate the likely cause" "$STEP8" \
   "req-006: investigates likely cause"
-assert_contains "exact attempted command, as a copyable code block" "$STEP8" \
+assert_contains "exact attempted command as a copyable code block" "$STEP8" \
   "req-006: prints exact attempted command as a code block"
 assert_contains "attemptStatus" "$STEP8" \
   "req-006: relies on the cached marker file for retry"
@@ -101,10 +101,10 @@ echo "=== req-009: marker write before deletion ==="
 
 assert_contains "before Step 6's deletion" "$STEP5" \
   "req-009: marker written before the deletion step"
-assert_contains '"attemptStatus": "pending"' "$STEP5" \
+assert_contains 'attemptStatus: "pending"' "$STEP5" \
   "req-009: marker records attemptStatus pending before deletion"
 assert_contains "not a separate cache file" "$STEP5" \
-  "req-009: reuses the single install-time marker file, ADR-002"
+  "req-009: reuses the single install-time marker file"
 
 echo ""
 echo "=== req-010: cross-session recovery ==="
@@ -113,7 +113,7 @@ assert_contains "Check for an Interrupted Prior Run" "$STEP2" \
   "req-010: dedicated recovery-detection step exists"
 assert_contains 'attemptStatus: "pending"' "$STEP2" \
   "req-010: recovery check reads attemptStatus pending"
-assert_contains "skipping Step 3's detection entirely" "$STEP2" \
+assert_contains "skipping Step 3" "$STEP2" \
   "req-010: recovered runs skip re-detection"
 assert_contains "If either is false, this is a normal run" "$STEP2" \
   "req-010: no interruption detected falls through to the normal Step 3 detection path"

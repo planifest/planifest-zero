@@ -13,8 +13,8 @@ fail() { echo "  FAIL: $1"; FAIL=$((FAIL+1)); }
 
 TEMPLATE="planifest-zero/templates/requirement.template.md"
 ORCH="planifest-zero/skills/planifest-orchestrator/SKILL.md"
-CODEGEN="planifest-zero/skills/planifest-codegen-agent/SKILL.md"
-VALIDATE="planifest-zero/skills/planifest-validate-agent/SKILL.md"
+CODEGEN="planifest-zero/skills/planifest-implement/SKILL.md"
+VALIDATE="planifest-zero/skills/planifest-validate-and-accept/SKILL.md"
 SETUP_SH="planifest-zero/setup.sh"
 SETUP_PS1="planifest-zero/setup.ps1"
 
@@ -81,16 +81,23 @@ fi
 
 echo ""
 echo "=== REQ-002: Agent dispatch template in orchestrator SKILL.md ==="
-if grep -q "Agent Dispatch Template\|## Agent Dispatch" "$ORCH"; then
-  pass "REQ-002: orchestrator has Agent Dispatch Template section"
+DISPATCH_STD="planifest-zero/standards/agent-dispatch-standards.md"
+if grep -q "Agent Dispatch Template\|## Agent Dispatch" "$DISPATCH_STD"; then
+  pass "REQ-002: dispatch standards hold the Agent Dispatch Template section"
 else
-  fail "REQ-002: orchestrator missing Agent Dispatch Template section"
+  fail "REQ-002: dispatch standards missing Agent Dispatch Template section"
 fi
 
-if grep -q "self-contained\|self.contained" "$ORCH"; then
-  pass "REQ-002: orchestrator dispatch template includes self-contained prompt rule"
+if grep -q "self-contained\|self.contained" "$DISPATCH_STD"; then
+  pass "REQ-002: dispatch template includes the self-contained prompt rule"
 else
-  fail "REQ-002: orchestrator missing self-contained prompt rule"
+  fail "REQ-002: dispatch standards missing self-contained prompt rule"
+fi
+
+if grep -q "agent-dispatch-standards" "$ORCH"; then
+  pass "REQ-002: orchestrator points at the dispatch standards"
+else
+  fail "REQ-002: orchestrator does not point at the dispatch standards"
 fi
 
 # 0000022: relocated to standards/agent-dispatch-standards.md (ADR-001) - orchestrator points to it
@@ -103,18 +110,18 @@ fi
 
 echo ""
 echo "=== REQ-002: Parallel Dispatch Checklist in codegen-agent SKILL.md ==="
-if grep -q "Parallel Dispatch Checklist\|## Parallel Dispatch" "$CODEGEN"; then
-  pass "REQ-002: codegen-agent has Parallel Dispatch Checklist section"
+if grep -qi "## Parallel dispatch" "$CODEGEN"; then
+  pass "REQ-002: implement has a parallel dispatch section"
 else
-  fail "REQ-002: codegen-agent missing Parallel Dispatch Checklist section"
+  fail "REQ-002: implement missing a parallel dispatch section"
 fi
 
 echo ""
 echo "=== REQ-002: Pre-Execution Parallelism Plan in validate-agent SKILL.md ==="
-if grep -q "Pre-Execution Parallelism\|## Pre-Execution" "$VALIDATE"; then
-  pass "REQ-002: validate-agent has Pre-Execution Parallelism Plan section"
+if grep -qi "## Parallelism" "$VALIDATE"; then
+  pass "REQ-002: validate-and-accept has a parallelism section"
 else
-  fail "REQ-002: validate-agent missing Pre-Execution Parallelism Plan section"
+  fail "REQ-002: validate-and-accept missing a parallelism section"
 fi
 
 echo ""

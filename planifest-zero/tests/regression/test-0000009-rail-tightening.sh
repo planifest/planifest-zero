@@ -5,13 +5,13 @@
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/../helpers/assert.sh"
+source "$SCRIPT_DIR/helpers/assert.sh"
 
-FRAMEWORK="$SCRIPT_DIR/../.."
+FRAMEWORK="$SCRIPT_DIR/.."
 SETUP_SH="$FRAMEWORK/setup.sh"
 SETUP_PS1="$FRAMEWORK/setup.ps1"
 ORCHESTRATOR="$FRAMEWORK/skills/planifest-orchestrator/SKILL.md"
-SHIP_AGENT="$FRAMEWORK/skills/planifest-ship-agent/SKILL.md"
+SHIP_AGENT="$FRAMEWORK/skills/planifest-ship/SKILL.md"
 GATE_WRITE="$FRAMEWORK/hooks/enforcement/gate-write.mjs"
 AUTO_TRIGGER="$FRAMEWORK/hooks/enforcement/auto-trigger-orchestrator.mjs"
 PRESENCE_CHECK="$FRAMEWORK/hooks/enforcement/check-orchestrator-presence.mjs"
@@ -71,8 +71,8 @@ assert_equals "yes" "$(grep_has "## Skill Map" "$DESIGN_TPL")" \
 assert_equals "yes" "$(grep_has "Skill Map" "$ORCHESTRATOR")" \
   "REQ-003b: orchestrator produces Skill Map in P0"
 
-assert_equals "yes" "$(grep_has "Subagent Decomposition" "$ORCHESTRATOR")" \
-  "REQ-003a: orchestrator has Subagent Decomposition Directive"
+assert_equals "yes" "$(grep_has "subagent decomposition" "$ORCHESTRATOR")" \
+  "REQ-003a: orchestrator directs subagent decomposition"
 
 # ── REQ-004: open-source skill library ───────────────────────────────────────
 
@@ -196,7 +196,7 @@ assert_equals "yes" "$(grep_has "orchestrator-ack" "$ORCHESTRATOR")" \
   "REQ-008p: orchestrator SKILL.md writes .orchestrator-ack on P0 start"
 
 assert_equals "yes" "$(grep_has "orchestrator-ack" "$SHIP_AGENT")" \
-  "REQ-008p: ship-agent deletes .orchestrator-ack at P7"
+  "REQ-008p: ship skill deletes .orchestrator-ack at close-out"
 
 # getting-started.md is the entry-point file (deliberately terse, per the
 # 0000012 three-file docs architecture, ADR-001); presence-check/strict-mode
