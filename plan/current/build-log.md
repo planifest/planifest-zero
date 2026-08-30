@@ -154,6 +154,11 @@ Gate accepted: P3 (2026-08-30, continuous run)
 | Telemetry | emitted |
 | Notes | Checks: full test suite, node syntax over every hook and script, bash -n over shell scripts, self-description check, consistency check over plan artifacts, fresh temp-clone setup execution with and without the telemetry flag. |
 
+P4 results: every check green first attempt, zero self-corrections this phase. Suite 52+17 zero failures. All .mjs pass node --check, all shell scripts pass bash -n, self-description check passes, temp-clone setup execution passes with and without the telemetry flag, skill text 1,315 of 1,447 budget lines.
+
+Deviation noted (non-blocking): consistency-check flags all six requirements for exceeding 3 acceptance criteria. The human confirmed the six-story single-run design at discovery, and this run executed under the installed contract where the check is not a gate. Recorded for the changelog rather than re-splitting a green build.
+Gate accepted: P4 (2026-08-30, continuous run, first-attempt pass exception)
+
 ---
 
 ## Summary (filled at P7)
