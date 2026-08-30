@@ -26,8 +26,8 @@ echo "=== req-006: failure-marker mechanism documented ==="
 
 assert_equals "yes" "$(grep_has 'durable failure marker' "$STANDARDS")" \
   "req-006: documents the hook failure marker"
-assert_equals "yes" "$(grep_has 'ADR-005' "$STANDARDS")" \
-  "req-006: references ADR-005 (exit-zero) as the preserved constraint"
+assert_equals "yes" "$(grep_has 'exit-zero' "$STANDARDS")" \
+  "req-006: exit-zero hook constraint preserved"
 
 echo ""
 echo "=== req-006: interactive block-or-proceed protocol documented ==="

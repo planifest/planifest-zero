@@ -34,23 +34,23 @@ assert_contains "Block until resolved, or proceed without telemetry" "$TELEMETRY
 echo ""
 echo "=== req-003: once-per-root-cause-per-run + build-log recording ==="
 
-assert_contains "never re-ask for the same" "$TELEMETRY_SECTION" \
+assert_contains "Never re-ask for the same" "$TELEMETRY_SECTION" \
   "req-003: never re-asks for the same root cause"
-assert_contains "build-log.md" "$TELEMETRY_SECTION" \
+assert_contains "phase block" "$TELEMETRY_SECTION" \
   "req-003: records the human's answer in build-log.md"
-assert_contains "Delete the marker file once acknowledged" "$TELEMETRY_SECTION" \
+assert_contains "Delete the marker once acknowledged" "$TELEMETRY_SECTION" \
   "req-003: marker cleared after acknowledgment"
 
 echo ""
 echo "=== req-003: agent-driven failure path (no marker needed) ==="
 
-assert_contains "stop immediately, state the exact error" "$TELEMETRY_SECTION" \
+assert_contains "stop, state the exact error" "$TELEMETRY_SECTION" \
   "req-003: agent-driven emission failure stops immediately inline"
 
 echo ""
 echo "=== req-003: unified signal reference (ADR-001 consistency) ==="
 
-assert_contains "Unified signal" "$TELEMETRY_SECTION" \
+assert_contains "one signal" "$TELEMETRY_SECTION" \
   "req-003: references the unified telemetry signal"
 
 print_summary

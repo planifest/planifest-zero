@@ -30,9 +30,9 @@ assert_equals "yes" "$(grep_has 'emitted / failed-with-recorded-choice / confirm
 echo ""
 echo "=== req-005: orchestrator requires Telemetry to be filled every phase ==="
 
-assert_equals "yes" "$(grep_has 'Every phase records a .Telemetry. line' "$ORCHESTRATOR")" \
+assert_equals "yes" "$(grep_has 'Every phase block records a .Telemetry. line' "$ORCHESTRATOR")" \
   "req-005: orchestrator states every phase must record the Telemetry field"
-assert_equals "yes" "$(grep_has 'not complete until this field is filled' "$ORCHESTRATOR")" \
+assert_equals "yes" "$(grep_has 'blank field is the same error as a missing phase block' "$ORCHESTRATOR")" \
   "req-005: orchestrator ties a blank Telemetry field to phase-block completeness"
 assert_equals "yes" "$(grep_has 'confirmed-disabled' "$ORCHESTRATOR")" \
   "req-005: orchestrator names the confirmed-disabled state"
