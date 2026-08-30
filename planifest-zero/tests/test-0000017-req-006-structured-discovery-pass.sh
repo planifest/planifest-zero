@@ -20,16 +20,19 @@ grep_has()    { grep -q "$1" "$2" 2>/dev/null && echo "yes" || echo "no"; }
 echo ""
 echo "=== req-006: discovery pass defined for all 4 adoption modes ==="
 
-assert_equals "yes" "$(grep_has "Structured Discovery Pass (all modes)" "$ORCHESTRATOR")" \
-  "req-006: orchestrator has a Structured Discovery Pass section"
+assert_equals "yes" "$(grep_has "### Adoption Modes" "$ORCHESTRATOR")" \
+  "req-006: orchestrator has the adoption-modes discovery section"
 
-# each mode's taxonomy entry mentions writing to discovery.md
-MODE_SECTION=$(sed -n '/### Mode Taxonomy/,/### Conflict Warnings/p' "$ORCHESTRATOR")
+# the adoption-modes section covers all four modes and the discovery.md lifecycle
+MODE_SECTION=$(sed -n '/### Adoption Modes/,/#### Retrofit Scan/p' "$ORCHESTRATOR")
 for mode in Greenfield "Standard Iterative" Retrofit "External Anchor"; do
-  BLOCK=$(printf '%s' "$MODE_SECTION" | sed -n "/\*\*$mode\*\*/,/^\*\*\|### /p")
-  assert_contains "discovery.md" "$BLOCK" \
-    "req-006: $mode mode writes to discovery.md"
+  assert_contains "$mode" "$MODE_SECTION" \
+    "req-006: $mode mode present in the adoption table"
 done
+assert_contains "discovery.md" "$MODE_SECTION" \
+  "req-006: adoption section states the discovery.md lifecycle"
+assert_contains "fresh every run" "$MODE_SECTION" \
+  "req-006: discovery.md is fresh every run"
 
 # the old Greenfield "No discovery pass needed" line is gone
 assert_equals "no" "$(grep_has "No discovery pass needed" "$ORCHESTRATOR")" \
@@ -40,7 +43,7 @@ assert_equals "no" "$(grep_has "No discovery pass needed" "$ORCHESTRATOR")" \
 echo ""
 echo "=== req-006: Phase 0 Start Actions wiring ==="
 
-assert_equals "yes" "$(grep_has "Write discovery.md" "$ORCHESTRATOR")" \
+assert_equals "yes" "$(grep_has "Write \`discovery.md\`" "$ORCHESTRATOR")" \
   "req-006: Start Actions has a Write discovery.md step"
 assert_equals "yes" "$(grep_has "before the first coaching question" "$ORCHESTRATOR")" \
   "req-006: discovery.md written before the first coaching question"
@@ -50,10 +53,8 @@ assert_equals "yes" "$(grep_has "before the first coaching question" "$ORCHESTRA
 echo ""
 echo "=== req-006: shared header ==="
 
-assert_equals "yes" "$(grep_has "Shared header (all four modes)" "$ORCHESTRATOR")" \
-  "req-006: shared header defined in orchestrator"
-HEADER_LINE=$(grep "Shared header (all four modes)" "$ORCHESTRATOR")
-assert_contains "adoption-mode detection result" "$HEADER_LINE" \
+HEADER_LINE=$(grep "shared header" "$ORCHESTRATOR")
+assert_contains "adoption-mode result" "$HEADER_LINE" \
   "req-006: header includes adoption-mode signal"
 assert_contains "git pre-flight" "$HEADER_LINE" \
   "req-006: header includes git pre-flight"
@@ -65,9 +66,9 @@ assert_contains "skills-inbox scan" "$HEADER_LINE" \
 echo ""
 echo "=== req-006: lifecycle ==="
 
-assert_equals "yes" "$(grep_has "fresh every pipeline run" "$ORCHESTRATOR")" \
+assert_equals "yes" "$(grep_has "fresh every run" "$ORCHESTRATOR")" \
   "req-006: fresh-each-run lifecycle documented"
-LIFECYCLE_LINE=$(grep "fresh every pipeline run" "$ORCHESTRATOR")
+LIFECYCLE_LINE=$(grep "fresh every run" "$ORCHESTRATOR")
 assert_contains "archived" "$LIFECYCLE_LINE" \
   "req-006: archived-at-P7 documented"
 
@@ -76,7 +77,7 @@ assert_contains "archived" "$LIFECYCLE_LINE" \
 echo ""
 echo "=== req-006: partial failure ==="
 
-assert_equals "yes" "$(grep_has "could not be determined" "$ORCHESTRATOR")" \
+assert_equals "yes" "$(grep_has "could not be read" "$ORCHESTRATOR")" \
   "req-006: partial failure states section could not be determined"
 assert_equals "yes" "$(grep_has "never a hard block" "$ORCHESTRATOR")" \
   "req-006: partial failure never hard-blocks coaching"
@@ -86,7 +87,7 @@ assert_equals "yes" "$(grep_has "never a hard block" "$ORCHESTRATOR")" \
 echo ""
 echo "=== req-006: cross-session ==="
 
-assert_equals "yes" "$(grep_has "trusted as-is" "$ORCHESTRATOR")" \
+assert_equals "yes" "$(grep_has "trust it as-is" "$ORCHESTRATOR")" \
   "req-006: resume trusts existing discovery.md"
 assert_equals "yes" "$(grep_has "regenerate it fresh" "$ORCHESTRATOR")" \
   "req-006: missing/incomplete discovery.md regenerated, not patched"

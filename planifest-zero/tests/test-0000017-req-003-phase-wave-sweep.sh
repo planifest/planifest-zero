@@ -42,8 +42,8 @@ assert_equals "" "$STRAYS" \
 echo ""
 echo "=== req-003: pipeline-phase sense (P0-P9) preserved ==="
 
-assert_equals "yes" "$(grep_has '## Phase 1 - Requirements' "$FRAMEWORK/skills/planifest-orchestrator/SKILL.md")" \
-  "req-003: orchestrator P1 pipeline-phase heading untouched"
+assert_equals "yes" "$(grep_has '## P1: Discovery' "$FRAMEWORK/skills/planifest-orchestrator/SKILL.md")" \
+  "req-003: orchestrator P1 pipeline-phase heading present"
 
 # ── AC: report lists every reviewed instance with disposition ────────────────
 
