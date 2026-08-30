@@ -115,4 +115,4 @@ See `planifest-zero/standards/telemetry-standards.md` for the event envelope, em
 
 ## Commit cadence
 
-Commit after every artifact write. Do not batch commits to the phase gate.
+Commit after every meaningful artifact write. Do not batch commits to the phase gate.

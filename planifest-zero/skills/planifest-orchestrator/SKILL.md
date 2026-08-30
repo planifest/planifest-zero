@@ -174,6 +174,8 @@ Detect the tool from `CLAUDE_CODE_*` env vars or a `.claude/` directory. Check h
 
 ### Decomposition
 
+Push cadence: after each gate commit, if remote push is authorised by a standing override in `planifest-overrides/instructions/` or a per-session grant in the build log, push the feature branch. A failed push is reported once and never blocks the pipeline.
+
 Split big features. A feature with more than 3 user stories is too big. With more than 5 or 6 features, group them into waves. Each wave is a separate pipeline run that reads the prior wave's manifests rather than its code. For multi-component work in one repository, follow `planifest-zero/standards/monorepo-standards.md`. When two components need the same data, one owns it and the other consumes it through a defined interface. Shared writes are a Hard Limit violation: coach a redesign.
 
 ### Discovery Start Actions

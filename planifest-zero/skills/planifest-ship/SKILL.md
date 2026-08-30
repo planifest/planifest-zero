@@ -71,7 +71,7 @@ Source every metric from the build log. Never infer or fabricate. If routing or 
 
 ### Step 6: Version bump
 
-Apply the release version to `docs/about.md`, `product.yml`, and `component.yml`. The version must match `[0-9]+\.[0-9]+(\.[0-9]+)?` and must not be lower than the last release tag. If it fails validation, ask the human for the value. Never tag a fabricated version.
+Derive the current product version with `node planifest-zero/scripts/product-version.mjs`, then apply the release version to `docs/about.md`, `product.yml`, and `component.yml`. The version must match `[0-9]+\.[0-9]+(\.[0-9]+)?` and must not be lower than the last release tag. If it fails validation, ask the human for the value. Never tag a fabricated version.
 
 ### Step 7: Git tag
 
