@@ -5,9 +5,9 @@
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/helpers/assert.sh"
+source "$SCRIPT_DIR/../helpers/assert.sh"
 
-FRAMEWORK="$SCRIPT_DIR/.."
+FRAMEWORK="$SCRIPT_DIR/../.."
 SETUP_SH="$FRAMEWORK/setup.sh"
 SETUP_PS1="$FRAMEWORK/setup.ps1"
 ORCHESTRATOR="$FRAMEWORK/skills/planifest-orchestrator/SKILL.md"

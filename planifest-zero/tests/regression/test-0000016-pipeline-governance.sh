@@ -134,11 +134,9 @@ echo "=== req-010: loop state / revision log templates ==="
 assert_file_exists "$TEMPLATES/loop-state.template.md" "req-010: loop-state.template.md exists"
 LS_T=$(cat "$TEMPLATES/loop-state.template.md" 2>/dev/null || echo "")
 assert_contains "Iteration"                "$LS_T" "req-010: iteration counter field"
-assert_contains "Reversal budget"          "$LS_T" "req-010: budget field"
 assert_contains "Run Log"                  "$LS_T" "req-010: run log section"
 assert_contains "Append-only"              "$LS_T" "req-010: append-only rule stated"
 assert_contains "Decision"                 "$LS_T" "req-010: decision field (continue/done/escalate)"
-assert_file_exists "$TEMPLATES/revision-log.template.md" "req-010/017: revision-log.template.md exists"
 
 # -----------------------------------------------------------------------
 echo ""
@@ -147,9 +145,9 @@ echo "=== req-011: telemetry event types + toggles default off ==="
 
 TEL=$(cat "$STANDARDS/telemetry-standards.md" 2>/dev/null || echo "")
 assert_contains "loop_iteration"             "$TEL" "req-011: loop_iteration event documented"
-assert_contains "phase_reversal_petitioned"  "$TEL" "req-011: phase_reversal_petitioned documented"
-assert_contains "phase_reversal_granted"     "$TEL" "req-011: phase_reversal_granted documented"
-assert_contains "phase_reversal_denied"      "$TEL" "req-011: phase_reversal_denied documented"
+assert_not_contains "phase_reversal_petitioned"  "$TEL" "req-011: reversal events retired from standards"
+assert_not_contains "phase_reversal_granted"     "$TEL" "req-011: granted event retired"
+assert_not_contains "phase_reversal_denied"      "$TEL" "req-011: denied event retired"
 
 assert_file_exists "$TEMPLATES/loop-toggles.template.yml" "req-011: loop-toggles.template.yml exists"
 TOG=$(cat "$TEMPLATES/loop-toggles.template.yml" 2>/dev/null || echo "")
@@ -229,17 +227,6 @@ assert_contains "Scope"       "$OUT" "req-014: catches design without scope/comp
 
 # -----------------------------------------------------------------------
 echo ""
-echo "=== req-015: defect report template ==="
-# -----------------------------------------------------------------------
-
-assert_file_exists "$TEMPLATES/defect-report.template.md" "req-015: defect-report.template.md exists"
-DR_T=$(cat "$TEMPLATES/defect-report.template.md" 2>/dev/null || echo "")
-assert_contains "What Is Blocked"            "$DR_T" "req-015: blocked section"
-assert_contains "Binding Upstream Artifact"  "$DR_T" "req-015: binding artifact section"
-assert_contains "Attempts Made"              "$DR_T" "req-015: attempts section"
-assert_contains "Evidence"                   "$DR_T" "req-015: evidence section"
-assert_contains "Proposed Correction Scope"  "$DR_T" "req-015: correction scope section"
-
 # -----------------------------------------------------------------------
 echo ""
 echo "=== req-018: ratchet-check hook ==="
@@ -310,31 +297,24 @@ echo ""
 echo "=== skill text: new skills exist and conform ==="
 # -----------------------------------------------------------------------
 
-for s in planifest-loop-runner planifest-design-critic planifest-reversal-assessor planifest-verify-by-execution; do
+for s in planifest-loop-runner; do
   assert_file_exists "$SKILLS/$s/SKILL.md" "skill $s exists"
   S=$(cat "$SKILLS/$s/SKILL.md" 2>/dev/null || echo "")
   assert_contains "name: $s" "$S" "$s: frontmatter name"
   assert_contains "description:" "$S" "$s: frontmatter description"
 done
 
-CRITIC=$(cat "$SKILLS/planifest-design-critic/SKILL.md" 2>/dev/null || echo "")
-assert_contains "REJECT" "$CRITIC" "req-013: critic is REJECT-default"
-assert_contains "report-only" "$CRITIC" "req-013: critic supports report-only"
-assert_contains "consistency-check.mjs" "$CRITIC" "req-013: critic runs the consistency script"
-
-ASSESSOR=$(cat "$SKILLS/planifest-reversal-assessor/SKILL.md" 2>/dev/null || echo "")
-assert_contains "REJECT" "$ASSESSOR" "req-016: assessor is REJECT-default"
-assert_contains "blast radius" "$ASSESSOR" "req-016: assessor rubric includes blast radius"
-assert_contains "additive" "$ASSESSOR" "req-016: assessor classifies additive vs altering"
+# The plan skill inherited the mechanical consistency gate from the retired critic.
+PLAN_SKILL=$(cat "$SKILLS/planifest-plan/SKILL.md" 2>/dev/null || echo "")
+assert_contains "consistency-check.mjs" "$PLAN_SKILL" "req-013: plan skill runs the consistency script"
 
 RUNNER=$(cat "$SKILLS/planifest-loop-runner/SKILL.md" 2>/dev/null || echo "")
 assert_contains "no-progress" "$RUNNER" "req-009: loop-runner defines no-progress stop rule"
 assert_contains "loop-state" "$RUNNER" "req-009: loop-runner references loop-state file"
 assert_contains "loop-toggles" "$RUNNER" "req-009/011: loop-runner reads toggles"
 
-VBE=$(cat "$SKILLS/planifest-verify-by-execution/SKILL.md" 2>/dev/null || echo "")
-assert_contains "running the software" "$VBE" "req-020: verify-by-execution runs the software"
-assert_contains "not-verifiable" "$VBE" "req-020: not-verifiable outcome exists"
+VBE=$(cat "$SKILLS/planifest-validate-and-accept/SKILL.md" 2>/dev/null || echo "")
+assert_contains "not-verifiable" "$VBE" "req-020: validate-and-accept keeps the not-verifiable outcome"
 
 # -----------------------------------------------------------------------
 echo ""
@@ -343,30 +323,28 @@ echo "=== skill text: edited skills carry the new directives ==="
 
 ORCH=$(cat "$SKILLS/planifest-orchestrator/SKILL.md" 2>/dev/null || echo "")
 assert_contains "plan/backlog/" "$ORCH" "req-001/002: orchestrator documents backlog convention + pickup"
-assert_contains "product.yml" "$ORCH" "req-005: orchestrator reads product.yml at P0"
+assert_contains "product.yml" "$ORCH" "req-005: orchestrator reads product.yml at discovery"
 assert_contains "every meaningful artifact write" "$ORCH" "req-007: Hard Limit 7 strengthened"
 assert_contains "push the feature branch" "$ORCH" "req-008: push cadence documented"
-assert_contains "planifest-reversal-assessor" "$ORCH" "req-016/017: reversal protocol wired"
-assert_contains "cross-model" "$ORCH" "req-021: cross-model gate at P6→P7"
 
-WAVE_ORCH=$(printf '%s' "$ORCH" | grep -c '### Waves' || true)
+WAVE_ORCH=$(printf '%s' "$ORCH" | grep -ci 'group them into waves' || true)
 assert_equals "1" "$WAVE_ORCH" "req-006: orchestrator Decomposition uses Waves"
 
 BRIEF_T=$(cat "$TEMPLATES/feature-brief.template.md" 2>/dev/null || echo "")
 assert_contains "| Wave |" "$BRIEF_T" "req-006: brief template Features table uses Wave column"
 assert_contains "## Waves" "$BRIEF_T" "req-006: brief template Waves section"
 
-SHIP=$(cat "$SKILLS/planifest-ship-agent/SKILL.md" 2>/dev/null || echo "")
-assert_contains "product.yml" "$SHIP" "req-004: ship-agent reads product.yml"
-assert_contains "product-version.mjs" "$SHIP" "req-004: ship-agent uses derivation script"
+SHIP=$(cat "$SKILLS/planifest-ship/SKILL.md" 2>/dev/null || echo "")
+assert_contains "product.yml" "$SHIP" "req-004: ship skill reads product.yml"
+assert_contains "product-version.mjs" "$SHIP" "req-004: ship skill uses derivation script"
 
-VAL=$(cat "$SKILLS/planifest-validate-agent/SKILL.md" 2>/dev/null || echo "")
-assert_contains "planifest-loop-runner" "$VAL" "req-009: validate-agent references loop-runner"
-assert_contains "planifest-verify-by-execution" "$VAL" "req-020: validate-agent invokes verify-by-execution"
+VAL=$(cat "$SKILLS/planifest-validate-and-accept/SKILL.md" 2>/dev/null || echo "")
+assert_contains "planifest-loop-runner" "$VAL" "req-009: validate-and-accept references loop-runner"
+assert_contains "verify" "$VAL" "req-020: validate-and-accept verifies by execution"
 
-for s in planifest-spec-agent planifest-adr-agent planifest-codegen-agent planifest-validate-agent planifest-security-agent planifest-docs-agent; do
-  S=$(cat "$SKILLS/$s/SKILL.md" 2>/dev/null || echo "")
-  assert_contains "meaningful artifact write" "$S" "req-007: $s carries commit directive"
+for s in planifest-plan planifest-implement; do
+  SKILL_CONTENT=$(cat "$SKILLS/$s/SKILL.md")
+  assert_contains "meaningful artifact write" "$SKILL_CONTENT" "req-007: $s carries commit directive"
 done
 
 print_summary

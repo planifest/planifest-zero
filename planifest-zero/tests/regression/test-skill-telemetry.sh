@@ -1,97 +1,59 @@
 #!/usr/bin/env bash
-# Validates that all 8 SKILL.md files contain the required Telemetry section.
-# Covers: REQ-004 (gate text), REQ-006 (event coverage per skill)
-# Gate text updated 0000018 (ADR-001/ADR-002): the old "skip silently if
-# unavailable" framing and the literal ".claude/telemetry-enabled" sentinel
-# reference are replaced by the unified-signal, mandatory-emission,
-# interactive-failure gate. See telemetry-standards.md for the full protocol.
-
+# Telemetry wiring across the phase skills. Each phase skill points at
+# telemetry-standards.md and names its phase value. Event ownership lives in
+# the standards owner table, not repeated per skill.
 set -uo pipefail
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILLS_DIR="$(cd "$SCRIPT_DIR/../../skills" && pwd)"
+STANDARDS="$(cd "$SCRIPT_DIR/../../standards" && pwd)/telemetry-standards.md"
 source "$SCRIPT_DIR/../helpers/assert.sh"
 
-SKILLS_DIR="$(cd "$SCRIPT_DIR/../../skills" && pwd)"
-
-SKILLS=(
-  planifest-orchestrator
-  planifest-spec-agent
-  planifest-adr-agent
-  planifest-codegen-agent
-  planifest-validate-agent
-  planifest-change-agent
-  planifest-security-agent
-  planifest-docs-agent
+declare -A PHASE_OF=(
+  [planifest-orchestrator]="discovery"
+  [planifest-plan]="plan"
+  [planifest-implement]="implement"
+  [planifest-validate-and-accept]="validate-and-accept"
+  [planifest-ship]="ship"
 )
 
-check_skill() {
-  local skill="$1"
-  local file="$SKILLS_DIR/$skill/SKILL.md"
-
+for skill in planifest-orchestrator planifest-plan planifest-implement planifest-validate-and-accept planifest-ship; do
   echo ""
   echo "=== $skill ==="
-
+  file="$SKILLS_DIR/$skill/SKILL.md"
   if [ ! -f "$file" ]; then
-    echo "  FAIL: SKILL.md not found at $file"
-    ((FAIL++)) || true
-    return
+    assert_equals "present" "missing" "$skill: SKILL.md exists"
+    continue
   fi
-
-  local content
   content=$(cat "$file")
-
-  assert_contains "## Telemetry"            "$content" "$skill: has ## Telemetry section"
-  assert_contains "emit_event"              "$content" "$skill: gate references emit_event"
-  assert_contains "nified signal"           "$content" "$skill: gate references the unified signal (0000018)"
-  assert_contains "mandatory, not best-effort" "$content" "$skill: gate specifies mandatory emission, not silent skip"
-  assert_contains "lock until resolved"     "$content" "$skill: gate specifies the interactive block-or-proceed protocol"
-  assert_contains "phase_start"             "$content" "$skill: emits phase_start"
-  assert_contains "phase_end"               "$content" "$skill: emits phase_end"
-}
-
-# -----------------------------------------------------------------------
-# All 8 skills: common gate + phase lifecycle
-# -----------------------------------------------------------------------
-
-for skill in "${SKILLS[@]}"; do
-  check_skill "$skill"
+  assert_contains "## Telemetry" "$content" "$skill: has ## Telemetry section"
+  assert_contains "telemetry-standards.md" "$content" "$skill: points at telemetry-standards.md"
+  assert_contains "${PHASE_OF[$skill]}" "$content" "$skill: names its phase value"
 done
 
-# -----------------------------------------------------------------------
-# Skill-specific event coverage
-# -----------------------------------------------------------------------
+echo ""
+echo "=== standards: mandatory gate and interactive failure protocol ==="
+STD=$(cat "$STANDARDS")
+assert_contains "mandatory, not best-effort" "$STD" "standards: emission is mandatory when the signal is active"
+assert_contains "lock until resolved" "$STD" "standards: interactive block-or-proceed protocol"
+assert_contains "phase_start" "$STD" "standards: phase_start documented"
+assert_contains "phase_end" "$STD" "standards: phase_end documented"
 
 echo ""
-echo "=== Skill-specific events ==="
-
-check_event() {
-  local skill="$1"
-  local event="$2"
-  local content
-  content=$(cat "$SKILLS_DIR/$skill/SKILL.md")
-  assert_contains "$event" "$content" "$skill: emits $event"
+echo "=== standards: event ownership table ==="
+own() { # event, owner-fragment
+  LINE=$(grep "\`$1\`" "$STANDARDS" | head -1)
+  assert_contains "$2" "$LINE" "standards: $1 owned by $2"
 }
-
-check_event planifest-orchestrator    "phase_skip"
-check_event planifest-orchestrator    "spec_gap"
-check_event planifest-orchestrator    "mcp_impact"
-check_event planifest-spec-agent      "spec_gap"
-check_event planifest-adr-agent       "adr_decision"
-check_event planifest-codegen-agent   "deviation"
-check_event planifest-codegen-agent   "migration_proposal"
-check_event planifest-codegen-agent   "self_correction"
-check_event planifest-codegen-agent   "retry_limit_exceeded"
-check_event planifest-validate-agent  "validation_failure"
-check_event planifest-validate-agent  "self_correction"
-check_event planifest-validate-agent  "retry_limit_exceeded"
-check_event planifest-change-agent    "deviation"
-check_event planifest-change-agent    "migration_proposal"
-check_event planifest-change-agent    "retry_limit_exceeded"
-check_event planifest-security-agent  "security_finding"
-check_event planifest-security-agent  "deviation"
-check_event planifest-docs-agent      "doc_gap"
-check_event planifest-docs-agent      "deviation"
-
-# -----------------------------------------------------------------------
+own phase_skip planifest-orchestrator
+own spec_gap planifest-orchestrator
+own mcp_impact planifest-orchestrator
+own adr_decision planifest-plan
+own deviation planifest-implement
+own migration_proposal planifest-implement
+own doc_gap planifest-implement
+own validation_failure planifest-validate-and-accept
+own self_correction planifest-validate-and-accept
+own security_finding planifest-validate-and-accept
+own retry_limit_exceeded "any phase skill"
 
 print_summary

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Tests for feature 0000006-build-assessment-phase
 # Covers: req-001 through req-008
+# Amended for the 0000030 framework cut-down: build assessment folded into
+# skills/planifest-ship/SKILL.md Step 5, P8 removed, phase agents retired.
 
 set -uo pipefail
 
@@ -33,38 +35,38 @@ assert_contains "append"                     "$ORCH" "req-001: orchestrator has 
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== req-002: planifest-build-assessment-agent skill ==="
+echo "=== req-002: build assessment step in the ship skill ==="
+echo "(0000030: planifest-build-assessment-agent retired, build assessment folded into planifest-ship Step 5)"
 
-SKILL_FILE="$SKILLS/planifest-build-assessment-agent/SKILL.md"
-assert_file_exists "$SKILL_FILE"                                "req-002: skill file exists"
+# The retired skill carried its own frontmatter name check. The folded-in
+# step has no frontmatter of its own, so that check is dropped.
+SHIP_FILE="$SKILLS/planifest-ship/SKILL.md"
+assert_file_exists "$SHIP_FILE"                                 "req-002: ship skill file exists"
 
-ASSESS=$(cat "$SKILL_FILE")
-FRONTMATTER_NAME=$(grep "^name:" "$SKILL_FILE" | head -1 | awk '{print $2}')
-assert_equals "planifest-build-assessment-agent" "$FRONTMATTER_NAME" "req-002: frontmatter name matches directory"
-
-assert_contains "Model"                      "$ASSESS" "req-002: Model Usage section present"
-assert_contains "Skills Invoked"             "$ASSESS" "req-002: Skills Invoked section present"
-assert_contains "Subagent"                   "$ASSESS" "req-002: Subagent Dispatch section present"
-assert_contains "MCP"                        "$ASSESS" "req-002: MCP Tool Usage section present"
-assert_contains "Parallel"                   "$ASSESS" "req-002: Parallel Task Bursts section present"
-assert_contains "Self-Correction"            "$ASSESS" "req-002: Self-Corrections section present"
-assert_contains "Artefact"                   "$ASSESS" "req-002: Artefact Counts section present"
-assert_contains "Efficiency"                 "$ASSESS" "req-002: Efficiency Observations section present"
-assert_contains "build-report.md"            "$ASSESS" "req-002: output path references build-report.md"
-assert_contains "build-log.md"               "$ASSESS" "req-002: skill reads build-log.md as input"
+SHIP=$(cat "$SHIP_FILE")
+assert_contains "### Step 5: Build assessment" "$SHIP" "req-002: Step 5 Build assessment present"
+assert_contains "model tiers"                "$SHIP" "req-002: covers agent counts and model tiers per phase"
+assert_contains "Parallelism used"           "$SHIP" "req-002: covers parallelism"
+assert_contains "Self-corrections"           "$SHIP" "req-002: covers self-corrections"
+assert_contains "avoidable"                  "$SHIP" "req-002: avoidability judged per self-correction"
+assert_contains "Telemetry gaps"             "$SHIP" "req-002: covers telemetry gaps"
+assert_contains "improvement suggestion"     "$SHIP" "req-002: one improvement suggestion per phase"
+assert_contains "build-report.md"            "$SHIP" "req-002: output path references build-report.md"
+assert_contains "build-log.md"               "$SHIP" "req-002: step reads build-log.md as input"
+assert_contains "Never infer or fabricate"   "$SHIP" "req-002: no-fabrication rule present"
 
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== req-003: P8 wired in orchestrator ==="
+echo "=== req-003: build assessment wired into P5 Ship ==="
+echo "(0000030: P8 removed, build assessment now runs inside P5 Ship)"
 
-assert_contains "P8:"                        "$ORCH" "req-003: P8 in orchestrator prefix table"
-assert_contains "P8 Build Assessment"        "$ORCH" "req-003: P8 pipeline sequence includes Build Assessment"
-assert_contains "planifest-build-assessment-agent" "$ORCH" "req-003: orchestrator Framework Index includes P8 skill"
+assert_contains "| P5 | Ship |"              "$ORCH" "req-003: orchestrator phase table lists P5 Ship"
+assert_contains "planifest-ship"             "$ORCH" "req-003: P5 owned by planifest-ship"
+assert_contains "build report"               "$ORCH" "req-003: P5 Ship gate condition mentions build report"
 
-SHIP=$(cat "$SKILLS/planifest-ship-agent/SKILL.md")
-assert_contains "planifest-build-assessment-agent" "$SHIP" "req-003: ship agent references P8 skill"
-assert_contains "build-report.md"            "$SHIP" "req-003: ship agent confirms build-report.md in final output"
+assert_contains "Build report:"              "$SHIP" "req-003: ship final gate output lists the build report line"
+assert_contains "build-report.md"            "$SHIP" "req-003: ship final gate confirms build-report.md"
 
 # -----------------------------------------------------------------------
 
@@ -100,30 +102,21 @@ assert_contains "Cannot parallelise"         "$DISPATCH_STD" "req-005: Cannot pa
 
 echo ""
 echo "=== req-006: parallelism directives in phase skills ==="
+echo "(0000030: the six phase agents are retired, parallelism now lives in the surviving phase skills)"
 
-SPEC=$(cat "$SKILLS/planifest-spec-agent/SKILL.md")
-assert_contains "Parallelism Directive"      "$SPEC" "req-006: spec-agent has Parallelism Directive"
-assert_contains "MUST"                       "$SPEC" "req-006: spec-agent uses MUST"
+PLAN=$(cat "$SKILLS/planifest-plan/SKILL.md")
+assert_contains "## Parallelism"             "$PLAN" "req-006: plan skill has Parallelism section"
+assert_contains "MUST parallelise"           "$PLAN" "req-006: plan skill has MUST parallelise table"
 
-ADR=$(cat "$SKILLS/planifest-adr-agent/SKILL.md")
-assert_contains "Parallelism Directive"      "$ADR" "req-006: adr-agent has Parallelism Directive"
-assert_contains "MUST"                       "$ADR" "req-006: adr-agent uses MUST"
+IMPLEMENT=$(cat "$SKILLS/planifest-implement/SKILL.md")
+assert_contains "## Parallel dispatch"       "$IMPLEMENT" "req-006: implement skill has Parallel dispatch section"
+assert_contains "MUST"                       "$IMPLEMENT" "req-006: implement skill uses MUST"
 
-CODEGEN=$(cat "$SKILLS/planifest-codegen-agent/SKILL.md")
-assert_contains "Parallelism Directive"      "$CODEGEN" "req-006: codegen-agent has Parallelism Directive"
-assert_contains "MUST"                       "$CODEGEN" "req-006: codegen-agent uses MUST"
-
-VALIDATE=$(cat "$SKILLS/planifest-validate-agent/SKILL.md")
-assert_contains "Parallelism Directive"      "$VALIDATE" "req-006: validate-agent has Parallelism Directive"
-assert_contains "MUST"                       "$VALIDATE" "req-006: validate-agent uses MUST"
-
-SECURITY=$(cat "$SKILLS/planifest-security-agent/SKILL.md")
-assert_contains "Parallelism Directive"      "$SECURITY" "req-006: security-agent has Parallelism Directive"
-assert_contains "MUST"                       "$SECURITY" "req-006: security-agent uses MUST"
-
-DOCS=$(cat "$SKILLS/planifest-docs-agent/SKILL.md")
-assert_contains "Parallelism Directive"      "$DOCS" "req-006: docs-agent has Parallelism Directive"
-assert_contains "MUST"                       "$DOCS" "req-006: docs-agent uses MUST"
+# The validate skill states batch order rather than MUST, so assert the
+# parallel batching wording instead.
+VALIDATE=$(cat "$SKILLS/planifest-validate-and-accept/SKILL.md")
+assert_contains "## Parallelism"             "$VALIDATE" "req-006: validate-and-accept skill has Parallelism section"
+assert_contains "(parallel)"                 "$VALIDATE" "req-006: validate-and-accept states parallel batches"
 
 # -----------------------------------------------------------------------
 

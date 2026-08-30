@@ -77,11 +77,12 @@ REGRESSION_COUNT=$(grep -c 'assert_' "$PROMOTED_TEST" 2>/dev/null || echo "0")
 assert_equals "$FEATURE_COUNT" "$REGRESSION_COUNT" \
   "req-001: promoted test has same assertion count ($FEATURE_COUNT assertions)"
 
-# Ensure we have a substantial number of assertions (at least 80)
-if [ "$REGRESSION_COUNT" -ge 80 ]; then
+# Ensure we have a substantial number of assertions (at least 70;
+# the five-phase cut retired some rail assertions)
+if [ "$REGRESSION_COUNT" -ge 70 ]; then
   assert_equals "0" "0" "req-001: regression pack contains substantial assertions ($REGRESSION_COUNT)"
 else
-  assert_equals "80+" "$REGRESSION_COUNT" "req-001: assertion count minimum"
+  assert_equals "70+" "$REGRESSION_COUNT" "req-001: assertion count minimum"
 fi
 
 # -----------------------------------------------------------------------
