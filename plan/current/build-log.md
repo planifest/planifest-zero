@@ -191,18 +191,31 @@ Gate accepted: P5 (2026-08-30, continuous run, low-risk exception)
 P6 results: zero drift after two fixes. product.yml version aligned to 0.2.0 with its feature pointer updated and feature-number narrative removed from its comments. All five docs/ artifacts present, decisions-index carries the four 0000031 ADRs, zero dead links across twelve living documents, suite still green.
 Gate accepted: P6 (2026-08-30, continuous run, zero-drift exception)
 
+### P7: Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-30T02:10:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Changelog, summary table, archive to plan/_archive/0000031-five-phase-planifest-zero-2026-08-30/. No .skips file this run. |
+
 ---
 
 ## Summary (filled at P7)
 
 | Metric | Value |
 |--------|-------|
-| Total phases completed | `{{count}}` |
-| Total agents spawned | `{{count}}` |
-| Total MCP calls | `{{count}}` |
-| Phases using parallelism | `{{count}}` |
-| Primary tier agent calls | `{{count}}` |
-| Cheaper tier agent calls | `{{count}}` |
-| Self-corrections | `{{count}}` |
-| Phases skipped | `{{list or "none"}}` |
+| Total phases completed | `10 (P0 to P9)` |
+| Total agents spawned | `27` |
+| Total MCP calls | `0` |
+| Phases using parallelism | `3 (P1, P2, P3)` |
+| Primary tier agent calls | `13 (Fable 5)` |
+| Cheaper tier agent calls | `14 (4 Haiku scope-lock drafts, 10 Sonnet artifact drafts)` |
+| Self-corrections | `0 at P4; P3 test sweep amendments were planned work` |
+| Phases skipped | `none` |
 | Phases with a recorded telemetry gap | `0` |
