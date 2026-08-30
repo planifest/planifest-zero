@@ -141,6 +141,19 @@ P3 progress: rename green (78 live files swept, plan/ and decisions-index.md exe
 P3 gate: complete. All six requirement suites green. Legacy sweep finished inline after the sweep subagents hit the session limit mid-run: 20 suites amended, 5 deleted with their regression copies, 3 manifest entries removed, promotion floor lowered to 70 with a recorded reason. Full suite: 52 feature and 17 regression, zero failures. Three compressed rules restored to skills during the sweep (orchestrator push cadence, ship version derivation via product-version.mjs, plan commit phrasing).
 Gate accepted: P3 (2026-08-30, continuous run)
 
+### P4: Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-30T01:30:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent, planifest-verify-by-execution |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Checks: full test suite, node syntax over every hook and script, bash -n over shell scripts, self-description check, consistency check over plan artifacts, fresh temp-clone setup execution with and without the telemetry flag. |
+
 ---
 
 ## Summary (filled at P7)
