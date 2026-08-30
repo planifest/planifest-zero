@@ -1,0 +1,288 @@
+id: "planifest-framework"
+name: "Planifest Framework"
+feature: "0000029-context-mode-removal-and-boot-file-regeneration-fix"
+version: "0.28.1"
+status: "active"
+type: "component-pack"
+domain: "developer-tooling"
+summary: "Core standards, skills, hooks, and setup scripts that enforce the Planifest confirmed-design pipeline."
+systemContext: "Installed into any AI-assisted project via setup.ps1/setup.sh. Provides enforcement hooks, structured standards, and agent skills consumed by Claude Code, Cursor, Windsurf, and GitHub Copilot."
+
+responsibilities:
+  - "Enforce confirmed-design gate: block writes outside declared component scope"
+  - "Inject active scope context on every agent turn via check-design hook"
+  - "Emit structured telemetry for context pressure and pipeline phase events"
+  - "Declare preferred and avoided libraries per language via library-standards docs"
+  - "Provide formatting standards: date format (DD MMM YYYY), locale (British English), verbosity"
+  - "Supply migration files for propagating standards changes across existing repos"
+  - "Register and sync capability skills from planifest-overrides/"
+  - "Maintain build log throughout pipeline run for P8 build assessment"
+  - "Direct model tier selection (primary vs cheaper) for all spawned subagents"
+  - "Enforce parallelism directives across all phase skills"
+  - "Declare build target tier (local/docker/ci-only) in feature brief and design; enforce per-tier agent behaviour in codegen and validate phases"
+  - "Centralise telemetry envelope and emission gate in telemetry-standards.md"
+  - "Provide language quirks reference (language-quirks-en-gb.md) for British English with documented American exceptions"
+  - "Track installed skill directories via .planifest-manifest for safe re-runs"
+  - "Present one-at-a-time skill optimisation suggestions via planifest-optimise-agent (never modifies files)"
+  - "Detect and recommend adoption mode at P0 (Greenfield, Standard Iterative, Retrofit, External Anchor)"
+  - "Suggest and confirm version number at P0 based on pipeline track"
+  - "Run Scope Lock Challenge before design confirmation to surface happy/sad/bad path gaps"
+  - "Enforce one-question-at-a-time across all phase skills"
+  - "Maintain docs/about.md for project version tracking (read at P0, written at P7)"
+  - "Delete plan/.run-mode at P9 so next P0 always asks run-mode fresh"
+  - "Detect stale plan/.run-mode at P0 fresh start and auto-clear with visible warning"
+  - "Detect interrupted P9 on resume (empty plan/current/ + .orchestrator-active present) and complete cleanup"
+  - "Recommend new session to human after P9 completes (advisory, not blocking)"
+  - "Enforce build log phase block at every phase P0–P9 before doing phase work"
+  - "Provide plan/backlog/ convention for deferred work with P0 pickup protocol"
+  - "Derive product-level release version from product.yml per versionPolicy at P9"
+  - "Commit after every meaningful artifact write, not only at phase gates (Hard Limit 7)"
+  - "Provide canonical loop mechanics (state, run log, stop rules, toggles) via planifest-loop-runner"
+  - "Run REJECT-default fresh-context verifiers: design-critic, reversal-assessor, cross-model review gate (pre-P7)"
+  - "Govern P0-P6 phase reversals: defect report, assessor verdict, scoped correction, 2/feature budget"
+  - "Block silent weakening of acceptance criteria/scope during loops via ratchet-check hook"
+  - "Verify acceptance criteria by executing the software at P4 via planifest-verify-by-execution"
+  - "Refresh an existing install without manual flag reverse-engineering via planifest-refresh-setup (standalone skill)"
+  - "Record the flags used at install time in a per-tool marker file (.planifest-setup-flags) at the end of setup.sh/setup.ps1"
+  - "Maintain a populated tests/regression/ pack as the safety net for cross-cutting skill/standards/template changes, gated by human review of the promoted test list before any baseline run"
+  - "Bound skill-content growth via a recorded audit-findings-report + dual-guardrail trim process (no enforcement-content loss, no ambiguity regression), never applied without a pre-recorded regression-pack baseline to compare against"
+  - "Restate every orchestrator rule in exactly one canonical file (phase skill, workflow, standard, or template) with a pointer from the orchestrator, verified by a P4 diff review as the second detector alongside content-pinning regression tests"
+  - "Source telemetry product_id from a durable declared identifier (product.yml id field) rather than a filesystem path, with unresolvable product_id routed to the existing failure-marker mechanism rather than a fallback value"
+  - "Prompt the human on the loop for a declared product id at P0 when product.yml/id is absent, hard-stopping rather than proceeding silently"
+  - "Document the emit_event MCP tool's envelope argument name correctly across telemetry-standards.md and all phase skills' Telemetry sections"
+  - "Omit AI-attribution footer from ship-agent PR output by default, restorable only via a planifest-overrides/instructions/ opt-in"
+  - "Stage plan/current/ explicitly in the P7 archive commit's git add, not reliant on git's rename-detection heuristic"
+  - "Track active setup flags/backend-url in a versioned planifest-overrides/setup-config/{tool}.md file, additive to the existing gitignored marker"
+  - "Route docs-agent's recommendations.md Deferred Items/Tech Debt rows into plan/backlog/ entries tagged by source, going forward"
+  - "Check continuous_run/plan/.run-mode before docs-agent's Gate B stops for confirmation"
+  - "Default the Scope Lock Challenge to always-drafted, batch-presented answers via parallel planifest-scope-lock-agent dispatch, scoped narrowly against 0000014-ADR-008's one-question-at-a-time convention"
+  - "Backstop the orchestrator's ADR-002 telemetry-failure-marker phase-start check with a deterministic check-telemetry-failures UserPromptSubmit hook (read-only; injects a reminder, never deletes markers or decides block-or-proceed)"
+  - "Instruct dispatched subagents to file out-of-scope discoveries directly to plan/backlog/ per templates/backlog-entry.template.md, with the dispatching agent pre-computing the next backlog ID, rather than reaching for a host-tool mechanism like spawn_task (0000027-req-003)"
+  - "Backstop agent-driven emit_event compliance via a PostToolUse receipt hook (emit-event-receipt.mjs) plus check-telemetry-receipts.mjs, which flags a phase whose build-log claims 'Telemetry: emitted' with zero receipts on disk (0000027-req-004, ADR-001)"
+  - "Resolve the current pipeline phase for phase_start/phase_end emission via resolve-phase.mjs, an interposing PreToolUse(Skill)/Stop hook pair that maps phase-skill names to phase IDs (0000027-req-001/req-004)"
+  - "Surface a planifest-framework/ dependency update at P0 as a decision distinct from ordinary feature-brief coaching (Resume Detection step 1a), requiring human confirmation of both the update and its provenance, documented in standards/framework-update-policy.md (0000027-req-005, ADR-002)"
+  - "One-time backfill of the 7 Deferred Items/Tech Debt rows found across 4 pre-0000025 archived features' recommendations.md into tagged plan/backlog/ entries, never modifying the source files (0000027-req-006)"
+  - "Record an ADR for the skill-scope-principle test (does this skill provide governance or traceability the host tool cannot) with planifest-test-writer/implementer/refactor/verify-by-execution as worked examples (0000027-req-007)"
+  - "Name a minimal default Phase 1 artifact set (execution plan, requirements, scope, risk register, domain glossary) with explicit trigger conditions for OpenAPI/cost model/SLO definitions/operational model, reflected consistently in feature-pipeline.md and planifest-spec-agent, with the default artifact count stated in the README (0000027-req-008)"
+  - "Retry a telemetry emission failure only when it is network-level, never on an HTTP error status: 2 retries, 3 attempts total, fixed 300ms gaps, applied once in the shared hooks/telemetry/emit-event.mjs so all fetch-calling hooks inherit it (0000028-req-001, ADR-001)"
+  - "Hold each duplicated hook helper in exactly one shared module inside the existing hooks/enforcement/ and hooks/telemetry/ trees, placed in the always-installed enforcement/ tree whenever any enforcement hook is a caller (0000028-req-002, ADR-002)"
+  - "Print a single stderr line naming the hook, the marker path and the write error when the durable telemetry failure marker cannot itself be written, so a failing marker write is never fully silent (0000028-req-003)"
+  - "Reject U+2014 in Planifest prose at write time via the em-dash-guard.mjs PreToolUse(Write, Edit) hook, scoped to plan/current/, docs/, and planifest-framework/ skills, templates and standards, bypassed only by a visible in-content sentinel comment (0000028-req-006, ADR-003)"
+  - "Rewire one caller at a time when self-modifying installed hooks: commit the shared module first, re-run setup.sh for that edit alone, then assert a real side effect rather than an exit code before the next rewire (0000028-ADR-004)"
+  - "Wire every hooks/enforcement/ entry into settings.json through a node interpreter prefix rather than a bare .mjs path, so the enforcement layer cannot fail open at exit 126 on a non-executable file mode (0000028-P5 SEC-001)"
+  - "Always overwrite the boot file (CLAUDE.md/AGENTS.md) from the current template on every setup.sh/setup.ps1 run, since durable local customization lives in planifest-overrides/instructions/ and is re-applied every run (0000029-req-001)"
+  - "Keep templates/standard-boot.md free of any reference to a specific third-party MCP plugin by name; a boot template must not instruct the agent to prefer a plugin that may not be installed, trusted, or reviewed (0000029-req-002)"
+
+exceptions:
+  - "Does not write to planifest-overrides/ — that directory is user-owned"
+  - "Does not store or transmit credentials"
+  - "Does not modify application source code directly"
+
+stack:
+  language: "javascript"
+  runtime: "node"
+  framework: "none"
+  frontend: "none"
+  styling: "none"
+  componentLibrary: "none"
+  database: "none"
+  orm: "none"
+  testing: "bash (bespoke test harness)"
+  iac: "none"
+  cloud: "none"
+  compute: "none"
+  ci: "github-actions"
+
+contract:
+  inputs:
+    - name: "stdin (hook payload)"
+      type: "event"
+      description: "JSON hook payload from Claude Code / Copilot / Cursor lifecycle events"
+  outputs:
+    - name: "stdout (additionalContext or block message)"
+      type: "event"
+      description: "Gate-write block message or check-design scope injection"
+    - name: "PLANIFEST_TELEMETRY_URL /emit"
+      type: "http"
+      description: "context_pressure events posted to structured telemetry backend"
+  consumedBy: ["claude-code-hooks", "copilot-agent-hooks"]
+  consumes: []
+  breakingChangePolicy: "requires-adr"
+
+data:
+  ownsData: false
+  tables: []
+  schemaVersion: "0.0.0"
+  migrationPath: "planifest-framework/migrations/"
+
+scope:
+  inScope:
+    - "Library standards docs for TypeScript, Python, Go, Java, databases"
+    - "Formatting standards: date format, locale, verbosity"
+    - "gate-write and check-design enforcement hooks"
+    - "context-pressure telemetry hook"
+    - "GitHub Copilot adapter"
+    - "Orchestrator sentinel enforcement"
+    - "Capability skill intake via planifest-overrides/capability-skills/"
+    - "Migration infrastructure for standards propagation"
+    - "setup.ps1 / setup.sh for tool registration"
+    - "P8 Build Assessment phase and planifest-build-assessment-agent skill"
+    - "build-log.template.md and build log maintenance across pipeline phases"
+    - "Model tier decision table and parallelism directives in all phase skills"
+    - "Build target field in feature-brief and design templates"
+    - "telemetry-standards.md, build-target-standards.md, language-quirks-en-gb.md standards files"
+    - "planifest-optimise-agent skill for interactive skill file review"
+    - "design.template.md extracted from orchestrator inline block"
+    - "setup.sh/.ps1 .planifest-manifest tracking for idempotent re-runs"
+    - "plan/backlog/ entries, product.yml template, loop-state/run-log/defect-report/revision-log templates"
+    - "ratchet-check.mjs enforcement hook, consistency-check.mjs and product-version.mjs scripts"
+    - "planifest-loop-runner, planifest-design-critic, planifest-reversal-assessor, planifest-verify-by-execution skills"
+    - "Loop/reversal telemetry event types and planifest-overrides/loop-toggles.yml (all default off)"
+    - "tests/regression/ population and baseline-vs-post-trim comparison for skill/standards/template content edits"
+    - "standards/agent-dispatch-standards.md as the canonical home for model-tier decisions and parallelism/dispatch mechanics, referenced (not restated) by the orchestrator, ship-agent, and codegen-agent"
+    - "product.yml id field as the canonical declared product_id for telemetry, for single- and multi-component projects alike"
+    - "Correct emit_event MCP tool argument documentation (envelope, not event) in telemetry-standards.md and all phase skills"
+    - "check-telemetry-failures.mjs enforcement hook: always installed alongside gate-write/check-design (not gated behind --context-mode-mcp or --structured-telemetry-mcp) because it is UserPromptSubmit-shaped like those hooks, not PostToolUse like context-pressure.mjs, and only reads plan/.telemetry-failures/ rather than depending on the telemetry hooks being active"
+    - "agent-dispatch-standards.md's Agent Dispatch Template: out-of-scope-discovery filing clause (0000027-req-003)"
+    - "hooks/enforcement/check-telemetry-receipts.mjs, hooks/telemetry/emit-event-receipt.mjs, hooks/telemetry/resolve-phase.mjs, scripts/verify-telemetry-hooks.mjs (0000027-req-004)"
+    - "standards/framework-update-policy.md and orchestrator Resume Detection step 1a (0000027-req-005)"
+    - "Historical plan/backlog/ backfill for pre-0000025 recommendations.md content (0000027-req-006)"
+    - "Skill-scope-principle ADR (0000027-req-007)"
+    - "Minimal Phase 1 artifact set definition in feature-pipeline.md, planifest-spec-agent, and README (0000027-req-008)"
+    - "hooks/telemetry/emit-event.mjs, record-telemetry-failure.mjs, read-product-id.mjs, get-flag-path.mjs and hooks/enforcement/read-stdin.mjs, phase-enum.mjs as the shared modules behind the telemetry and enforcement hooks (0000028-req-001/req-002)"
+    - "hooks/enforcement/em-dash-guard.mjs and its setup.sh/setup.ps1 PreToolUse registration (0000028-req-006)"
+    - "Tier 1 telemetry install glob widened from emit-phase-*.mjs to *.mjs in setup.sh and setup.ps1, so a shared module is never silently dropped for Cursor, Windsurf and Cline (0000028-req-002)"
+    - "node interpreter prefix on every enforcement hook command string written into settings.json by setup.sh (0000028-P5 SEC-001)"
+    - "write_boot_file/Write-BootFile always-overwrite behaviour, replacing the prior skip-if-exists guard (0000029-req-001)"
+    - "templates/standard-boot.md free of any named third-party MCP plugin reference (0000029-req-002)"
+  outOfScope:
+    - "Application-level code generation (handled by planifest-codegen-agent)"
+    - "CI pipeline configuration for consumer projects"
+  deferred:
+    - "Windsurf native hook wiring (hooks API not yet stable)"
+    - "Roo-Code support (tool sunset 02 May 2026)"
+
+risk:
+  level: "low"
+  items:
+    - "Path translation on Windows/Git Bash requires cygpath guards in tests"
+    - "Telemetry backend URL is env-var controlled — misconfiguration sends events to wrong endpoint. --backend-url is now validated at CLI-parse time against a plain http(s)-URL shape before it can reach shell-command interpolation in merge_telemetry_hook_settings() (0000027-req-004, P5 security fix, CWE-22-adjacent)"
+    - "Aggressive skill/instruction trimming can leave technically-complete but ambiguous wording that increases future agent confusion or retries even without losing enforcement content — mitigated by the regression-pack baseline comparison introduced in 0000021"
+    - "Only 4 of 22 regression tests pin orchestrator-specific content; a lost rule in an untested area would not fail the pack — mitigated by the P4 diff review named as a second detector in 0000022, resolving identically to a failed test (restore, never rationalise)"
+    - "resolve-phase.mjs's Skill-tool PreToolUse matcher and tool_input.skill field name are modeled on this repo's existing hook precedent but were not verified against a live Claude Code hook firing (no live orchestrator session available during P3) (0000027-req-001)"
+    - "Stop-triggered phase_end fires on the first turn boundary after a phase's Skill call, not the true last turn of a multi-turn phase — presence of the event is guaranteed, duration_ms may under-report for multi-turn phases (0000027-req-001/req-004)"
+    - "Retry classifies AbortError as network-level, so a slow but live backend can receive the same event up to 3 times; the envelope is byte-identical across attempts because timestamp is fixed before the first attempt, so a listener can deduplicate on (session_id, phase, event, timestamp), but no explicit idempotency key exists (0000028-P5 SEC-004)"
+    - "Worst-case telemetry hook wall time on the failure path is 3 attempts x 3s abort plus 2 x 300ms gaps, which is 9.6s against a blackholing host, not the 600ms sleep budget alone; against a refusing localhost listener it stays near 600ms (0000028-P5 SEC-003)"
+    - "The em dash guard's bypass sentinel is matched anywhere in the payload, including inside prose that merely quotes it, so any document explaining the rule exempts itself from the rule (0000028-P5 SEC-005)"
+    - "setup.sh copies hook modules but never prunes, so a module renamed or deleted upstream leaves a stale copy in .claude/hooks/; now that the telemetry glob is *.mjs rather than an implicit allowlist, an install can accumulate .mjs files with no corresponding reviewed source (0000028-P5 SEC-007)"
+
+quality:
+  testCoverage:
+    unit: 0
+    integration: 613
+    e2e: 0
+  techDebt:
+    - "Resolved by 0000028-req-002: check-telemetry-receipts.mjs's phase-number-to-name table and resolve-phase.mjs's PHASE_SKILLS map now both import hooks/enforcement/phase-enum.mjs, along with emit-event-receipt.mjs's KNOWN_PHASES path-traversal guard, so the three encodings can no longer drift apart (0000027-req-004 debt closed)"
+    - "getSessionId() keeps 4 copies across context-pressure.mjs, emit-phase-start.mjs, emit-phase-end.mjs and resolve-phase.mjs, spanning 3 genuinely different behaviour profiles (2-priority vs 4-priority chains, create-vs-read-only on the session file). Deliberately excluded from 0000028-req-002 as a behaviour change rather than a refactor; each copy now carries a comment naming its profile (0000028-TD-001)"
+    - "readStdin() still has 8 pre-extraction copies outside the two hook trees, in hooks/adapters/ and hooks/context-mode/, so the NFR-001 stdin-error fix does not reach them; folding them in needs its own install-path placement analysis of the kind ADR-002 performed (0000028-TD-002)"
+    - "resolve-phase.mjs's endDedupFlag() sits beside the shared get-flag-path.mjs and builds a similar-looking but different filename for a different purpose; a future reader merging the two would break phase_end dedup (0000028-TD-003)"
+  quirks:
+    - "resolve-phase.mjs infers the active phase from the Skill tool's tool_input.skill field via a PreToolUse(Skill) hook, then re-execs emit-phase-start.mjs; a Stop hook re-execs emit-phase-end.mjs using a session marker file, cleared after use (0000027-req-001)"
+    - "context-pressure fill% is a proxy metric based on transcript file size, not actual token count"
+    - "gate-write component path matching is prefix-based; very short prefixes may over-permit"
+    - "ratchet-check treats a reworded criterion as remove+add and blocks it (conservative); the .ratchet-approve marker is the intended path for legitimate rewording"
+    - "ratchet-check cannot verify who wrote .ratchet-approve (ADR-004 same-changeset detection not implemented in 0.16.0); marker forgery is audit-detected via ratchet-log.md and P8, not prevented"
+    - "product-version.mjs parses only the constrained product.template.yml shape, not arbitrary YAML"
+    - "readProductId() (telemetry hooks) extracts product.yml's top-level id field via a constrained regex, not a full YAML parser — consistent with the existing minimal-dependency style of these hook files; will not handle a non-trivial YAML structure around the id key"
+    - "read-stdin.mjs and phase-enum.mjs live in hooks/enforcement/ and are imported cross-directory by hooks/telemetry/ callers. The direction is deliberate and not reversible: enforcement/ installs unconditionally, telemetry/ only under --structured-telemetry-mcp, so the always-present tree must hold any helper with an enforcement caller (0000028-ADR-002)"
+    - "The em dash guard only matches the Write and Edit tools and only inspects paths that resolve under 5 relative prefixes, so a write made through Bash, or through an absolute path outside cwd, is not inspected at all. This is a style rule with a deliberately narrow reach, not an authorisation control (0000028-req-006)"
+
+pipeline:
+  templateVersion: "1.0.0"
+  featureMode: "retrofit"
+  domainKnowledgePath: "plan/current"
+
+metadata:
+  createdAt: "2026-05-02"
+  updatedAt: "2026-08-08"
+  # Updated by 0000021 (spec-agent) P1: seeded requirements-derived
+  # responsibilities/scope/risk entries for the regression-pack and
+  # audit-findings-report/guardrailed-trim process ahead of P3 codegen.
+  # Updated by 0000022 (spec-agent) P1: seeded requirements-derived
+  # responsibilities/scope/risk entries for the orchestrator redundancy
+  # removal (canonical-owner de-duplication, agent-dispatch-standards.md)
+  # ahead of P3 codegen.
+  # Updated by 0000023 (codegen-agent) P3: restored continuous_run exception
+  # for P1-P3, fixed session-marker commit lifecycle, fixed copilot.sh/.ps1
+  # self-copy crash + setup.ps1 dispatcher guard, added product_id telemetry
+  # emission.
+  # Updated by 0000024 (codegen-agent) P3: replaced git-path product_id
+  # derivation with a declared product.yml id field (no fallback, routes
+  # to existing failure-marker mechanism), added orchestrator P0 hard-stop
+  # prompt, fixed stale emit_event envelope-argument documentation, closed
+  # 0000017's unexecuted RCA live-verification follow-up.
+  # Updated by 0000025 (codegen-agent) P3: 7-story bundle — ship-agent PR
+  # footer default-off with opt-in toggle, ship-agent P7 git add stages
+  # plan/current/ explicitly, setup-config tracked in
+  # planifest-overrides/setup-config/ (additive to existing marker),
+  # docs-agent routes recommendations.md deferred items to plan/backlog/,
+  # docs-agent Gate B and other phase-skill gates respect continuous_run,
+  # Scope Lock Challenge defaults to always-drafted/batch-presented answers
+  # (supersedes 0000017-ADR-003), subagent parallelism directives expanded
+  # for validate-agent/docs-agent/agent-dispatch-standards.md. Updated 2
+  # pre-existing tests (0000017-req-005, 0000023-req-002) whose assertions
+  # encoded the exact behavior these fixes intentionally changed.
+  # Updated by 0000026 (change-agent, backlog 0000044 folded in): added
+  # check-telemetry-failures.mjs, a read-only UserPromptSubmit hook that
+  # deterministically backstops the orchestrator's ADR-002 phase-start
+  # telemetry-failure-marker check by injecting an additionalContext
+  # reminder when plan/.telemetry-failures/ has unacknowledged markers.
+  # Wired into setup.sh/.ps1 alongside gate-write/check-design (always
+  # installed, not gated behind --context-mode-mcp or
+  # --structured-telemetry-mcp). Updated the orchestrator SKILL.md's
+  # Telemetry section to note the new backstop.
+  # Updated by 0000027 (spec-agent) P1: seeded requirements-derived
+  # responsibilities/scope/risk entries for the 6 planifest-framework-owned
+  # items in this feature's 8-item batch (req-003 subagent backlog filing,
+  # req-004 telemetry-compliance backstop, req-005 framework-update P0 flow,
+  # req-006 historical backlog backfill, req-007 skill-scope ADR, req-008
+  # minimal artifact set) ahead of P2 ADRs and P3 codegen.
+  # Updated by 0000027 (codegen-agent) P3: added out-of-scope-discovery
+  # filing clause to agent-dispatch-standards.md and all 5 phase skills
+  # (req-003); added emit-event-receipt.mjs, check-telemetry-receipts.mjs,
+  # resolve-phase.mjs, verify-telemetry-hooks.mjs and wired them into
+  # setup.sh/.ps1 (req-001, req-004, ADR-001); added
+  # standards/framework-update-policy.md and orchestrator Resume Detection
+  # step 1a (req-005, ADR-002); referenced ADR-003 from the orchestrator's
+  # Capability Skills section (req-007); landed the ADR-004 minimal
+  # Phase 1 artifact set in feature-pipeline.md, planifest-spec-agent, and
+  # README.md, and fixed the now-stale unconditional artifact list in
+  # planifest-docs-agent (req-008). Backfilled 7 historical plan/backlog/
+  # entries (0000048-0000054) from 4 pre-0000025 archives (req-006).
+  # Corrected a stale blocked-bug comment in
+  # test-0000023-req-003-copilot-setup-self-copy.sh now that req-002 fixed
+  # the cline.sh bug it referenced.
+  # Updated by 0000028 (docs-agent) P6: version 0.27.0 to 0.28.0. Bounded
+  # retry on network-level telemetry emission failures only, never on an
+  # HTTP error status, added once in the new shared
+  # hooks/telemetry/emit-event.mjs (req-001, ADR-001). Six duplicated
+  # helpers extracted into shared modules across hooks/enforcement/
+  # (read-stdin.mjs, phase-enum.mjs) and hooks/telemetry/ (emit-event.mjs,
+  # record-telemetry-failure.mjs, read-product-id.mjs, get-flag-path.mjs),
+  # with 13 readStdin copies collapsed to one and a latent NFR-001
+  # violation fixed in 10 of them (req-002, ADR-002). getSessionId
+  # deliberately excluded. Tier 1 telemetry install glob widened to *.mjs
+  # in setup.sh and setup.ps1. stderr fallback when the durable marker
+  # write itself fails (req-003). Install refreshed so the phase telemetry
+  # hooks register, and plan/.telemetry-receipts/ gitignored (req-004).
+  # resolve-phase.mjs and the telemetry schema's loop/reversal fields
+  # verified live rather than by inspection (req-005, closing backlog
+  # 0000058 and 0000053). New em-dash-guard.mjs PreToolUse hook plus a
+  # bounded cleanup of 99 live artifacts (req-006, ADR-003). P5 SEC-001:
+  # every hooks/enforcement/ command string in setup.sh now carries a node
+  # prefix, so the enforcement layer no longer fails open at exit 126.
+  createdBy: "agent"
+  lastModifiedBy: "agent"
+  skill: "planifest-codegen-agent"
+  tool: "claude-code"
+  model: "claude-sonnet-5"
