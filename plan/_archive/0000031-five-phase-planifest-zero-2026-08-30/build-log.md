@@ -204,6 +204,34 @@ Gate accepted: P6 (2026-08-30, continuous run, zero-drift exception)
 | Telemetry | emitted |
 | Notes | Changelog, summary table, archive to plan/_archive/0000031-five-phase-planifest-zero-2026-08-30/. No .skips file this run. |
 
+### P8: Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-30T02:20:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Assessment written to build-report.md in this archive. |
+
+### P9: Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-30T02:25:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Sentinels cleared, PR raised via gh pr create per the standing custom-001 grant. Tag deferred to the merge commit, matching the v0.1.0 precedent on this squash-merge repo. |
+
+Gate accepted: P7 (2026-08-30, archive complete)
+
 ---
 
 ## Summary (filled at P7)
