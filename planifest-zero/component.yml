@@ -1,0 +1,137 @@
+# Planifest Component Manifest
+id: "planifest-zero"
+name: "Planifest Framework"
+feature: "0000031-five-phase-planifest-zero"
+version: "0.2.0"
+status: "active"
+type: "component-pack"
+domain: "developer-tooling"
+summary: "Core standards, skills, hooks, and setup scripts that enforce the Planifest confirmed-design pipeline."
+systemContext: "Installed into a Claude Code project via setup.sh or setup.ps1. Provides enforcement hooks, structured standards, and the agent skills that drive the five-phase pipeline."
+
+responsibilities:
+  - "Enforce the confirmed-design gate: block writes outside declared component scope"
+  - "Inject active scope context on every agent turn via the check-design hook"
+  - "Emit structured telemetry for context pressure and pipeline phase events"
+  - "Declare preferred and avoided libraries per language via library-standards docs"
+  - "Provide formatting standards: date format (DD MMM YYYY), locale (British English), verbosity"
+  - "Supply migration files for propagating standards changes across existing repos"
+  - "Register and sync capability skills from planifest-overrides/"
+  - "Maintain the build log throughout a pipeline run for the ship-phase build assessment"
+  - "Direct model tier selection for all spawned subagents"
+  - "Enforce parallelism directives across all phase skills"
+  - "Centralise the telemetry envelope and emission gate in telemetry-standards.md"
+  - "Track installed skill directories via .planifest-manifest for safe re-runs"
+  - "Detect and recommend adoption mode at discovery"
+  - "Suggest and confirm the version number at discovery"
+  - "Run the Scope Lock Challenge before design confirmation, drafted inline"
+  - "Enforce one question at a time across all phase skills"
+
+exceptions:
+  - "Does not generate application code. That is the implement phase's job in consumer projects."
+  - "Does not configure CI for consumer projects."
+  - "Supports Claude Code only. No other agentic tool target exists."
+
+stack:
+  language: "bash | powershell | javascript"
+  runtime: "node"
+  framework: "none"
+  frontend: "none"
+  styling: "none"
+  componentLibrary: "none"
+  database: "none"
+  orm: "none"
+  testing: "bash"
+  iac: "none"
+  cloud: "none"
+  compute: "none"
+  ci: "github-actions"
+
+contract:
+  inputs:
+    - name: "stdin (hook payload)"
+      type: "event"
+      description: "JSON hook payload from Claude Code lifecycle events"
+  outputs:
+    - name: "stdout (additionalContext or block message)"
+      type: "event"
+      description: "gate-write block message or check-design scope injection"
+    - name: "PLANIFEST_TELEMETRY_URL /emit"
+      type: "http"
+      description: "Telemetry events posted to the structured telemetry backend"
+  consumedBy: ["claude-code-hooks"]
+  consumes: []
+  breakingChangePolicy: "requires-adr"
+
+data:
+  ownsData: false
+  tables: []
+  schemaVersion: "0.0.0"
+  migrationPath: "planifest-zero/migrations/"
+
+scope:
+  inScope:
+    - "Library standards docs for TypeScript, Python, Go, Java, databases"
+    - "Formatting standards: date format, locale, verbosity"
+    - "Enforcement hooks: gate-write, check-design, ratchet-check, em-dash-guard, auto-trigger-orchestrator, check-orchestrator-presence, check-telemetry-failures, check-telemetry-receipts"
+    - "Telemetry hooks: context-pressure, emit-phase-start, emit-phase-end, emit-event-receipt, resolve-phase"
+    - "Shared hook modules: read-stdin.mjs, phase-enum.mjs, emit-event.mjs, record-telemetry-failure.mjs, read-product-id.mjs, get-flag-path.mjs"
+    - "Orchestrator sentinel enforcement"
+    - "Capability skill intake via planifest-overrides/capability-skills/"
+    - "Migration infrastructure for standards propagation"
+    - "setup.sh and setup.ps1 for Claude Code registration"
+    - "The 12 pipeline skills across the five phases"
+    - "Templates, schemas, and standards bundled into each skill at install time"
+    - "scripts/: consistency-check.mjs, product-version.mjs, self-description-check.mjs, verify-telemetry-hooks.mjs, promote-to-regression.sh, refresh-delete-boot-files"
+    - "tests/ and tests/regression/ for the framework's own behaviour"
+  outOfScope:
+    - "Application-level code generation (handled by the implement phase in consumer projects)"
+    - "CI pipeline configuration for consumer projects"
+    - "Any agentic tool other than Claude Code"
+  deferred: []
+
+risk:
+  level: "low"
+  items:
+    - "Path translation on Windows and Git Bash requires cygpath guards in tests"
+    - "The telemetry backend URL is env-var controlled, so misconfiguration sends events to the wrong endpoint. --backend-url is validated at CLI-parse time against a plain http(s) URL shape before it reaches shell-command interpolation."
+    - "Aggressive skill trimming can leave technically complete but ambiguous wording that increases agent retries. The regression-pack baseline comparison is the mitigation."
+    - "Stop-triggered phase_end fires on the first turn boundary after a phase's Skill call, not the true last turn. Event presence is guaranteed, duration_ms may under-report for multi-turn phases."
+    - "Retry classifies AbortError as network-level, so a slow but live backend can receive the same event up to 3 times. The envelope is byte-identical across attempts, so a listener can deduplicate on (session_id, phase, event, timestamp). No explicit idempotency key exists."
+    - "Worst-case telemetry hook wall time on the failure path is 9.6s against a blackholing host, not the 600ms sleep budget alone."
+    - "The em dash guard's bypass sentinel matches anywhere in the payload, so any document explaining the rule exempts itself from it."
+    - "setup.sh prunes retired skills but not hook modules, so a hook module deleted upstream leaves a stale copy in .claude/hooks/."
+
+quality:
+  testCoverage:
+    unit: 0
+    integration: 0
+    e2e: 0
+  techDebt:
+    - "getSessionId() keeps 4 copies across context-pressure.mjs, emit-phase-start.mjs, emit-phase-end.mjs, and resolve-phase.mjs, spanning 3 genuinely different behaviour profiles. Each copy carries a comment naming its profile."
+    - "resolve-phase.mjs's endDedupFlag() sits beside the shared get-flag-path.mjs and builds a similar-looking but different filename for a different purpose. Merging the two would break phase_end dedup."
+    - "The test suite mixes per-feature suites with regression copies. Consolidation is future work."
+  quirks:
+    - "resolve-phase.mjs infers the active phase from the Skill tool's tool_input.skill field via a PreToolUse(Skill) hook, then re-execs emit-phase-start.mjs. A Stop hook re-execs emit-phase-end.mjs using a session marker file, cleared after use."
+    - "context-pressure fill% is a proxy metric based on transcript file size, not actual token count"
+    - "gate-write component path matching is prefix-based, so very short prefixes may over-permit"
+    - "ratchet-check treats a reworded criterion as remove plus add and blocks it. The .ratchet-approve marker is the intended path for legitimate rewording."
+    - "ratchet-check cannot verify who wrote .ratchet-approve. Marker forgery is audit-detected via ratchet-log.md and the ship-phase build assessment, not prevented."
+    - "product-version.mjs parses only the constrained product.template.yml shape, not arbitrary YAML"
+    - "readProductId() extracts product.yml's top-level id field via a constrained regex, not a full YAML parser"
+    - "read-stdin.mjs and phase-enum.mjs live in hooks/enforcement/ and are imported cross-directory by hooks/telemetry/ callers. enforcement/ installs unconditionally and telemetry/ only under --structured-telemetry-mcp, so the always-present tree holds any helper with an enforcement caller."
+    - "The em dash guard only matches the Write and Edit tools and only inspects paths resolving under 5 relative prefixes. A write made through Bash is not inspected. This is a style rule, not an authorisation control."
+
+pipeline:
+  templateVersion: "1.0.0"
+  featureMode: "standard-iterative"
+  domainKnowledgePath: "plan/current"
+
+metadata:
+  createdAt: "2026-05-02"
+  updatedAt: "2026-08-30"
+  createdBy: "agent"
+  lastModifiedBy: "agent"
+  skill: "planifest-implement"
+  tool: "claude-code"
+  model: "claude-opus-5"

@@ -3,5 +3,5 @@
 # Shell hook scripts MUST use LF endings to be executable by bash on all platforms.
 # Git for Windows would otherwise write CRLF, which breaks the shebang line.
 
-planifest-framework/hooks/pre-commit  text eol=lf
-planifest-framework/hooks/pre-push    text eol=lf
+planifest-zero/hooks/pre-commit  text eol=lf
+planifest-zero/hooks/pre-push    text eol=lf

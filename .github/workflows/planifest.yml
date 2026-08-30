@@ -15,23 +15,6 @@ jobs:
       - name: Validate Code/Doc Parity
         run: |
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          COMMIT_MESSAGES=$(git log origin/${{ github.base_ref }}...HEAD --format="%s")
-
-          # Fast Path exemption: if all commits are fix(fast-path): only require component.yml or changelog
-          FAST_PATH_COUNT=$(echo "$COMMIT_MESSAGES" | grep -cE "^fix\(fast-path\):" || true)
-          TOTAL_COUNT=$(echo "$COMMIT_MESSAGES" | grep -c "." || true)
-
-          if [ "$FAST_PATH_COUNT" -gt 0 ] && [ "$FAST_PATH_COUNT" -eq "$TOTAL_COUNT" ]; then
-            if echo "$CHANGED_FILES" | grep -q "^src/"; then
-              if ! echo "$CHANGED_FILES" | grep -qE "(component\.yml|plan/changelog/)"; then
-                echo "::error title=Planifest Fast Path Violation::Fast Path commits must update component.yml or plan/changelog/."
-                exit 1
-              fi
-            fi
-            echo "✅ Planifest fast-path pipeline passed."
-            exit 0
-          fi
-
           # Standard check. This is a presence check, not a correspondence
           # guarantee: it confirms a file under plan/, docs/, or a
           # component.yml also changed in this diff — it does not verify
@@ -45,7 +28,7 @@ jobs:
           echo "✅ Planifest pipeline passed."
 
   # This job is specific to this repository's own self-description and is
-  # deliberately NOT mirrored into planifest-framework/hooks/planifest.yml
+  # deliberately NOT mirrored into planifest-zero/hooks/planifest.yml
   # (the copy setup.sh ships to consumer repos) — a consuming repo's README
   # doesn't have this repository's "## Repository structure" / "## The
   # framework" sections to validate against. See ADR-001 (feature 0000019).
@@ -55,12 +38,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Verify README matches repository structure
-        run: node planifest-framework/scripts/self-description-check.mjs .
+        run: node planifest-zero/scripts/self-description-check.mjs .
 
   validate-telemetry-schema:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify ship phase accepted by telemetry MCP
+      - name: Verify all five phases accepted by telemetry MCP
         # secrets context is unavailable in job-level if conditions (GitHub Actions limitation).
         # Secret is passed as env var; step exits 0 silently when not configured (REQ-021).
         env:
@@ -70,27 +53,29 @@ jobs:
             echo "ℹ️ PLANIFEST_TELEMETRY_URL not configured — skipping telemetry schema guard."
             exit 0
           fi
-          PAYLOAD=$(node -e "
-            process.stdout.write(JSON.stringify({
-              schema_version: '1.0',
-              event: 'phase_start',
-              phase: 'ship',
-              agent: 'planifest-ship-agent',
-              tool: 'ci',
-              model: 'ci',
-              mcp_mode: 'none',
-              session_id: 'ci-schema-guard',
-              timestamp: new Date().toISOString(),
-              data: { phase_name: 'ship' }
-            }));
-          ")
-          HTTP_STATUS=$(curl -s -o /tmp/telemetry-response.json -w "%{http_code}" \
-            -X POST "$PLANIFEST_TELEMETRY_URL/emit" \
-            -H "Content-Type: application/json" \
-            -d "$PAYLOAD")
-          if [ "$HTTP_STATUS" -ge 400 ]; then
-            echo "::error title=Planifest Telemetry Schema Guard::MCP server rejected phase='ship' (HTTP $HTTP_STATUS). Deploy the structured-telemetry-mcp schema update before merging ship-agent (REQ-021)."
-            cat /tmp/telemetry-response.json
-            exit 1
-          fi
-          echo "✅ Telemetry schema accepts phase='ship' (HTTP $HTTP_STATUS)."
+          for PHASE in discovery plan implement validate-and-accept ship; do
+            PAYLOAD=$(node -e "
+              process.stdout.write(JSON.stringify({
+                schema_version: '1.0',
+                event: 'phase_start',
+                phase: process.argv[1],
+                agent: 'planifest-orchestrator',
+                tool: 'ci',
+                model: 'ci',
+                mcp_mode: 'none',
+                session_id: 'ci-schema-guard',
+                timestamp: new Date().toISOString(),
+                data: { phase_name: process.argv[1] }
+              }));
+            " "$PHASE")
+            HTTP_STATUS=$(curl -s -o /tmp/telemetry-response.json -w "%{http_code}" \
+              -X POST "$PLANIFEST_TELEMETRY_URL/emit" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD")
+            if [ "$HTTP_STATUS" -ge 400 ]; then
+              echo "::error title=Planifest Telemetry Schema Guard::MCP server rejected phase='$PHASE' (HTTP $HTTP_STATUS). Deploy the schema update accepting the five-phase enum before merging."
+              cat /tmp/telemetry-response.json
+              exit 1
+            fi
+            echo "✅ Telemetry schema accepts phase='$PHASE' (HTTP $HTTP_STATUS)."
+          done

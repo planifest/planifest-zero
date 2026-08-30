@@ -4,7 +4,7 @@ Planifest is a specification-first framework for Claude Code. It requires the ag
 
 It treats the human as product owner and architect. The agent is the implementer, working within constraints the human sets.
 
-This is the cut-down framework. Version `0.1.0` supports Claude Code alone. It supports the [Agent Skills specification](https://agentskills.io/specification).
+Version `0.2.0` targets Claude Code alone and follows the [Agent Skills specification](https://agentskills.io/specification).
 
 ---
 
@@ -26,13 +26,16 @@ Whether the trade-off pays off depends on the work. See [Limitations](#limitatio
 
 ## How it works
 
-1. **The human writes a feature brief.** What to build, why, and within what constraints.
-2. **The agent interrogates.** The orchestrator skill assesses the brief and asks questions until the context is complete.
-3. **The agent plans.** It produces an execution plan and an Architecture Decision Record.
-4. **The agent builds.** Code generation, then validation, security review, and documentation.
-5. **The human reviews.** The pull request is the backstop.
+The pipeline runs five phases. Every change, however small, takes the same route. A small change is a small run.
 
-Every artifact follows a template, so output stays consistent across sessions and models.
+1. **The human writes a feature brief.** What to build, why, and within what constraints.
+2. **Discovery.** The orchestrator assesses the brief and asks questions until the context is complete.
+3. **Plan.** The agent produces requirements, an execution plan, and Architecture Decision Records behind one confirmation gate.
+4. **Implement.** Code, tests, and documentation land together.
+5. **Validate and accept.** CI checks and a security review run, then the human accepts.
+6. **Ship.** The plan is archived, the run is assessed, and the pull request is raised.
+
+Every agent response carries a phase prefix (`D:`, `PL:`, `IM:`, `VA:`, `SH:`), so you always know where you are. Every artifact follows a template, so output stays consistent across sessions and models.
 
 ---
 
@@ -40,13 +43,13 @@ Every artifact follows a template, so output stays consistent across sessions an
 
 ```
 repo/
-├── planifest-framework/   ← The framework. Drop in, don't modify per-project.
-│   ├── skills/            ← Agent instructions: orchestrator and phase skills
+├── planifest-zero/   ← The framework. Drop in, don't modify per-project.
+│   ├── skills/            ← Agent instructions: the 12 pipeline skills
 │   ├── templates/         ← File format templates for every artifact
 │   ├── schemas/           ← JSON Schema validation definitions
 │   ├── standards/         ← Code quality and design standards
 │   ├── hooks/             ← Enforcement and telemetry hooks, git hooks, CI workflow
-│   ├── workflows/         ← Pipeline route definitions
+│   ├── workflows/         ← The feature pipeline route definition
 │   ├── scripts/           ← Deterministic tooling
 │   └── tests/             ← The framework's own test suite
 │
@@ -58,29 +61,29 @@ repo/
 │                            Each component carries a component.yml.
 │
 └── docs/                  ← Living documentation: component registry, architecture
-                             overview, decisions index, dependency graph. Written by
-                             the docs agent, read by agents and humans.
+                             overview, decisions index, dependency graph. Kept
+                             current by the implement phase, read by agents and humans.
 ```
 
-A typical feature produces five Phase 1 artifacts by default: execution plan, requirements, scope, risk register, and domain glossary. OpenAPI spec, cost model, SLO definitions, and operational model arrive only when their trigger condition applies. See [feature-pipeline.md](planifest-framework/workflows/feature-pipeline.md).
+A typical feature produces five plan-phase artifacts by default: execution plan, requirements, scope, risk register, and domain glossary. OpenAPI spec, cost model, SLO definitions, and operational model arrive only when their trigger condition applies. See [feature-pipeline.md](planifest-zero/workflows/feature-pipeline.md).
 
 ---
 
 ## Getting started
 
-See [getting-started.md](planifest-framework/getting-started.md) for step-by-step setup.
+See [getting-started.md](planifest-zero/getting-started.md) for step-by-step setup.
 
 Quick start:
 
 ```bash
 # macOS or Linux
-./planifest-framework/setup.sh claude-code
+./planifest-zero/setup.sh claude-code
 
 # Windows
-.\planifest-framework\setup.ps1 claude-code
+.\planifest-zero\setup.ps1 claude-code
 ```
 
-The setup script copies skills into `.claude/skills/`, adds YAML frontmatter, wires the enforcement hooks, and writes the `CLAUDE.md` boot file.
+The setup script copies skills into `.claude/skills/`, prunes retired skills, wires the enforcement hooks and git hooks, and writes the `CLAUDE.md` boot file.
 
 Two optional flags:
 
@@ -97,6 +100,8 @@ Two optional flags:
 
 **The human decides, the agent executes.** The human chooses the architecture, the stack, the data ownership, and the scope.
 
+**One route.** Every change is a feature change through the five-phase pipeline. There is no side door for "trivial" fixes, so every diff carries its plan and docs.
+
 **Decompose big initiatives.** Split work into features small enough for one agent session, then group features into waves. That is how Planifest manages context at scale.
 
 **Everything is traced.** Every artifact records the skill that produced it, the tool it ran in, and the model that generated it.
@@ -109,17 +114,17 @@ Two optional flags:
 
 | Folder | Contents |
 |--------|----------|
-| [skills/](planifest-framework/skills/) | The orchestrator and every phase and sub-agent skill |
-| [templates/](planifest-framework/templates/) | File format templates for every pipeline artifact, each with a guide where applicable |
-| [schemas/](planifest-framework/schemas/) | Shared type definitions and the domain document envelope |
-| [standards/](planifest-framework/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, and testing standards |
-| [setup/](planifest-framework/setup/) | The Claude Code tool config, as a `.sh` and `.ps1` pair |
-| [hooks/](planifest-framework/hooks/) | Enforcement and telemetry hooks, git hooks, and the CI workflow |
-| [workflows/](planifest-framework/workflows/) | Route definitions: fast-path, feature-pipeline, change-pipeline, retrofit |
-| [scripts/](planifest-framework/scripts/) | Consistency checks, version derivation, regression promotion |
-| [tests/](planifest-framework/tests/) | Per-feature test scripts plus the promoted regression pack |
-| [migrations/](planifest-framework/migrations/) | Pending and completed framework migrations, applied by the `planifest-migrator` skill |
-| [skills-inbox/](planifest-framework/skills-inbox/) | Drop-in intake for a new capability skill, processed at the next Phase 0 |
+| [skills/](planifest-zero/skills/) | The 12 pipeline skills: the orchestrator, four phase skills, the TDD trio, and four support skills |
+| [templates/](planifest-zero/templates/) | File format templates for every pipeline artifact, each with a guide where applicable |
+| [schemas/](planifest-zero/schemas/) | Shared type definitions and the domain document envelope |
+| [standards/](planifest-zero/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, and testing standards |
+| [setup/](planifest-zero/setup/) | The Claude Code tool config, as a `.sh` and `.ps1` pair |
+| [hooks/](planifest-zero/hooks/) | Enforcement and telemetry hooks, git hooks, and the CI workflow |
+| [workflows/](planifest-zero/workflows/) | The feature pipeline route definition |
+| [scripts/](planifest-zero/scripts/) | Consistency checks, version derivation, regression promotion |
+| [tests/](planifest-zero/tests/) | Per-feature test scripts plus the promoted regression pack |
+| [migrations/](planifest-zero/migrations/) | Pending and completed framework migrations, applied by the `planifest-migrator` skill |
+| [skills-inbox/](planifest-zero/skills-inbox/) | Drop-in intake for a new capability skill, processed at the next discovery |
 
 ---
 
@@ -127,7 +132,7 @@ Two optional flags:
 
 These apply regardless of model or configuration:
 
-1. **Requirement gaps are surfaced, then resolved or explicitly deferred, before codegen begins.** Every deferral is recorded in that feature's `plan/current/scope.md`, so the claim is checkable rather than asserted.
+1. **Requirement gaps are surfaced, then resolved or explicitly deferred, before implementation begins.** Every deferral is recorded in that feature's `plan/current/scope.md`, so the claim is checkable rather than asserted.
 2. **No direct schema modification.** A migration proposal is required, and the human approves it.
 3. **Destructive schema operations require human approval.**
 4. **Data is owned by one component.** Never write to another component's data.
@@ -140,7 +145,7 @@ These apply regardless of model or configuration:
 
 Planifest trades upfront ceremony for traceability. That trade is not always worth making.
 
-- **Overhead is real.** For small changes, prototypes, or exploratory work, the full pipeline is disproportionate. The fast-path workflow reduces this without eliminating it.
+- **Overhead is real.** The pipeline scales down for small changes, but never to zero. Prototypes and exploratory work may not repay it.
 - **It depends on review discipline.** The PR gate is only a backstop if humans read the plans and the diffs. Planifest structures the review. It cannot perform it.
 - **Plans do not prevent all bad output.** A complete specification reduces assumption-driven errors. It does not guarantee correct code.
 - **No comparative benchmarks exist.** Nothing here measures outcomes with and without the framework. Claims about quality rest on design rationale and our own use.
@@ -153,8 +158,6 @@ Planifest trades upfront ceremony for traceability. That trade is not always wor
 
 Planifest is under active development. Template and skill formats may change between versions.
 
-Version `0.1.0` is a deliberate reset. Feature `0000030-framework-cut-down` removed support for eight other agentic tools, deleted the vendored skill library and the context-mode integration, and cleared the accumulated plan and docs history. Everything before `0.1.0` is recoverable from git history.
-
 ## Contributing
 
 Issues and pull requests are welcome. Agent skills and templates are the areas most likely to benefit from outside contributions.
@@ -163,7 +166,7 @@ Issues and pull requests are welcome. Agent skills and templates are the areas m
 
 ## Documentation
 
-`planifest-docs` holds the human documentation: architecture notes, research, and the roadmap. Agents do not need these. They work from the skills and templates in `planifest-framework/`. It is available as a [git repository](https://github.com/planifest/planifest-docs) and a [GitHub Pages site](https://planifest.github.io/planifest-docs/).
+`planifest-docs` holds the human documentation: architecture notes, research, and the roadmap. Agents do not need these. They work from the skills and templates in `planifest-zero/`. It is available as a [git repository](https://github.com/planifest/planifest-docs) and a [GitHub Pages site](https://planifest.github.io/planifest-docs/).
 
 | Document | Purpose |
 |----------|---------|
@@ -174,7 +177,7 @@ Issues and pull requests are welcome. Agent skills and templates are the areas m
 | [Pipeline](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p015-planifest-pipeline.md) | Pipeline phase descriptions |
 | [Roadmap](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p014-planifest-roadmap.md) | Deferred items and future features |
 
-These docs still describe the multi-tool framework. They pre-date the 0.1.0 cut-down.
+These documents describe an older, multi-tool design of the framework and do not yet match the current version.
 
 ---
 
