@@ -34,7 +34,7 @@ Non-negotiable. They apply in every session, every phase.
 
 ## Phases and Response Prefixes
 
-Every request is a feature change. It runs one route: the five-phase pipeline. There is no fast path, no change pipeline, and no separate retrofit route. Every response begins with the phase prefix.
+Every request is a feature change. It runs one route: the five-phase pipeline. Every response begins with the phase prefix.
 
 | N | Phase | Prefix | Owner |
 |---|-------|--------|-------|
@@ -174,8 +174,6 @@ Detect the tool from `CLAUDE_CODE_*` env vars or a `.claude/` directory. Check h
 
 ### Decomposition
 
-Push cadence: after each gate commit, if remote push is authorised by a standing override in `planifest-overrides/instructions/` or a per-session grant in the build log, push the feature branch. A failed push is reported once and never blocks the pipeline.
-
 Split big features. A feature with more than 3 user stories is too big. With more than 5 or 6 features, group them into waves. Each wave is a separate pipeline run that reads the prior wave's manifests rather than its code. For multi-component work in one repository, follow `planifest-zero/standards/monorepo-standards.md`. When two components need the same data, one owns it and the other consumes it through a defined interface. Shared writes are a Hard Limit violation: coach a redesign.
 
 ### Discovery Start Actions
@@ -239,7 +237,7 @@ Read `plan/current/feature-brief.md`. If `## Scenario Paths` is filled in, use t
 
 **Present as a batch.** Show all four questions with their labelled drafts in a single turn. Label every draft as a draft, never as a decided answer.
 
-**Confirmation is human-only, per item.** Only the human's explicit accept, edit, or reject for each individual item counts as scope confirmation. Silence is never approval. The conversation moving on is never approval. A blanket "looks fine" across the batch is never approval for any single item. You now both draft and record, so state this to yourself plainly: your own draft is never confirmation, no matter how confident it reads.
+**Confirmation is human-only, per item.** Only the human's explicit accept, edit, or reject for each individual item counts as scope confirmation. Silence is never approval. The conversation moving on is never approval. A blanket "looks fine" across the batch is never approval for any single item. Your own draft is never confirmation, no matter how confident it reads.
 
 **Record immediately.** The moment the human confirms one item, append to the build log under the P1 block, before handling the next item:
 
@@ -280,7 +278,7 @@ Before presenting the design for confirmation, verify:
 - [ ] Adoption mode confirmed
 - [ ] Version confirmed, not lower than the last known version
 - [ ] Scope Lock Challenge complete, all four paths in the build log
-- [ ] `discovery.md` exists and is complete (redundant catch for Hard Limit 12)
+- [ ] `discovery.md` exists and is complete (Hard Limit 12)
 - [ ] Feature id follows `{0000000}-{kebab-case-name}`
 
 Coach the human on any unchecked item before proceeding. Completeness loop (toggle `discovery_completeness`, default off): when enabled, this checklist is the loop's pass condition per `planifest-loop-runner`. If the same item fails after 2 rounds, emit `D: Blocked: {item}` with escalation context.
@@ -323,6 +321,7 @@ Conventions for every downstream phase:
 - **Build log first:** append a `### P<n>: {Phase Name}` block before any phase work (Hard Limit 9).
 - **Load the phase skill before acting.** Read it in full first.
 - **Commit** all new artifacts before presenting the gate summary.
+- **Push cadence:** after each gate commit, if remote push is authorised by a standing override in `planifest-overrides/instructions/` or a per-session grant in the build log, push the feature branch. A failed push is reported once and never blocks the pipeline.
 - **Skills inbox:** re-check at each transition.
 
 | Phase | Invoke | Gate condition | STOP rule |

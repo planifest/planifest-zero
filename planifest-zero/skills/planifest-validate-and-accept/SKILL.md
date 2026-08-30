@@ -35,7 +35,7 @@ Run the stack's declared checks in this order:
 4. **Test**
 5. **Build**
 
-If a check fails, self-correct: read the error, find the root cause, fix it, re-run. Record each cycle (check, error, root cause, fix, result). Maximum **5 cycles**. Loop mechanics (state file, run-log records, stop rules, escalation format) follow `planifest-loop-runner`, with the cap staying 5. After 5 failed cycles, STOP and escalate:
+If a check fails, self-correct: read the error, find the root cause, fix it, re-run. Record each cycle (check, error, root cause, fix, result). Maximum **5 cycles**. Loop mechanics (state file, run-log records, stop rules, escalation format) follow `planifest-loop-runner`, with a cap of 5. After 5 failed cycles, STOP and escalate:
 
 ```
 VALIDATION BLOCKED - human intervention required

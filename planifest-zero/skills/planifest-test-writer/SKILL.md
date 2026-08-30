@@ -49,7 +49,7 @@ The test file:
 If this test covers core framework behaviour that should be protected long-term (not just for this feature), add a comment at the top of the test file:
 
 ```bash
-# REGRESSION-CANDIDATE: covers {what behaviour}, tagged by test-writer for human review at the ship phase
+# REGRESSION-CANDIDATE: covers {what behaviour}, tagged for human review
 ```
 
-This is advisory. planifest-ship presents tagged tests to the human for promotion confirmation.
+Advisory only. A human promotes tagged tests with `planifest-zero/scripts/promote-to-regression.sh`.

@@ -53,7 +53,7 @@ Armed on every loop, checked at every DECIDE:
 | Rule | Trigger | Action |
 |------|---------|--------|
 | Pass | The owning skill's pass condition is met | `done`: set state, disarm |
-| Iteration cap | iteration == cap (default **3**, the validate-and-accept CI loop keeps **5**, a skill may declare its own) | `escalate` |
+| Iteration cap | iteration == cap (default **3**, the validate-and-accept CI loop uses **5**, a skill may declare its own) | `escalate` |
 | no-progress | The same gap/finding survives **2 consecutive iterations** without measurable change | `escalate`: do not spend the remaining cap restating the problem |
 
 Caps and budgets are enforced by orchestrator control flow reading the state file, not by this text.

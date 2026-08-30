@@ -81,7 +81,7 @@ No ADR for decisions already mandated by the requirements, direct consequences o
 The plan phase ends at one human gate. Before presenting the gate summary:
 
 1. Run `node planifest-zero/scripts/consistency-check.mjs` over the artifact set.
-2. Fix what it flags and re-run until clean. This mechanical check is mandatory. It replaced a retired review skill.
+2. Fix what it flags and re-run until clean. This mechanical check is mandatory.
 
 Then present the artifact set summary and stop for human confirmation.
 
