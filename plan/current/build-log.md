@@ -175,6 +175,22 @@ Gate accepted: P4 (2026-08-30, continuous run, first-attempt pass exception)
 P5 results: risk low. One low finding, LOW-001 symlink-following in skill pruning, fixed in-run in both setup scripts and re-verified by execution. Zero critical, high, or medium findings. Report at plan/current/security-report.md.
 Gate accepted: P5 (2026-08-30, continuous run, low-risk exception)
 
+### P6: Documentation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-30T02:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Living docs were rewritten during P3 by a dispatched agent. This phase checks presence, version coherence, and dead links. |
+
+P6 results: zero drift after two fixes. product.yml version aligned to 0.2.0 with its feature pointer updated and feature-number narrative removed from its comments. All five docs/ artifacts present, decisions-index carries the four 0000031 ADRs, zero dead links across twelve living documents, suite still green.
+Gate accepted: P6 (2026-08-30, continuous run, zero-drift exception)
+
 ---
 
 ## Summary (filled at P7)
