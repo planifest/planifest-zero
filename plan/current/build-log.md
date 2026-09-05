@@ -40,6 +40,7 @@ Strict mode: `plan/.orchestrator-strict` present. Session id arrived on the seco
 Adoption mode: standard-iterative, confirmed by human on 2026-09-05
 P0 exchange (adoption mode): Q: Confirm standard-iterative? / A: Yes.
 Discovery: `plan/current/discovery.md` written and committed before coaching.
+P0 exchange (backlog 0000084): Q: pull-in / leave / discard? / A: Leave.
 
 ---
 
