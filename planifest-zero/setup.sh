@@ -1003,6 +1003,39 @@ CONFIG_EOF
   return 0
 }
 
+# Remove the stale planifest-overrides/setup-config/{tool}.md left by setup
+# runs before 0000032 ADR-001 moved the record to plan/state/ (0000032
+# req-003, ADR-003 decisions 1-2). Called only after a successful write of
+# plan/state/{tool}.md; a failed write leaves the old file alone since the
+# record it depends on isn't in place yet. Removal failure warns and returns
+# 0 so the caller continues (ADR-003 decision 4).
+remove_legacy_setup_config() {
+  local tool="$1"
+
+  local legacy_dir="$PROJECT_ROOT/planifest-overrides/setup-config"
+  local legacy_file="$legacy_dir/${tool}.md"
+
+  if [ -e "$legacy_file" ]; then
+    if rm -f "$legacy_file" 2>/dev/null; then
+      echo "  - removed planifest-overrides/setup-config/${tool}.md"
+    else
+      echo "  ! Warning: could not remove planifest-overrides/setup-config/${tool}.md" >&2
+    fi
+  fi
+
+  if [ -d "$legacy_dir" ]; then
+    if [ -z "$(ls -A "$legacy_dir" 2>/dev/null)" ]; then
+      if rmdir "$legacy_dir" 2>/dev/null; then
+        echo "  - removed planifest-overrides/setup-config/"
+      else
+        echo "  ! Warning: could not remove planifest-overrides/setup-config/" >&2
+      fi
+    fi
+  fi
+
+  return 0
+}
+
 # Write the flags-used marker recording what was applied at install time (REQ-008, ADR-002).
 # Called only after a tool's setup completes successfully. set -euo pipefail means a failed
 # setup_tool call aborts the script before this function is ever reached, satisfying
@@ -1110,7 +1143,9 @@ fi
 run_tool_setup() {
   local t="$1"
   setup_tool "$t"
-  write_setup_config_override "$t" || true
+  if write_setup_config_override "$t"; then
+    remove_legacy_setup_config "$t"
+  fi
   # TOOL_SKILLS_DIR is set globally by the tool config sourced inside setup_tool
   # (e.g. ".claude/skills"); its parent is the tool's own config directory (REQ-008).
   write_setup_flags_marker "$t" "$(dirname "$TOOL_SKILLS_DIR")"

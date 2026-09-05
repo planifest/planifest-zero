@@ -969,7 +969,9 @@ function Invoke-PlanifestSetup {
     # rather than erroring under $ErrorActionPreference = 'Stop'.
     if ($toolConfig -and $toolConfig.SkillsDir) {
         $toolDir = Split-Path -Parent $toolConfig.SkillsDir
-        Write-SetupConfigOverride -ToolName $ToolName | Out-Null
+        if (Write-SetupConfigOverride -ToolName $ToolName) {
+            Remove-LegacySetupConfig -ToolName $ToolName
+        }
         Write-SetupFlagsMarker -ToolName $ToolName -ToolDir $toolDir
     }
 
@@ -1047,6 +1049,40 @@ function Write-SetupFlagsMarker {
 
     $marker | ConvertTo-Json -Depth 10 | Set-Content -Path $markerPath -Encoding UTF8
     Write-Host "  + $ToolDir\.planifest-setup-flags"
+}
+
+# Remove the stale planifest-overrides\setup-config\{tool}.md left by setup
+# runs before 0000032 ADR-001 moved the record to plan\state\ (0000032
+# req-003, ADR-003 decisions 1-2). Called only after a successful write of
+# plan/state/{tool}.md; a failed write leaves the old file alone since the
+# record it depends on isn't in place yet. Removal failure warns and
+# continues (ADR-003 decision 4).
+function Remove-LegacySetupConfig {
+    param($ToolName)
+
+    $legacyDir = Join-Path $ProjectRoot 'planifest-overrides\setup-config'
+    $legacyFile = Join-Path $legacyDir "$ToolName.md"
+
+    if (Test-Path $legacyFile) {
+        try {
+            Remove-Item -Path $legacyFile -Force -ErrorAction Stop
+            Write-Host "  - removed planifest-overrides/setup-config/$ToolName.md"
+        } catch {
+            Write-Warning "Could not remove planifest-overrides/setup-config/$ToolName.md"
+        }
+    }
+
+    if (Test-Path $legacyDir) {
+        $remaining = @(Get-ChildItem -Path $legacyDir -Force -ErrorAction SilentlyContinue)
+        if ($remaining.Count -eq 0) {
+            try {
+                Remove-Item -Path $legacyDir -Force -ErrorAction Stop
+                Write-Host "  - removed planifest-overrides/setup-config/"
+            } catch {
+                Write-Warning "Could not remove planifest-overrides/setup-config/"
+            }
+        }
+    }
 }
 
 # --- Main ---
