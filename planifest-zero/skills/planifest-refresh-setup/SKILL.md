@@ -1,6 +1,6 @@
 ---
 name: planifest-refresh-setup
-description: Refreshes a Planifest install by detecting the target tool, reconstructing the setup flags in effect from installed hook wiring and the flags-used marker file, confirming with the human on the loop, and re-invoking setup.sh/setup.ps1 with those flags. Invoke on request ("refresh the framework setup", "re-run setup with current settings", "refresh setup for {tool}").
+description: Refreshes a Planifest install by detecting the target tool, reading the tracked `plan/state/{tool}.md` record first, falling back to the flags-used marker file and then installed hook wiring, confirming with the human on the loop, and re-invoking setup.sh/setup.ps1 with those flags. Invoke on request ("refresh the framework setup", "re-run setup with current settings", "refresh setup for {tool}").
 hooks:
   phase: standalone
 ---
@@ -35,8 +35,14 @@ Do not proceed to Step 2. Do not ask "which tool" in this branch. That question 
 
 Skip this step if Step 2 produced a recovered flag set.
 
-1. Check `{tool-dir}/.planifest-setup-flags`. If it exists and is well-formed (see `planifest-zero/component.yml`), read `flags` and `backendUrl` and report every flag at **high** confidence, source: marker file.
-2. If the marker file is absent, incomplete, or for a different tool, infer flags from installed hook wiring instead:
+1. Check `plan/state/{tool}.md` first. This is the tracked record and, when valid, the highest-confidence source available. Read it and validate it:
+   - It must contain a fenced ```json block that parses as well-formed JSON.
+   - The parsed object must hold all four fields: `tool`, `flags`, `backendUrl`, `writtenAt`.
+   - The `tool` field matches the target tool from Step 1.
+   - If all of the above hold, the record is valid: report every flag it holds, plus the backend URL, at **high** confidence, source: `plan/state/{tool}.md`. The marker file is not consulted, and Step 3 skips straight to sub-step 4 below.
+   - If the record is absent, unreadable, fails to parse, is missing any of the four fields, or names a different tool, treat it as missing. This does not stop the run: continue to sub-step 2.
+2. Check `{tool-dir}/.planifest-setup-flags`. If it exists and is well-formed (see `planifest-zero/component.yml`), read `flags` and `backendUrl` and report every flag at **high** confidence, source: marker file.
+3. If the marker file is also absent, incomplete, or for a different tool, infer flags from installed hook wiring instead:
 
    | Signal | Implies | Confidence |
    |--------|---------|-----------|
@@ -44,13 +50,13 @@ Skip this step if Step 2 produced a recovered flag set.
    | `plan/.orchestrator-strict` file exists | `--strict-orchestrator` | high |
    | No signal present for a given flag | that flag was not used | high (absence of a signal is itself a confident signal) |
 
-3. Build the full flag list and the exact command that will be run: `setup.sh {tool} {flags...}` (or `setup.ps1 {tool} {flags...}` on Windows).
+4. Build the full flag list and the exact command that will be run: `setup.sh {tool} {flags...}` (or `setup.ps1 {tool} {flags...}` on Windows).
 
 ## Step 4 - Confirm With the Human on the Loop
 
 Always required, in every run, regardless of confidence level, including a run where every flag is high confidence from the marker file. There is no bypass.
 
-Present the target tool, every flag with its source (marker file / inferred from `{signal}`) and confidence level, and the exact command about to run.
+Present the target tool, every flag with its source (the record at `plan/state/{tool}.md` / marker file / inferred from `{signal}`) and confidence level, and the exact command about to run.
 
 Wait for an explicit affirmative. If the human rejects the proposed flags, halt and take no further action. Do not delete anything or fall back to a different flag set on your own.
 
