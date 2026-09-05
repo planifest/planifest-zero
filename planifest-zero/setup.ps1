@@ -976,17 +976,17 @@ function Invoke-PlanifestSetup {
     Write-Host "  Done."
 }
 
-# Write planifest-overrides/setup-config/{tool}.md — the tracked, git-versioned source
-# of truth for active setup flags/backendUrl (0000025 req-004, ADR-002 decision 1). This
-# is additive: it does not replace Write-SetupFlagsMarker, and it is called BEFORE it so
+# Write plan/state/{tool}.md — the tracked, git-versioned source of truth for
+# active setup flags/backendUrl (0000032 req-002, ADR-001). This is additive:
+# it does not replace Write-SetupFlagsMarker, and it is called BEFORE it so
 # the gitignored marker is always (re)written to match this file's values for the current
-# run (ADR-002 decision 3). On failure to write (e.g. permissions), warns and returns
-# $false so the caller falls back to existing marker-only behavior rather than aborting
-# setup (req-004 acceptance criteria, sad path).
+# run (ADR-001 decision 5, carried over from 0000025 ADR-002 decision 3). On failure to
+# write (e.g. permissions), warns and returns $false so the caller falls back to existing
+# marker-only behavior rather than aborting setup (req-002 acceptance criteria, sad path).
 function Write-SetupConfigOverride {
     param($ToolName)
 
-    $configDir = Join-Path $ProjectRoot 'planifest-overrides\setup-config'
+    $configDir = Join-Path $ProjectRoot 'plan\state'
     $configFile = Join-Path $configDir "$ToolName.md"
 
     $flags = @()
@@ -1006,7 +1006,7 @@ function Write-SetupConfigOverride {
     $fence = [char]96 + [char]96 + [char]96
     $content = "# Setup config: $ToolName`n`n" +
         "> Tracked source of truth for active setup flags/backend-url for **$ToolName**`n" +
-        "> (0000025 req-004, ADR-002). The gitignored ``.planifest-setup-flags`` marker in`n" +
+        "> (0000032 ADR-001). The gitignored ``.planifest-setup-flags`` marker in`n" +
         "> this tool's config directory is a local completion-status cache, reconciled to`n" +
         "> match this file on every ``setup.sh``/``setup.ps1`` run.`n`n" +
         "$fence" + "json`n$configJson`n$fence`n"
@@ -1014,10 +1014,10 @@ function Write-SetupConfigOverride {
     try {
         New-Item -ItemType Directory -Path $configDir -Force -ErrorAction Stop | Out-Null
         Set-Content -Path $configFile -Value $content -Encoding UTF8 -ErrorAction Stop
-        Write-Host "  + planifest-overrides\setup-config\$ToolName.md"
+        Write-Host "  + plan/state/$ToolName.md"
         return $true
     } catch {
-        Write-Warning "Could not write planifest-overrides/setup-config/$ToolName.md — continuing with .planifest-setup-flags-only behavior"
+        Write-Warning "Could not write plan/state/$ToolName.md — continuing with .planifest-setup-flags-only behavior"
         return $false
     }
 }
