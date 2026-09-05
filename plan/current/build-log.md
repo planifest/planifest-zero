@@ -50,6 +50,12 @@ P0 exchange (refresh-setup read path): Q: The skill never reads the tracked reco
 P0 exchange (location): Q: plan/state/{tool}.md as the brief proposes, or another name? / A: plan/state/{tool}.md. Layout docs gain a state/ row.
 P0 exchange (upgrade path): Q: Existing planifest-overrides/setup-config/{tool}.md: inline cleanup by setup.sh after a successful write, or a pending migration? / A: Inline cleanup. Delete the exact old path, remove setup-config/ if empty, correct the doc promise about never touching planifest-overrides/.
 Scope Lock dispatch: 4 x planifest-scope-lock-agent in parallel (sonnet tier, cheaper), backlog IDs 0000086-0000089 reserved, none filed. All four drafts returned.
+Scope Lock (happy path): setup.sh/setup.ps1 writes plan/state/claude-code.md, deletes the old setup-config file and emptied folder with one line each, and refresh-setup reads the record first at high confidence. [source: agent-draft-accepted]
+Scope Lock (first-run path): brand-new repo: setup creates plan/state/ itself and writes the record silently. Upgrading repo: writes new, removes old with one line per removal. Refresh-setup with no record falls back to marker then hook inference. [source: agent-draft-accepted]
+Scope Lock (error path): unwritable record folder warns and continues with the run's flags. Failed deletion of the old file warns and continues. Refresh-setup treats an unreadable or malformed record as missing and falls back, reporting the source used. [source: agent-draft-accepted]
+Scope Lock (cross-session): interruption between new write and old delete loses nothing. Next setup run rewrites and removes. Refresh-setup validates the record before trusting it and falls back on parse failure. Interrupted refresh runs recover from the marker as today. [source: agent-draft-accepted]
+P0 exchange (scope lock flags): Q: Fold the three flagged assumptions in as confirmed behaviour (setup creates plan/state/, failed deletion warns, refresh-setup validates before trusting)? / A: Yes, all accepted.
+Scope Lock complete. All four scenario paths captured.
 
 ---
 
