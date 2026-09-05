@@ -74,7 +74,7 @@ Not applicable - existing bash/PowerShell tooling, no new stack.
   successful write, one printed line per removal, warning and continuing on failure.
 - Update layout docs: `plan/README.md`, `plan/feature-structure.md`, `pipeline-reference.md`,
   `project-operations.md`.
-- Write a superseding ADR for 0000025 ADR-002 (git history only) recording the new location and why.
+- Write a superseding ADR for 0000025 ADR 002 (git history only) recording the new location and why.
 
 ### Out of Scope
 - `planifest-framework/`, the dev-time copy that runs this repo's own pipeline. It is

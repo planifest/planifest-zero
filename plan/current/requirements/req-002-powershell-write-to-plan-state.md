@@ -32,18 +32,9 @@ state rather than under human-owned overrides, matching the bash behaviour.
   values.
 
 ## Acceptance Criteria
-- [ ] `setup.ps1` defines `Write-SetupConfigOverride` and the function body references
-  `plan/state` rather than `planifest-overrides`.
-- [ ] `Invoke-PlanifestSetup` calls `Write-SetupConfigOverride -ToolName $ToolName` before
-  `Write-SetupFlagsMarker`.
-- [ ] The written ```json block shape (`tool`, `flags`, `backendUrl`, `writtenAt`) matches
-  req-001's bash record field for field, confirmed by a mirror code review of the two
-  functions since no PowerShell runner exists in CI (backlog 0000084).
-- [ ] A documented manual `pwsh` run of `setup.ps1 claude-code` on a Windows or `pwsh`-capable
-  machine produces `plan/state/claude-code.md` with the correct `tool` field and prints a
-  line naming that path, recorded by the person who ran it.
-- [ ] The manual run repeated a second time changes only `writtenAt` in
-  `plan/state/claude-code.md`.
+- [ ] `Write-SetupConfigOverride` in `setup.ps1` references `plan/state` and not `planifest-overrides`, and `Invoke-PlanifestSetup` calls it before `Write-SetupFlagsMarker`. Verified by a static test.
+- [ ] The ```json block shape (`tool`, `flags`, `backendUrl`, `writtenAt`) matches req-001 field for field, confirmed by mirror review because no PowerShell runner exists in CI (backlog 0000084).
+- [ ] A documented manual `pwsh` run of `setup.ps1 claude-code` produces `plan/state/claude-code.md` with the correct `tool` field, prints a line naming the path, and a repeat run changes only `writtenAt`.
 
 ## Dependencies
 - None.

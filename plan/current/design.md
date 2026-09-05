@@ -42,7 +42,7 @@
   - After a successful write, both scripts delete `planifest-overrides/setup-config/{tool}.md` at its exact path and remove `setup-config/` if it is then empty, printing one line per removal. A failed removal warns and continues. Repeat runs stay silent.
   - `planifest-refresh-setup` Step 3 reads `plan/state/{tool}.md` first at high confidence, validates it, and falls back to the marker then hook inference when it is missing, unreadable, or malformed.
   - Layout docs updated: `plan/README.md`, `plan/feature-structure.md`, `planifest-zero/pipeline-reference.md` (including the "never touches planifest-overrides/" promise), `planifest-zero/project-operations.md`.
-  - A superseding ADR for 0000025 ADR-002 and a Superseded row in `docs/decisions-index.md`.
+  - A superseding ADR for 0000025 ADR 002 and a Superseded row in `docs/decisions-index.md`.
   - Tests: the relocation suite `test-0000025-req-004-setup-config-relocation.sh` rewritten for the new path, plus coverage for inline cleanup and the refresh-setup read order.
 - Out:
   - `planifest-framework/` in this repo.
@@ -62,7 +62,7 @@
 - The relocation test asserts on exact printed lines and could couple tests to wording. Likelihood: medium. Impact: low.
 
 ## Dependencies
-- Upstream: 0000030 ADR-001 (Claude Code only), 0000031 ADR-002 (product folder `planifest-zero/`), 0000031 ADR-003 (feature pipeline is the only route), 0000025 ADR-002 (git history, superseded by this feature).
+- Upstream: 0000030 ADR 001 (Claude Code only), 0000031 ADR 002 (product folder `planifest-zero/`), 0000031 ADR 003 (feature pipeline is the only route), 0000025 ADR 002 (git history, superseded by this feature).
 - Downstream: the next refresh of `planifest-framework/` from `planifest-zero/` in this repo.
 
 ## Active Skills

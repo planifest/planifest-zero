@@ -32,19 +32,9 @@ than under human-owned overrides.
   `write_setup_flags_marker`, so the gitignored marker keeps reconciling to the same values.
 
 ## Acceptance Criteria
-- [ ] Running `setup.sh claude-code` on a repo with no `plan/state/` directory creates
-  `plan/state/` and writes `plan/state/claude-code.md`.
-- [ ] `plan/state/claude-code.md` contains a ```json block whose `tool` field is
-  `"claude-code"`.
-- [ ] `plan/state/claude-code.md` contains `flags` and `backendUrl` fields matching the
-  flags passed to `setup.sh` for that run.
-- [ ] Setup prints a line containing `plan/state/claude-code.md` after a successful write.
-- [ ] Running `setup.sh` a second time changes only the `writtenAt` field in
-  `plan/state/claude-code.md`.
-- [ ] `setup.sh` exits `0` and still writes `{tool-dir}/.planifest-setup-flags` when
-  `plan/state/` cannot be created (for example, `plan/` is read-only).
-- [ ] `plan/state/claude-code.md` is not matched by any `.gitignore` rule and appears in
-  `git status --porcelain` as trackable.
+- [ ] Running `setup.sh claude-code` on a repo with no `plan/state/` creates the folder and writes `plan/state/claude-code.md` with a ```json block whose `tool`, `flags`, and `backendUrl` fields match the run, and prints a line naming that path.
+- [ ] A second run changes only the `writtenAt` field, and `git check-ignore plan/state/claude-code.md` exits non-zero.
+- [ ] When `plan/state/` cannot be created (read-only `plan/`), `setup.sh` prints one warning, still writes `{tool-dir}/.planifest-setup-flags`, and exits `0`.
 
 ## Dependencies
 - None.

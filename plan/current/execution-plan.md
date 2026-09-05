@@ -25,7 +25,7 @@ Functional requirements are split into individual files, one user story per file
 | [req-003-inline-cleanup-of-old-record.md](requirements/req-003-inline-cleanup-of-old-record.md) | Both scripts remove the old record and emptied folder after a successful write. |
 | [req-004-refresh-setup-reads-record-first.md](requirements/req-004-refresh-setup-reads-record-first.md) | Refresh-setup Step 3 reads and validates the record before the marker and hook inference. |
 | [req-005-layout-docs-updated.md](requirements/req-005-layout-docs-updated.md) | Four layout docs describe `plan/state/` and stop describing `setup-config/`. |
-| [req-006-superseding-adr.md](requirements/req-006-superseding-adr.md) | A superseding ADR records the relocation and marks 0000025 ADR-002 superseded. |
+| [req-006-superseding-adr.md](requirements/req-006-superseding-adr.md) | A superseding ADR records the relocation and marks 0000025 ADR 002 superseded. |
 
 ## Non-Functional Requirements
 

@@ -32,19 +32,9 @@ source available.
   inference) supplied the proposed flags.
 
 ## Acceptance Criteria
-- [ ] With a valid `plan/state/claude-code.md` present, refresh-setup's Step 3 reports every
-  flag at high confidence with source `plan/state/claude-code.md`, and does not read the
-  marker file.
-- [ ] With `plan/state/claude-code.md` absent, refresh-setup falls back to the marker file
-  as it does today.
-- [ ] With `plan/state/claude-code.md` present but containing invalid JSON, refresh-setup
-  treats it as missing and falls back to the marker file, without stopping the skill run.
-- [ ] With `plan/state/claude-code.md` present but missing the `flags` field, refresh-setup
-  treats it as missing and falls back to the marker file.
-- [ ] With `plan/state/claude-code.md` present but its `tool` field set to a different tool
-  name, refresh-setup treats it as missing for the current target and falls back.
-- [ ] The Step 4 confirmation output printed to the human names the source used
-  (`plan/state/{tool}.md`, the marker file, or inferred from hook wiring).
+- [ ] With a valid `plan/state/claude-code.md` present, Step 3 reports every flag and the backend URL at high confidence with source `plan/state/claude-code.md`, and does not consult the marker file.
+- [ ] With the record absent, unreadable, containing invalid JSON, missing the `flags` field, or naming a different `tool`, Step 3 treats it as missing and falls back to the marker file then hook inference without stopping the skill run.
+- [ ] The Step 4 confirmation names the source used for each flag: the record, the marker file, or hook inference.
 
 ## Dependencies
 - req-001

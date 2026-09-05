@@ -37,19 +37,9 @@ actually do.
   location.
 
 ## Acceptance Criteria
-- [ ] `plan/README.md` contains the string `plan/state/` in its folder table or supporting
-  text.
-- [ ] `plan/feature-structure.md`'s layout diagram lists `plan/state/`.
-- [ ] `planifest-zero/pipeline-reference.md` no longer lists `setup-config/` inside its
-  `planifest-overrides/` customisation section, and contains `plan/state/{tool}.md`.
-- [ ] `planifest-zero/pipeline-reference.md`'s re-run-after-update text no longer states
-  that setup "never touches `planifest-overrides/`" without qualification; it names
-  `plan/state/` as the path setup writes.
-- [ ] `planifest-zero/project-operations.md` no longer lists `setup-config/` as a
-  `planifest-overrides/` subfolder.
-- [ ] A repository-wide search for `planifest-overrides/setup-config` across
-  `plan/README.md`, `plan/feature-structure.md`, `planifest-zero/pipeline-reference.md`, and
-  `planifest-zero/project-operations.md` returns no matches.
+- [ ] `plan/README.md` has a `state/` row in its folder table, and `plan/feature-structure.md`'s layout diagram lists `plan/state/`.
+- [ ] `planifest-zero/pipeline-reference.md` describes `plan/state/{tool}.md` in place of the `setup-config/` section, and its re-run text no longer claims setup never touches `planifest-overrides/` without naming the cleanup of the old record.
+- [ ] A search for `planifest-overrides/setup-config` across the four docs (`plan/README.md`, `plan/feature-structure.md`, `planifest-zero/pipeline-reference.md`, `planifest-zero/project-operations.md`) returns no matches.
 
 ## Dependencies
 - req-001

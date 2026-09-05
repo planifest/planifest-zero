@@ -33,21 +33,9 @@ that my repository does not carry a duplicate, unread copy of the same state.
   prints nothing for this step.
 
 ## Acceptance Criteria
-- [ ] Given `planifest-overrides/setup-config/claude-code.md` exists before a run, after
-  `setup.sh claude-code` the file no longer exists and `plan/state/claude-code.md` does.
-- [ ] Setup prints a line naming `planifest-overrides/setup-config/claude-code.md` as
-  removed.
-- [ ] When `planifest-overrides/setup-config/` holds only the removed file, the directory
-  itself no longer exists after the run.
-- [ ] When `planifest-overrides/setup-config/` holds an additional unrelated file, the
-  directory still exists after the run and the unrelated file is untouched.
-- [ ] Given no `planifest-overrides/setup-config/` directory exists before a run, `setup.sh`
-  exits `0` and prints no removal line.
-- [ ] Running `setup.sh` a second time against an already-migrated repo (old file already
-  gone) prints no removal line.
-- [ ] `setup.ps1` defines the matching removal logic: a static check confirms
-  `Write-SetupConfigOverride` (or its caller) references removing the old
-  `planifest-overrides\setup-config\{tool}.md` path and its emptied parent directory.
+- [ ] Given `planifest-overrides/setup-config/claude-code.md` exists before `setup.sh claude-code`, afterwards the old file is gone, `plan/state/claude-code.md` exists, and one printed line names the removed old path. If the folder held only that file, the folder is gone too. If it held another file, the folder and that file remain.
+- [ ] Given no old file or folder exists, or on a second run against a migrated repo, `setup.sh` exits `0` and prints no removal line. Given the old file cannot be removed (read-only folder), `setup.sh` prints one warning and exits `0`.
+- [ ] A static test confirms `setup.ps1` removes the old `planifest-overrides\setup-config\{tool}.md` path and its emptied parent after a successful write.
 
 ## Dependencies
 - req-001
