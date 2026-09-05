@@ -45,6 +45,7 @@ P0 exchange (backlog 0000085): Q: pull-in / leave / discard? / A: Leave.
 Backlog pickup complete: both entries left in place.
 P0 exchange (version): Q: Bump 0.2.0 to 0.3.0 (feature pipeline, minor)? / A: Yes.
 Version confirmed: 0.3.0
+P0 exchange (component): Q: Change planifest-zero/ only, or both copies? / A: planifest-zero only. planifest-framework/ is the workflow tooling for this repo, not source.
 
 ---
 
