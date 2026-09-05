@@ -87,7 +87,20 @@ P0 complete.
 | MCP calls | `0` |
 | Parallel task batches | `0` |
 | Telemetry | failed-with-recorded-choice |
-| Notes | Three ADRs cross-reference each other, so written inline rather than in parallel. |
+| Notes | Three ADRs cross-reference each other, so written inline rather than in parallel. ADR-001 location (supersedes 0000025 ADR 002), ADR-002 refresh-setup precedence, ADR-003 inline cleanup. consistency-check clean. Gate passed under continuous run at 2026-09-05T20:59:50Z. |
+
+### P3: Code Generation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-05T20:59:50Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-codegen-agent |
+| Agents spawned | `pending` |
+| MCP calls | `0` |
+| Parallel task batches | `pending` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | pending |
 
 ---
 
