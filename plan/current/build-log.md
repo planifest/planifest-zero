@@ -59,6 +59,9 @@ Scope Lock complete. All four scenario paths captured.
 P0 exchange (run mode): Q: Check after each phase, or continuous run? / A: Continuous run. plan/.run-mode written.
 Capability skills: none relevant to a bash, PowerShell, and markdown stack. Proceeded silently.
 P0 gate checklist: all items pass. Design drafted and presented for confirmation.
+P0 exchange (design confirmation): Q: Confirm the design is correct and complete? / A: Yes.
+Gate accepted: P0 (2026-09-05T20:54:22Z)
+P0 complete.
 
 ---
 
