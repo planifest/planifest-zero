@@ -100,7 +100,7 @@ P0 complete.
 | MCP calls | `0` |
 | Parallel task batches | `pending` |
 | Telemetry | failed-with-recorded-choice |
-| Notes | pending |
+| Notes | Batch 1 (req-001, req-002) blocked by gate-write: design.md lacked a Component Paths section. Added the section listing the confirmed in-scope paths. No decision changed. |
 
 ---
 

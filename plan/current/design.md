@@ -36,14 +36,28 @@
 - Deployment: files inside the component pack. Consumers pick the change up on their next `setup.sh`/`setup.ps1` run, which relocates their record inline.
 - API versioning: not applicable
 
+## Component Paths
+- planifest-zero/setup.sh
+- planifest-zero/setup.ps1
+- planifest-zero/skills/planifest-refresh-setup/
+- planifest-zero/tests/
+- planifest-zero/pipeline-reference.md
+- planifest-zero/project-operations.md
+- planifest-zero/component.yml
+- plan/README.md
+- plan/feature-structure.md
+- docs/
+
 ## Scope
 - In:
-  - `write_setup_config_override` and `Write-SetupConfigOverride` write `plan/state/{tool}.md`, creating `plan/state/` when absent.
+  - `planifest-zero/setup.sh`: `write_setup_config_override` writes `plan/state/{tool}.md`, creating `plan/state/` when absent.
+  - `planifest-zero/setup.ps1`: `Write-SetupConfigOverride` writes `plan/state/{tool}.md`, creating `plan/state/` when absent.
   - After a successful write, both scripts delete `planifest-overrides/setup-config/{tool}.md` at its exact path and remove `setup-config/` if it is then empty, printing one line per removal. A failed removal warns and continues. Repeat runs stay silent.
   - `planifest-refresh-setup` Step 3 reads `plan/state/{tool}.md` first at high confidence, validates it, and falls back to the marker then hook inference when it is missing, unreadable, or malformed.
   - Layout docs updated: `plan/README.md`, `plan/feature-structure.md`, `planifest-zero/pipeline-reference.md` (including the "never touches planifest-overrides/" promise), `planifest-zero/project-operations.md`.
   - A superseding ADR for 0000025 ADR 002 and a Superseded row in `docs/decisions-index.md`.
-  - Tests: the relocation suite `test-0000025-req-004-setup-config-relocation.sh` rewritten for the new path, plus coverage for inline cleanup and the refresh-setup read order.
+  - `planifest-zero/tests/test-0000025-req-004-setup-config-relocation.sh`: the relocation suite rewritten for the new path.
+  - `planifest-zero/tests/test-0000032-req-001-bash-write-to-plan-state.sh`: new coverage for the bash write path, plus inline cleanup and the refresh-setup read order.
 - Out:
   - `planifest-framework/` in this repo.
   - The marker's role, format, or location.
