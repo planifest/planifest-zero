@@ -70,11 +70,24 @@ P0 complete.
 | Start | `2026-09-05T20:54:42Z` |
 | Model tier | primary (orchestrator), cheaper (artifact subagents) |
 | Skills loaded | planifest-orchestrator, planifest-spec-agent |
-| Agents spawned | `pending` |
+| Agents spawned | `2` |
 | MCP calls | `0` |
-| Parallel task batches | `pending` |
+| Parallel task batches | `1` |
 | Telemetry | failed-with-recorded-choice |
-| Notes | Continuous run. Marker root cause acknowledged at P0, no re-ask. |
+| Notes | Continuous run. Marker root cause acknowledged at P0, no re-ask. Artifacts: execution plan, 6 requirements, scope, risk register, glossary. OpenAPI, operational model, SLO, cost model, data contract omitted (no trigger). design_critic toggle unset, so no critic run. consistency-check clean after condensing ACs to 3 per requirement. Gate passed under continuous run at 2026-09-05T20:58:19Z. |
+
+### P2: Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-05T20:58:19Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-adr-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Three ADRs cross-reference each other, so written inline rather than in parallel. |
 
 ---
 
