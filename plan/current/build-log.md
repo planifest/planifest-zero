@@ -46,6 +46,7 @@ Backlog pickup complete: both entries left in place.
 P0 exchange (version): Q: Bump 0.2.0 to 0.3.0 (feature pipeline, minor)? / A: Yes.
 Version confirmed: 0.3.0
 P0 exchange (component): Q: Change planifest-zero/ only, or both copies? / A: planifest-zero only. planifest-framework/ is the workflow tooling for this repo, not source.
+P0 exchange (refresh-setup read path): Q: The skill never reads the tracked record today. Add the read (tracked file first, then marker, then hook inference), or pure path move with doc correction? / A: Add the read.
 
 ---
 
