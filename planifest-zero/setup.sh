@@ -942,17 +942,18 @@ setup_tool() {
   echo "  Done."
 }
 
-# Write planifest-overrides/setup-config/{tool}.md — the tracked, git-versioned source
-# of truth for active setup flags/backendUrl (0000025 req-004, ADR-002 decision 1). This
-# is additive: it does not replace write_setup_flags_marker, and it is called BEFORE it so
-# the gitignored marker is always (re)written to match this file's values for the current
-# run, satisfying ADR-002 decision 3's reconciliation rule. If the write fails (e.g.
-# permissions), warns and returns non-zero so the caller falls back to existing
-# marker-only behavior instead of aborting setup (req-004 acceptance criteria, sad path).
+# Write plan/state/{tool}.md — the tracked, git-versioned source of truth for
+# active setup flags/backendUrl (0000032 req-001, ADR-001 decision 1). This is
+# additive: it does not replace write_setup_flags_marker, and it is called BEFORE
+# it so the gitignored marker is always (re)written to match this file's values
+# for the current run, satisfying ADR-001 decision 5's reconciliation rule. If
+# the write fails (e.g. permissions), warns and returns non-zero so the caller
+# falls back to existing marker-only behavior instead of aborting setup
+# (req-001 acceptance criteria, sad path).
 write_setup_config_override() {
   local tool="$1"
 
-  local config_dir="$PROJECT_ROOT/planifest-overrides/setup-config"
+  local config_dir="$PROJECT_ROOT/plan/state"
   local config_file="$config_dir/${tool}.md"
 
   local flags=()
@@ -972,7 +973,7 @@ write_setup_config_override() {
   written_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
   if ! mkdir -p "$config_dir" 2>/dev/null; then
-    echo "  ! Warning: could not create planifest-overrides/setup-config/ — continuing with .planifest-setup-flags-only behavior" >&2
+    echo "  ! Warning: could not create plan/state/ — continuing with .planifest-setup-flags-only behavior" >&2
     return 1
   fi
 
@@ -980,7 +981,7 @@ write_setup_config_override() {
 # Setup config: $tool
 
 > Tracked source of truth for active setup flags/backend-url for **$tool**
-> (0000025 req-004, ADR-002). The gitignored \`.planifest-setup-flags\` marker in
+> (0000032 ADR-001). The gitignored \`.planifest-setup-flags\` marker in
 > this tool's config directory is a local completion-status cache, reconciled to
 > match this file on every \`setup.sh\`/\`setup.ps1\` run.
 
@@ -994,11 +995,11 @@ write_setup_config_override() {
 \`\`\`
 CONFIG_EOF
   then
-    echo "  ! Warning: failed to write planifest-overrides/setup-config/${tool}.md — continuing with .planifest-setup-flags-only behavior" >&2
+    echo "  ! Warning: failed to write plan/state/${tool}.md — continuing with .planifest-setup-flags-only behavior" >&2
     return 1
   fi
 
-  echo "  + planifest-overrides/setup-config/${tool}.md"
+  echo "  + plan/state/${tool}.md"
   return 0
 }
 
