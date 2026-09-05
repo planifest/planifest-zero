@@ -36,7 +36,10 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 Telemetry: marker `emit-event-receipt::Error::emit-event-envelope-has-unrecognised-phase-orchestrator-or-e` (5 occurrences, 2026-08-30) surfaced. Human chose **proceed** on 2026-09-05T09:01:07Z. Root cause: prior run emitted `emit_event` with `phase: "orchestrator"`, which the receipt hook's shared phase enum rejects. Backend on port 3741 is reachable. Marker deleted after acknowledgement. Mismatch filed as backlog 0000085.
 P0 exchange (telemetry): Q: Block until resolved, or proceed without telemetry for the rest of this run? / A: Proceed.
 Git pre-flight: branch `feat/0000032-relocate-setup-config-to-plan-state` (validated), tree clean, in sync with origin. Local main equals origin/main.
-Strict mode: `plan/.orchestrator-strict` present, no session_id in context, wrote UTC timestamp to `plan/.orchestrator-ack`.
+Strict mode: `plan/.orchestrator-strict` present. Session id arrived on the second prompt and was written to `plan/.orchestrator-ack`.
+Adoption mode: standard-iterative, confirmed by human on 2026-09-05
+P0 exchange (adoption mode): Q: Confirm standard-iterative? / A: Yes.
+Discovery: `plan/current/discovery.md` written and committed before coaching.
 
 ---
 
