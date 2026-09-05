@@ -47,6 +47,7 @@ P0 exchange (version): Q: Bump 0.2.0 to 0.3.0 (feature pipeline, minor)? / A: Ye
 Version confirmed: 0.3.0
 P0 exchange (component): Q: Change planifest-zero/ only, or both copies? / A: planifest-zero only. planifest-framework/ is the workflow tooling for this repo, not source.
 P0 exchange (refresh-setup read path): Q: The skill never reads the tracked record today. Add the read (tracked file first, then marker, then hook inference), or pure path move with doc correction? / A: Add the read.
+P0 exchange (location): Q: plan/state/{tool}.md as the brief proposes, or another name? / A: plan/state/{tool}.md. Layout docs gain a state/ row.
 
 ---
 
