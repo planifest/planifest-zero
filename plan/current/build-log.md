@@ -56,6 +56,9 @@ Scope Lock (error path): unwritable record folder warns and continues with the r
 Scope Lock (cross-session): interruption between new write and old delete loses nothing. Next setup run rewrites and removes. Refresh-setup validates the record before trusting it and falls back on parse failure. Interrupted refresh runs recover from the marker as today. [source: agent-draft-accepted]
 P0 exchange (scope lock flags): Q: Fold the three flagged assumptions in as confirmed behaviour (setup creates plan/state/, failed deletion warns, refresh-setup validates before trusting)? / A: Yes, all accepted.
 Scope Lock complete. All four scenario paths captured.
+P0 exchange (run mode): Q: Check after each phase, or continuous run? / A: Continuous run. plan/.run-mode written.
+Capability skills: none relevant to a bash, PowerShell, and markdown stack. Proceeded silently.
+P0 gate checklist: all items pass. Design drafted and presented for confirmation.
 
 ---
 
