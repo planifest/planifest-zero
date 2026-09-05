@@ -27,9 +27,9 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Start | `2026-09-05T09:01:07Z` |
 | Model tier | primary |
 | Skills loaded | planifest-orchestrator |
-| Agents spawned | `0` |
+| Agents spawned | `4` |
 | MCP calls | `0` |
-| Parallel task batches | `0` |
+| Parallel task batches | `1` |
 | Telemetry | failed-with-recorded-choice |
 | Notes | Fresh start. Draft feature brief present, no design. Context reset: session opened cold on this run, no residual context to clear. |
 
@@ -49,6 +49,7 @@ P0 exchange (component): Q: Change planifest-zero/ only, or both copies? / A: pl
 P0 exchange (refresh-setup read path): Q: The skill never reads the tracked record today. Add the read (tracked file first, then marker, then hook inference), or pure path move with doc correction? / A: Add the read.
 P0 exchange (location): Q: plan/state/{tool}.md as the brief proposes, or another name? / A: plan/state/{tool}.md. Layout docs gain a state/ row.
 P0 exchange (upgrade path): Q: Existing planifest-overrides/setup-config/{tool}.md: inline cleanup by setup.sh after a successful write, or a pending migration? / A: Inline cleanup. Delete the exact old path, remove setup-config/ if empty, correct the doc promise about never touching planifest-overrides/.
+Scope Lock dispatch: 4 x planifest-scope-lock-agent in parallel (sonnet tier, cheaper), backlog IDs 0000086-0000089 reserved, none filed. All four drafts returned.
 
 ---
 
