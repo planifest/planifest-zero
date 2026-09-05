@@ -43,6 +43,8 @@ Discovery: `plan/current/discovery.md` written and committed before coaching.
 P0 exchange (backlog 0000084): Q: pull-in / leave / discard? / A: Leave.
 P0 exchange (backlog 0000085): Q: pull-in / leave / discard? / A: Leave.
 Backlog pickup complete: both entries left in place.
+P0 exchange (version): Q: Bump 0.2.0 to 0.3.0 (feature pipeline, minor)? / A: Yes.
+Version confirmed: 0.3.0
 
 ---
 
