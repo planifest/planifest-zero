@@ -100,7 +100,7 @@ P0 complete.
 | MCP calls | `0` |
 | Parallel task batches | `pending` |
 | Telemetry | failed-with-recorded-choice |
-| Notes | Batch 1 (req-001, req-002) blocked by gate-write: design.md lacked a Component Paths section. Added the section listing the confirmed in-scope paths. No decision changed. |
+| Notes | Batch 1 (req-001, req-002) blocked by gate-write: design.md lacked a Component Paths section. Added the section listing the confirmed in-scope paths. No decision changed. The req-001 agent also reworded three Scope bullets to lead with file paths, cosmetic, swept into the same commit. Batch 1 complete: req-001 26/26, req-002 6/6, rewritten 0000025 suite 23/23. Runner reports 2 pre-existing failures unrelated to this feature, to be confirmed at P4. |
 
 ---
 
