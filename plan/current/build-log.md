@@ -63,6 +63,19 @@ P0 exchange (design confirmation): Q: Confirm the design is correct and complete
 Gate accepted: P0 (2026-09-05T20:54:22Z)
 P0 complete.
 
+### P1: Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-05T20:54:42Z` |
+| Model tier | primary (orchestrator), cheaper (artifact subagents) |
+| Skills loaded | planifest-orchestrator, planifest-spec-agent |
+| Agents spawned | `pending` |
+| MCP calls | `0` |
+| Parallel task batches | `pending` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Continuous run. Marker root cause acknowledged at P0, no re-ask. |
+
 ---
 
 ## Summary (filled at P7)
