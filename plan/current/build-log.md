@@ -48,6 +48,7 @@ Version confirmed: 0.3.0
 P0 exchange (component): Q: Change planifest-zero/ only, or both copies? / A: planifest-zero only. planifest-framework/ is the workflow tooling for this repo, not source.
 P0 exchange (refresh-setup read path): Q: The skill never reads the tracked record today. Add the read (tracked file first, then marker, then hook inference), or pure path move with doc correction? / A: Add the read.
 P0 exchange (location): Q: plan/state/{tool}.md as the brief proposes, or another name? / A: plan/state/{tool}.md. Layout docs gain a state/ row.
+P0 exchange (upgrade path): Q: Existing planifest-overrides/setup-config/{tool}.md: inline cleanup by setup.sh after a successful write, or a pending migration? / A: Inline cleanup. Delete the exact old path, remove setup-config/ if empty, correct the doc promise about never touching planifest-overrides/.
 
 ---
 
