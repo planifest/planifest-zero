@@ -1,5 +1,7 @@
 # Dependency Graph
 
+Last updated: 0000032-relocate-setup-config-to-plan-state
+
 ## Component dependency diagram
 
 ```mermaid

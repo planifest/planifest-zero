@@ -1,7 +1,7 @@
 ---
-version: "0.2.0"
-feature: "0000031-five-phase-planifest-zero"
-updated: "30 Aug 2026"
+version: "0.3.0"
+feature: "0000032-relocate-setup-config-to-plan-state"
+updated: "05 Sep 2026"
 ---
 # About
 
@@ -10,9 +10,9 @@ updated: "30 Aug 2026"
 
 | Field | Value |
 |-------|-------|
-| Version | `0.2.0` |
-| Last feature | `0000031-five-phase-planifest-zero` |
-| Updated | `30 Aug 2026` |
+| Version | `0.3.0` |
+| Last feature | `0000032-relocate-setup-config-to-plan-state` |
+| Updated | `05 Sep 2026` |
 
 ## What this is
 
