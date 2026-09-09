@@ -126,7 +126,20 @@ P0 complete.
 | MCP calls | `0` |
 | Parallel task batches | `0` |
 | Telemetry | failed-with-recorded-choice |
-| Notes | Fresh-context reviewer over the branch diff. Overall Medium. S-001 medium: refresh-setup validates record shape but not flag values or URL form, so a hostile commit could inject shell metacharacters into the proposed command, gated only by Step 4 human confirmation. Filed backlog 0000087. S-002, S-003 informational. Path handling and deletion confirmed safe. R-003 moved to mitigated. STOP for human: risk is not Low. Human chose fix now. S-001 fixed inline (too small for a subagent): Step 3 gains a flag allowlist and a backendUrl pattern check, req-004 Input Validation and ADR-002 decision 2 updated, req-004 suite extended to 22 cases (RED 3 failing, then GREEN). Backlog 0000087 deleted, superseded by the fix. Report re-rated Low, S-001 closed. |
+| Notes | Fresh-context reviewer over the branch diff. Overall Medium. S-001 medium: refresh-setup validates record shape but not flag values or URL form, so a hostile commit could inject shell metacharacters into the proposed command, gated only by Step 4 human confirmation. Filed backlog 0000087. S-002, S-003 informational. Path handling and deletion confirmed safe. R-003 moved to mitigated. STOP for human: risk is not Low. Human chose fix now. S-001 fixed inline (too small for a subagent): Step 3 gains a flag allowlist and a backendUrl pattern check, req-004 Input Validation and ADR-002 decision 2 updated, req-004 suite extended to 22 cases (RED 3 failing, then GREEN). Backlog 0000087 deleted, superseded by the fix. Report re-rated Low, S-001 closed. Gate passed at 2026-09-09T20:14:40Z: Low risk, zero open critical, high, or medium findings. |
+
+### P6: Documentation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T20:14:40Z` |
+| Model tier | primary (orchestrator), cheaper (docs subagent) |
+| Skills loaded | planifest-orchestrator, planifest-docs-agent |
+| Agents spawned | `pending` |
+| MCP calls | `0` |
+| Parallel task batches | `pending` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | pending |
 
 ---
 
