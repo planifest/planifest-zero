@@ -1,5 +1,7 @@
 # Component Registry
 
+Last updated: 0000032-relocate-setup-config-to-plan-state
+
 ## Registry
 
 | ID | Name | Type | Domain | Status | Summary | Docs |

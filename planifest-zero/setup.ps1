@@ -969,24 +969,26 @@ function Invoke-PlanifestSetup {
     # rather than erroring under $ErrorActionPreference = 'Stop'.
     if ($toolConfig -and $toolConfig.SkillsDir) {
         $toolDir = Split-Path -Parent $toolConfig.SkillsDir
-        Write-SetupConfigOverride -ToolName $ToolName | Out-Null
+        if (Write-SetupConfigOverride -ToolName $ToolName) {
+            Remove-LegacySetupConfig -ToolName $ToolName
+        }
         Write-SetupFlagsMarker -ToolName $ToolName -ToolDir $toolDir
     }
 
     Write-Host "  Done."
 }
 
-# Write planifest-overrides/setup-config/{tool}.md — the tracked, git-versioned source
-# of truth for active setup flags/backendUrl (0000025 req-004, ADR-002 decision 1). This
-# is additive: it does not replace Write-SetupFlagsMarker, and it is called BEFORE it so
+# Write plan/state/{tool}.md — the tracked, git-versioned source of truth for
+# active setup flags/backendUrl (0000032 req-002, ADR-001). This is additive:
+# it does not replace Write-SetupFlagsMarker, and it is called BEFORE it so
 # the gitignored marker is always (re)written to match this file's values for the current
-# run (ADR-002 decision 3). On failure to write (e.g. permissions), warns and returns
-# $false so the caller falls back to existing marker-only behavior rather than aborting
-# setup (req-004 acceptance criteria, sad path).
+# run (ADR-001 decision 5, carried over from 0000025 ADR-002 decision 3). On failure to
+# write (e.g. permissions), warns and returns $false so the caller falls back to existing
+# marker-only behavior rather than aborting setup (req-002 acceptance criteria, sad path).
 function Write-SetupConfigOverride {
     param($ToolName)
 
-    $configDir = Join-Path $ProjectRoot 'planifest-overrides\setup-config'
+    $configDir = Join-Path $ProjectRoot 'plan\state'
     $configFile = Join-Path $configDir "$ToolName.md"
 
     $flags = @()
@@ -1006,7 +1008,7 @@ function Write-SetupConfigOverride {
     $fence = [char]96 + [char]96 + [char]96
     $content = "# Setup config: $ToolName`n`n" +
         "> Tracked source of truth for active setup flags/backend-url for **$ToolName**`n" +
-        "> (0000025 req-004, ADR-002). The gitignored ``.planifest-setup-flags`` marker in`n" +
+        "> (0000032 ADR-001). The gitignored ``.planifest-setup-flags`` marker in`n" +
         "> this tool's config directory is a local completion-status cache, reconciled to`n" +
         "> match this file on every ``setup.sh``/``setup.ps1`` run.`n`n" +
         "$fence" + "json`n$configJson`n$fence`n"
@@ -1014,10 +1016,10 @@ function Write-SetupConfigOverride {
     try {
         New-Item -ItemType Directory -Path $configDir -Force -ErrorAction Stop | Out-Null
         Set-Content -Path $configFile -Value $content -Encoding UTF8 -ErrorAction Stop
-        Write-Host "  + planifest-overrides\setup-config\$ToolName.md"
+        Write-Host "  + plan/state/$ToolName.md"
         return $true
     } catch {
-        Write-Warning "Could not write planifest-overrides/setup-config/$ToolName.md — continuing with .planifest-setup-flags-only behavior"
+        Write-Warning "Could not write plan/state/$ToolName.md — continuing with .planifest-setup-flags-only behavior"
         return $false
     }
 }
@@ -1047,6 +1049,40 @@ function Write-SetupFlagsMarker {
 
     $marker | ConvertTo-Json -Depth 10 | Set-Content -Path $markerPath -Encoding UTF8
     Write-Host "  + $ToolDir\.planifest-setup-flags"
+}
+
+# Remove the stale planifest-overrides\setup-config\{tool}.md left by setup
+# runs before 0000032 ADR-001 moved the record to plan\state\ (0000032
+# req-003, ADR-003 decisions 1-2). Called only after a successful write of
+# plan/state/{tool}.md; a failed write leaves the old file alone since the
+# record it depends on isn't in place yet. Removal failure warns and
+# continues (ADR-003 decision 4).
+function Remove-LegacySetupConfig {
+    param($ToolName)
+
+    $legacyDir = Join-Path $ProjectRoot 'planifest-overrides\setup-config'
+    $legacyFile = Join-Path $legacyDir "$ToolName.md"
+
+    if (Test-Path $legacyFile) {
+        try {
+            Remove-Item -Path $legacyFile -Force -ErrorAction Stop
+            Write-Host "  - removed planifest-overrides/setup-config/$ToolName.md"
+        } catch {
+            Write-Warning "Could not remove planifest-overrides/setup-config/$ToolName.md"
+        }
+    }
+
+    if (Test-Path $legacyDir) {
+        $remaining = @(Get-ChildItem -Path $legacyDir -Force -ErrorAction SilentlyContinue)
+        if ($remaining.Count -eq 0) {
+            try {
+                Remove-Item -Path $legacyDir -Force -ErrorAction Stop
+                Write-Host "  - removed planifest-overrides/setup-config/"
+            } catch {
+                Write-Warning "Could not remove planifest-overrides/setup-config/"
+            }
+        }
+    }
 }
 
 # --- Main ---

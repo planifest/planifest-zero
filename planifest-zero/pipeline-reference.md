@@ -307,7 +307,7 @@ In retrofit mode, discovery includes a codebase scan before coaching. The orches
 
 ### Re-run setup after update
 
-Pass the same flags you used during initial setup. Re-running is idempotent. It overwrites generated copies, prunes retired skills, and never touches `planifest-overrides/`. The `planifest-refresh-setup` skill can reconstruct the flags in effect from `planifest-overrides/setup-config/` and re-run setup for you.
+Pass the same flags you used during initial setup. Re-running is idempotent. It overwrites generated copies, prunes retired skills, and writes the setup-flags record to `plan/state/{tool}.md`. If a pre-relocation record for the tool still exists under `planifest-overrides/`, setup removes it inline and otherwise leaves `planifest-overrides/` alone. The `planifest-refresh-setup` skill can reconstruct the flags in effect from `plan/state/{tool}.md` and re-run setup for you.
 
 ```bash
 # macOS / Linux, basic
@@ -349,6 +349,7 @@ If any `.md` files appear outside `_done/`, the orchestrator detects them at ses
 | `planifest-zero/hooks/` | Yes | Git hooks and CI workflow, applied by setup scripts |
 | `.github/workflows/planifest.yml` | Yes | CI/CD gate, must be committed to take effect in GitHub Actions |
 | `plan/` | Yes | Feature briefs, execution plans, ADRs, scope docs. Design history |
+| `plan/state/` | Yes | Machine-written setup-flags record per tool, for example `plan/state/claude-code.md`. Rewritten by every setup run, but stays git-tracked |
 | `src/` | Yes | Component code and manifests |
 | `docs/` | Yes | Repo-wide registry and dependency graph |
 | `planifest-overrides/` | Yes | Customisations, must be committed to be shared |
@@ -394,16 +395,6 @@ planifest-overrides/
 └── capability-skills/
     └── my-project-skill/
         └── SKILL.md
-```
-
-### setup-config/
-
-The tracked, git-versioned record of the setup flags in effect, one file per tool. The setup script writes it on every run, and the `planifest-refresh-setup` skill reads it to re-run setup with the same flags.
-
-```
-planifest-overrides/
-└── setup-config/
-    └── claude-code.md
 ```
 
 ### library-standards/

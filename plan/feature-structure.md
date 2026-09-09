@@ -41,13 +41,20 @@ plan/
 |   +-- {feature-id}-{YYYY-MM-DD}.md
 |
 +-- backlog/
-    +-- {id}-{slug}/entry.md
+|   +-- {id}-{slug}/entry.md
+|
++-- state/                   <- Machine-written run state, outside current/_archive.
+    +-- claude-code.md
 ```
 
 Two rules govern the layout:
 
 - No permanent per-feature folders. Work lives in `current/` and ships to `_archive/`.
 - One level of nesting inside a feature folder: `requirements/` and `adr/` only.
+
+`state/` holds machine-written records, such as the tracked setup-flags record per tool.
+These records stay git-tracked but sit outside the per-feature `current/`/`_archive/`
+structure.
 
 ## src/ layout
 

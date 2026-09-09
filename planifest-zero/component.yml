@@ -1,8 +1,8 @@
 # Planifest Component Manifest
 id: "planifest-zero"
 name: "Planifest Framework"
-feature: "0000031-five-phase-planifest-zero"
-version: "0.2.0"
+feature: "0000032-relocate-setup-config-to-plan-state"
+version: "0.3.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -22,6 +22,7 @@ responsibilities:
   - "Enforce parallelism directives across all phase skills"
   - "Centralise the telemetry envelope and emission gate in telemetry-standards.md"
   - "Track installed skill directories via .planifest-manifest for safe re-runs"
+  - "Record the active setup flags and backend URL in plan/state/{tool}.md, tracked, and remove any legacy planifest-overrides/setup-config record on the next run"
   - "Detect and recommend adoption mode at discovery"
   - "Suggest and confirm the version number at discovery"
   - "Run the Scope Lock Challenge before design confirmation, drafted inline"
@@ -129,7 +130,7 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-08-30"
+  updatedAt: "2026-09-05"
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-implement"

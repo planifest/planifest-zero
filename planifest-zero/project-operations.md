@@ -69,8 +69,9 @@ This writes `plan/.orchestrator-strict`. When present, the hook injects a **hard
 |-----------|---------|
 | `instructions/` | Project-specific instructions appended to the `CLAUDE.md` boot file on every setup run. Files sorted alphabetically and injected between HTML comment markers. |
 | `capability-skills/` | Permanent agent skills installed alongside built-in Planifest skills on every setup run. Each skill is a directory containing a `SKILL.md`. |
-| `setup-config/` | The tracked record of setup flags per tool, written by the setup script and read by the `planifest-refresh-setup` skill. |
 | `library-standards/` | Override framework library preferences per language. Agents check here before the framework defaults. Structure mirrors `planifest-zero/standards/library-standards/`. |
+
+The tracked record of setup flags per tool lives at `plan/state/{tool}.md`, not under `planifest-overrides/`. The setup script writes it, and the `planifest-refresh-setup` skill reads it.
 
 → [Full directory structure, file formats, and examples](pipeline-reference.md#customising-with-planifest-overrides)
 
@@ -106,6 +107,7 @@ After updating, check `planifest-zero/migrations/` for any pending `.md` files. 
 | `planifest-zero/hooks/` | Yes | Git hooks and CI workflow, applied by setup scripts |
 | `.github/workflows/planifest.yml` | Yes | CI/CD gate, must be committed to take effect |
 | `plan/` | Yes | Feature briefs, execution plans, ADRs, scope docs. Commit throughout the pipeline run, not only at ship |
+| `plan/state/` | Yes | Machine-written setup-flags record per tool, rewritten by every setup run. Git-tracked state, not a `planifest-overrides/` customisation |
 | `src/` | Yes | Component code and manifests |
 | `docs/` | Yes | Repo-wide registry and dependency graph |
 | `planifest-overrides/` | Yes | Customisations, committed to share with the team |

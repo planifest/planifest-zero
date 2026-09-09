@@ -51,3 +51,18 @@ manages the manifest. Do not edit it by hand.
    non-zero exit.
 
 The runner picks the file up automatically. Nothing else needs registering.
+
+## Manual verification (setup.ps1)
+
+No PowerShell runner exists in CI (backlog 0000084), so `setup.ps1` suites such
+as `test-0000032-req-002-powershell-write-to-plan-state.sh` assert statically
+against the script's source. A person with `pwsh` installed confirms the
+runtime behaviour by hand:
+
+1. Run `pwsh ./planifest-zero/setup.ps1 claude-code` from the repository root.
+2. Check that `plan/state/claude-code.md` exists and its `tool` field reads
+   `claude-code`.
+3. Confirm the run printed a line naming `plan/state/claude-code.md`.
+4. Run the same command again.
+5. Diff the file against its previous content. Only the `writtenAt` field
+   changes between the two runs.

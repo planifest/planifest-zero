@@ -1,0 +1,199 @@
+---
+title: "Build Log - 0000032-relocate-setup-config-to-plan-state"
+summary: "Working telemetry file maintained by the orchestrator throughout the pipeline run."
+---
+# Build Log - 0000032-relocate-setup-config-to-plan-state
+
+> Created at P0. Appended by the orchestrator at each phase boundary. Survives session changes.
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| Feature ID | `0000032-relocate-setup-config-to-plan-state` |
+| Pipeline start | `2026-09-05T09:01:07Z` |
+| Tool | `claude-code` |
+| Primary model | `claude-fable-5-1` |
+| Cheaper model | `claude-sonnet-5` |
+
+---
+
+## Phase Log
+
+### P0: Assess & Coach
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-05T09:01:07Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator |
+| Agents spawned | `4` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Fresh start. Draft feature brief present, no design. Context reset: session opened cold on this run, no residual context to clear. |
+
+Telemetry: marker `emit-event-receipt::Error::emit-event-envelope-has-unrecognised-phase-orchestrator-or-e` (5 occurrences, 2026-08-30) surfaced. Human chose **proceed** on 2026-09-05T09:01:07Z. Root cause: prior run emitted `emit_event` with `phase: "orchestrator"`, which the receipt hook's shared phase enum rejects. Backend on port 3741 is reachable. Marker deleted after acknowledgement. Mismatch filed as backlog 0000085.
+P0 exchange (telemetry): Q: Block until resolved, or proceed without telemetry for the rest of this run? / A: Proceed.
+Git pre-flight: branch `feat/0000032-relocate-setup-config-to-plan-state` (validated), tree clean, in sync with origin. Local main equals origin/main.
+Strict mode: `plan/.orchestrator-strict` present. Session id arrived on the second prompt and was written to `plan/.orchestrator-ack`.
+Adoption mode: standard-iterative, confirmed by human on 2026-09-05
+P0 exchange (adoption mode): Q: Confirm standard-iterative? / A: Yes.
+Discovery: `plan/current/discovery.md` written and committed before coaching.
+P0 exchange (backlog 0000084): Q: pull-in / leave / discard? / A: Leave.
+P0 exchange (backlog 0000085): Q: pull-in / leave / discard? / A: Leave.
+Backlog pickup complete: both entries left in place.
+P0 exchange (version): Q: Bump 0.2.0 to 0.3.0 (feature pipeline, minor)? / A: Yes.
+Version confirmed: 0.3.0
+P0 exchange (component): Q: Change planifest-zero/ only, or both copies? / A: planifest-zero only. planifest-framework/ is the workflow tooling for this repo, not source.
+P0 exchange (refresh-setup read path): Q: The skill never reads the tracked record today. Add the read (tracked file first, then marker, then hook inference), or pure path move with doc correction? / A: Add the read.
+P0 exchange (location): Q: plan/state/{tool}.md as the brief proposes, or another name? / A: plan/state/{tool}.md. Layout docs gain a state/ row.
+P0 exchange (upgrade path): Q: Existing planifest-overrides/setup-config/{tool}.md: inline cleanup by setup.sh after a successful write, or a pending migration? / A: Inline cleanup. Delete the exact old path, remove setup-config/ if empty, correct the doc promise about never touching planifest-overrides/.
+Scope Lock dispatch: 4 x planifest-scope-lock-agent in parallel (sonnet tier, cheaper), backlog IDs 0000086-0000089 reserved, none filed. All four drafts returned.
+Scope Lock (happy path): setup.sh/setup.ps1 writes plan/state/claude-code.md, deletes the old setup-config file and emptied folder with one line each, and refresh-setup reads the record first at high confidence. [source: agent-draft-accepted]
+Scope Lock (first-run path): brand-new repo: setup creates plan/state/ itself and writes the record silently. Upgrading repo: writes new, removes old with one line per removal. Refresh-setup with no record falls back to marker then hook inference. [source: agent-draft-accepted]
+Scope Lock (error path): unwritable record folder warns and continues with the run's flags. Failed deletion of the old file warns and continues. Refresh-setup treats an unreadable or malformed record as missing and falls back, reporting the source used. [source: agent-draft-accepted]
+Scope Lock (cross-session): interruption between new write and old delete loses nothing. Next setup run rewrites and removes. Refresh-setup validates the record before trusting it and falls back on parse failure. Interrupted refresh runs recover from the marker as today. [source: agent-draft-accepted]
+P0 exchange (scope lock flags): Q: Fold the three flagged assumptions in as confirmed behaviour (setup creates plan/state/, failed deletion warns, refresh-setup validates before trusting)? / A: Yes, all accepted.
+Scope Lock complete. All four scenario paths captured.
+P0 exchange (run mode): Q: Check after each phase, or continuous run? / A: Continuous run. plan/.run-mode written.
+Capability skills: none relevant to a bash, PowerShell, and markdown stack. Proceeded silently.
+P0 gate checklist: all items pass. Design drafted and presented for confirmation.
+P0 exchange (design confirmation): Q: Confirm the design is correct and complete? / A: Yes.
+Gate accepted: P0 (2026-09-05T20:54:22Z)
+P0 complete.
+
+### P1: Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-05T20:54:42Z` |
+| Model tier | primary (orchestrator), cheaper (artifact subagents) |
+| Skills loaded | planifest-orchestrator, planifest-spec-agent |
+| Agents spawned | `2` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Continuous run. Marker root cause acknowledged at P0, no re-ask. Artifacts: execution plan, 6 requirements, scope, risk register, glossary. OpenAPI, operational model, SLO, cost model, data contract omitted (no trigger). design_critic toggle unset, so no critic run. consistency-check clean after condensing ACs to 3 per requirement. Gate passed under continuous run at 2026-09-05T20:58:19Z. |
+
+### P2: Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-05T20:58:19Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-adr-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Three ADRs cross-reference each other, so written inline rather than in parallel. ADR-001 location (supersedes 0000025 ADR 002), ADR-002 refresh-setup precedence, ADR-003 inline cleanup. consistency-check clean. Gate passed under continuous run at 2026-09-05T20:59:50Z. |
+
+### P3: Code Generation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-05T20:59:50Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-codegen-agent |
+| Agents spawned | `6` |
+| MCP calls | `0` |
+| Parallel task batches | `3` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Batch 1 (req-001, req-002) blocked by gate-write: design.md lacked a Component Paths section. Added the section listing the confirmed in-scope paths. No decision changed. The req-001 agent also reworded three Scope bullets to lead with file paths, cosmetic, swept into the same commit. Batch 1 complete: req-001 26/26, req-002 6/6, rewritten 0000025 suite 23/23. Runner reports 2 pre-existing failures unrelated to this feature, to be confirmed at P4. Batch 2: req-003 19/19 (both scripts), req-004 17/17 (skill). Batch 3: req-005 5/5 docs, req-006 index rows. Manifest bumped to 0.3.0. Deviation from the three-subagent TDD protocol: one subagent per requirement ran red, green, and refactor itself, because each requirement is one file pair. Gate passed under continuous run at 2026-09-05T21:15:52Z. |
+
+### P4: Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-05T21:15:52Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-validate-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Checks: bash -n syntax clean on setup.sh and 6 suites. shellcheck not installed. Semantic coverage: req-001 to req-005 each have a named suite, req-006 covered by ADR files and 3 index rows. self-description-check pass. consistency-check clean. CI parity: no src/ change. Full runner: feature suites 55 passed, 2 failed. Regression 17 passed, 0 failed. The 2 failures (test-0000031-req-001-rename, test-0000031-req-005-telemetry-only-mcp) fail on main too, verified against a git archive export of main. Cause: planifest-framework/ folder present since PR #4. Filed backlog 0000086. Zero self-corrections. Human override requested to proceed past the pre-existing failures. Human asked for an explanation, then said go. Override granted, gate accepted at 2026-09-09T15:33:36Z. |
+
+### P5: Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T15:33:36Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-security-agent |
+| Agents spawned | `1` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Fresh-context reviewer over the branch diff. Overall Medium. S-001 medium: refresh-setup validates record shape but not flag values or URL form, so a hostile commit could inject shell metacharacters into the proposed command, gated only by Step 4 human confirmation. Filed backlog 0000087. S-002, S-003 informational. Path handling and deletion confirmed safe. R-003 moved to mitigated. STOP for human: risk is not Low. Human chose fix now. S-001 fixed inline (too small for a subagent): Step 3 gains a flag allowlist and a backendUrl pattern check, req-004 Input Validation and ADR-002 decision 2 updated, req-004 suite extended to 22 cases (RED 3 failing, then GREEN). Backlog 0000087 deleted, superseded by the fix. Report re-rated Low, S-001 closed. Gate passed at 2026-09-09T20:14:40Z: Low risk, zero open critical, high, or medium findings. |
+
+### P6: Documentation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T20:14:40Z` |
+| Model tier | primary (orchestrator), cheaper (docs subagent) |
+| Skills loaded | planifest-orchestrator, planifest-docs-agent |
+| Agents spawned | `2` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Gate A pass: docs/ exists. Gate B auto-accepted under continuous run: updated about.md (0.3.0), architecture-overview.md (new setup-config record subsection), component-registry.md and dependency-graph.md (last-updated line only). No api-index.md, no component exposes an API. Drift checks clean: both scripts write plan/state, cleanup guarded on a successful write, no recursive delete added, one component matches the registry, glossary terms match the code, ownsData false so no data drift. Per-component docs under src/{component-id}/docs/ do not exist and were not created: the single component is the framework itself and its manifest lives at planifest-zero/component.yml. Recorded as a deliberate absence in recommendations.md, matching feature 0000031. Two subagent-reported drift items (R-003 open, decisions-index missing rows) were stale reads: both were already done at P5 and P3. Corrected the claims in recommendations.md and iteration-log.md. Filed backlog 0000088 and 0000089. cross_model_review toggle unset, gate not run. Gate passed under continuous run at 2026-09-09T20:19:08Z. |
+
+### P7: Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T20:19:08Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Cross-reference check: no living doc links into plan/current/, so no link rewrite needed. Changelog and test report written to plan/changelog/. .feature-id written. Regression confirmation: no test file carried a REGRESSION-CANDIDATE tag, so nothing was presented for promotion. Final runner: 55 feature suites passed, 2 failed (both pre-existing on main, backlog 0000086), regression 17 passed 0 failed. This feature's six suites: 101 assertions, all passing. docs/about.md already at 0.3.0 from P6. |
+
+### P8: Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T20:23:40Z` |
+| Model tier | cheaper |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | `1` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Report written to build-report.md in this archive. 15 agents across 8 phases, zero self-corrections, all gates honoured. |
+
+---
+
+### P9: Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T20:23:40Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Version derived 0.3.0 from product.yml (max-component-version). Marker pre-flight clean. Human chose agent push. Branch and tag v0.3.0 pushed. PR #5 raised: https://github.com/planifest/planifest-zero/pull/5 |
+
+---
+
+## Summary (filled at P7)
+
+| Metric | Value |
+|--------|-------|
+| Total phases completed | `10` (P0 to P9) |
+| Total agents spawned | `15` |
+| Total MCP calls | `0` |
+| Phases using parallelism | `4` (P0, P1, P3, P6) |
+| Primary tier agent calls | `1` |
+| Cheaper tier agent calls | `14` |
+| Self-corrections | `0` |
+| Phases skipped | none |
+| Phases with a recorded telemetry gap | `10` (all phases: root cause acknowledged at P0, backlog 0000085) |

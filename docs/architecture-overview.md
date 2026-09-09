@@ -1,5 +1,7 @@
 # Architecture Overview
 
+Last updated: 0000032-relocate-setup-config-to-plan-state
+
 ## What this repo is
 
 This repo is the Planifest framework itself. It holds one component, `planifest-zero`, which other projects install into their working tree.
@@ -47,6 +49,12 @@ planifest-zero/          setup.sh claude-code          target project
 Skills bundle selectively. Each `SKILL.md` declares `bundle_templates` and `bundle_standards` in its frontmatter, and setup copies only those files. A skill with no manifest gets everything.
 
 Boot files are disposable build outputs. Every run regenerates `CLAUDE.md` from the template, then re-appends the contents of `planifest-overrides/instructions/` between sentinel markers. Durable local customisation lives in the overrides directory, never in the boot file.
+
+---
+
+## Setup-config record
+
+`setup.sh` and `setup.ps1` write the tracked record of active setup flags and the backend URL to `plan/state/{tool}.md`, creating the folder when it is absent. The `planifest-refresh-setup` skill reads and validates that record before falling back to the gitignored marker and hook inference.
 
 ---
 
