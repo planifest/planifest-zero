@@ -113,7 +113,20 @@ P0 complete.
 | MCP calls | `0` |
 | Parallel task batches | `0` |
 | Telemetry | failed-with-recorded-choice |
-| Notes | Checks: bash -n syntax clean on setup.sh and 6 suites. shellcheck not installed. Semantic coverage: req-001 to req-005 each have a named suite, req-006 covered by ADR files and 3 index rows. self-description-check pass. consistency-check clean. CI parity: no src/ change. Full runner: feature suites 55 passed, 2 failed. Regression 17 passed, 0 failed. The 2 failures (test-0000031-req-001-rename, test-0000031-req-005-telemetry-only-mcp) fail on main too, verified against a git archive export of main. Cause: planifest-framework/ folder present since PR #4. Filed backlog 0000086. Zero self-corrections. Human override requested to proceed past the pre-existing failures. |
+| Notes | Checks: bash -n syntax clean on setup.sh and 6 suites. shellcheck not installed. Semantic coverage: req-001 to req-005 each have a named suite, req-006 covered by ADR files and 3 index rows. self-description-check pass. consistency-check clean. CI parity: no src/ change. Full runner: feature suites 55 passed, 2 failed. Regression 17 passed, 0 failed. The 2 failures (test-0000031-req-001-rename, test-0000031-req-005-telemetry-only-mcp) fail on main too, verified against a git archive export of main. Cause: planifest-framework/ folder present since PR #4. Filed backlog 0000086. Zero self-corrections. Human override requested to proceed past the pre-existing failures. Human asked for an explanation, then said go. Override granted, gate accepted at 2026-09-09T15:33:36Z. |
+
+### P5: Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T15:33:36Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-security-agent |
+| Agents spawned | `pending` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | pending |
 
 ---
 
