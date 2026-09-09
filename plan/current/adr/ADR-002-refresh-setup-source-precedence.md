@@ -20,7 +20,7 @@ Today the precedence rule holds only because `setup.sh` writes both files from t
 ## Decision
 
 1. Step 3 of `planifest-refresh-setup` reads `plan/state/{tool}.md` first. A valid record yields every flag and the backend URL at high confidence, with source `plan/state/{tool}.md`. The marker is not consulted.
-2. A record is valid when its JSON block parses, holds `tool`, `flags`, `backendUrl`, and `writtenAt`, and its `tool` matches the target tool.
+2. A record is valid when its JSON block parses, holds `tool`, `flags`, `backendUrl`, and `writtenAt`, and its `tool` matches the target tool. Its values are validated too: every flag must belong to the allowed set (`--structured-telemetry-mcp`, `--strict-orchestrator`), and `backendUrl` must be `null` or match the URL pattern `setup.sh` enforces. The record is git-tracked and Step 4 builds a shell command from it, so shape validation alone would let a hostile commit inject a shell metacharacter.
 3. A record that is absent, unreadable, or invalid is treated as missing. Step 3 falls back to the marker, then to hook inference, exactly as today. The skill run does not stop.
 4. Step 4's confirmation names the source used for each flag: the record, the marker, or hook inference.
 5. Step 2's interrupted-run detection is unchanged. It keeps reading `attemptStatus` from the marker, because the record never holds attempt state.

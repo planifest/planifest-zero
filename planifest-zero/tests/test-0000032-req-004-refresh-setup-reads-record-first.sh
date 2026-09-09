@@ -74,4 +74,18 @@ echo "=== req-004: Step 2's interrupted-run detection is unchanged ==="
 assert_contains 'attemptStatus: "pending"' "$STEP2" \
   "req-004: Step 2 still reads attemptStatus from the marker"
 
+echo ""
+echo "=== req-004: the record's values are validated, not just its shape ==="
+
+assert_contains "--structured-telemetry-mcp" "$STEP3" \
+  "req-004: Step 3 names the allowed flag --structured-telemetry-mcp"
+assert_contains "--strict-orchestrator" "$STEP3" \
+  "req-004: Step 3 names the allowed flag --strict-orchestrator"
+assert_contains "allowed set" "$STEP3" \
+  "req-004: Step 3 constrains flags to an allowed set"
+assert_contains 'https?://' "$STEP3" \
+  "req-004: Step 3 constrains backendUrl to an http(s) URL pattern"
+assert_contains "shell metacharacter" "$STEP3" \
+  "req-004: Step 3 states why unvalidated values are refused"
+
 print_summary

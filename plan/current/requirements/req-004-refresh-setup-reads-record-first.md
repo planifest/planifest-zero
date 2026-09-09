@@ -44,6 +44,11 @@ source available.
 - [ ] Input source: filesystem path `plan/state/{tool}.md`
 - [ ] Allowed character pattern: the file must parse as well-formed JSON inside a fenced
   ```json block; content that does not parse is rejected, not sanitised
+- [ ] Allowed values: every entry in `flags` must be one of `--structured-telemetry-mcp` or
+  `--strict-orchestrator`; `backendUrl` must be `null` or match
+  `^https?://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9._/-]*)?$`, the pattern `setup.sh` enforces
+  on `--backend-url`. Values are validated, not only the shape, because Step 4 builds a
+  shell command from them and the record is git-tracked.
 - [ ] maximum length: no explicit limit; a record exceeding typical file-read limits is
   treated as unreadable
 - [ ] Failure behaviour: treat the record as missing and fall back to the marker file, then

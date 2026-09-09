@@ -39,8 +39,11 @@ Skip this step if Step 2 produced a recovered flag set.
    - It must contain a fenced ```json block that parses as well-formed JSON.
    - The parsed object must hold all four fields: `tool`, `flags`, `backendUrl`, `writtenAt`.
    - The `tool` field matches the target tool from Step 1.
+   - Every entry in `flags` belongs to the allowed set: `--structured-telemetry-mcp`, `--strict-orchestrator`. Reject the record if any other value appears.
+   - `backendUrl` is either `null` or matches `^https?://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9._/-]*)?$`, the same pattern `setup.sh` enforces on `--backend-url`.
+   - Validate the values, not only the shape. The record is git-tracked, so a hostile commit could otherwise place a shell metacharacter in `flags` or `backendUrl`, and Step 4 builds a shell command from them.
    - If all of the above hold, the record is valid: report every flag it holds, plus the backend URL, at **high** confidence, source: `plan/state/{tool}.md`. The marker file is not consulted, and Step 3 skips straight to sub-step 4 below.
-   - If the record is absent, unreadable, fails to parse, is missing any of the four fields, or names a different tool, treat it as missing. This does not stop the run: continue to sub-step 2.
+   - If the record is absent, unreadable, fails to parse, is missing any of the four fields, names a different tool, carries an unknown flag, or carries a malformed `backendUrl`, treat it as missing. This does not stop the run: continue to sub-step 2.
 2. Check `{tool-dir}/.planifest-setup-flags`. If it exists and is well-formed (see `planifest-zero/component.yml`), read `flags` and `backendUrl` and report every flag at **high** confidence, source: marker file.
 3. If the marker file is also absent, incomplete, or for a different tool, infer flags from installed hook wiring instead:
 
