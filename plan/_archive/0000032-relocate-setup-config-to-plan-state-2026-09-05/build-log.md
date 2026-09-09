@@ -180,7 +180,7 @@ P0 complete.
 | MCP calls | `0` |
 | Parallel task batches | `0` |
 | Telemetry | failed-with-recorded-choice |
-| Notes | Version derived 0.3.0 from product.yml (max-component-version). Marker pre-flight clean. Awaiting the human's push and PR decision. |
+| Notes | Version derived 0.3.0 from product.yml (max-component-version). Marker pre-flight clean. Human chose agent push. Branch and tag v0.3.0 pushed. PR #5 raised: https://github.com/planifest/planifest-zero/pull/5 |
 
 ---
 

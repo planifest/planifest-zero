@@ -2,7 +2,7 @@
 
 **Feature:** Relocate the setup-config record to plan/state/
 **Pipeline run:** P0 to P9 completed. No phases skipped.
-**PR:** pending
+**PR:** https://github.com/planifest/planifest-zero/pull/5
 
 ## What Was Built
 
