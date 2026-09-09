@@ -148,11 +148,11 @@ P0 complete.
 | Start | `2026-09-09T20:19:08Z` |
 | Model tier | primary |
 | Skills loaded | planifest-orchestrator, planifest-ship-agent |
-| Agents spawned | `pending` |
+| Agents spawned | `0` |
 | MCP calls | `0` |
 | Parallel task batches | `0` |
 | Telemetry | failed-with-recorded-choice |
-| Notes | pending |
+| Notes | Cross-reference check: no living doc links into plan/current/, so no link rewrite needed. Changelog and test report written to plan/changelog/. .feature-id written. Regression confirmation: no test file carried a REGRESSION-CANDIDATE tag, so nothing was presented for promotion. Final runner: 55 feature suites passed, 2 failed (both pre-existing on main, backlog 0000086), regression 17 passed 0 failed. This feature's six suites: 101 assertions, all passing. docs/about.md already at 0.3.0 from P6. |
 
 ---
 
