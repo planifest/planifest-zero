@@ -154,18 +154,46 @@ P0 complete.
 | Telemetry | failed-with-recorded-choice |
 | Notes | Cross-reference check: no living doc links into plan/current/, so no link rewrite needed. Changelog and test report written to plan/changelog/. .feature-id written. Regression confirmation: no test file carried a REGRESSION-CANDIDATE tag, so nothing was presented for promotion. Final runner: 55 feature suites passed, 2 failed (both pre-existing on main, backlog 0000086), regression 17 passed 0 failed. This feature's six suites: 101 assertions, all passing. docs/about.md already at 0.3.0 from P6. |
 
+### P8: Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T20:23:40Z` |
+| Model tier | cheaper |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | `1` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Report written to build-report.md in this archive. 15 agents across 8 phases, zero self-corrections, all gates honoured. |
+
+---
+
+### P9: Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-09T20:23:40Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | failed-with-recorded-choice |
+| Notes | Version derived 0.3.0 from product.yml (max-component-version). Marker pre-flight clean. Awaiting the human's push and PR decision. |
+
 ---
 
 ## Summary (filled at P7)
 
 | Metric | Value |
 |--------|-------|
-| Total phases completed | `{{count}}` |
-| Total agents spawned | `{{count}}` |
-| Total MCP calls | `{{count}}` |
-| Phases using parallelism | `{{count}}` |
-| Primary tier agent calls | `{{count}}` |
-| Cheaper tier agent calls | `{{count}}` |
-| Self-corrections | `{{count}}` |
-| Phases skipped | `{{list or "none"}}` |
-| Phases with a recorded telemetry gap | `{{count, phases where Telemetry was failed-with-recorded-choice, or "0"}}` |
+| Total phases completed | `10` (P0 to P9) |
+| Total agents spawned | `15` |
+| Total MCP calls | `0` |
+| Phases using parallelism | `4` (P0, P1, P3, P6) |
+| Primary tier agent calls | `1` |
+| Cheaper tier agent calls | `14` |
+| Self-corrections | `0` |
+| Phases skipped | none |
+| Phases with a recorded telemetry gap | `10` (all phases: root cause acknowledged at P0, backlog 0000085) |
