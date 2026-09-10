@@ -30,7 +30,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Agents spawned | `5` |
 | MCP calls | `0` |
 | Parallel task batches | `2` |
-| Telemetry | pending |
+| Telemetry | confirmed-disabled |
 | Notes | Fresh start. No feature brief on disk: the human stated the goal in conversation, so the brief is drafted from that and confirmed at the design gate. |
 
 Context reset: not performed. This session continued directly from feature 0000032 rather than starting cold. Claude Code has no programmatic context clear, so the residual context is recorded here rather than silently carried.
@@ -49,8 +49,24 @@ Verified in code: setup.sh already filters telemetry entries out of the settings
 Scope Lock complete. All four scenario paths captured.
 P0 exchange (run mode): Q: Check after each phase, or continuous run? / A: Continuous run. plan/.run-mode written.
 Capability skills: none relevant to this stack. Proceeded silently.
-P0 gate checklist: all items pass. Design drafted and presented for confirmation. Three of the four flagged the same gap: the brief has no decision on existing installs whose .claude/settings.json still wires telemetry hooks.
+P0 gate checklist: all items pass. Design drafted and presented for confirmation.
+P0 exchange (design confirmation): Q: Confirm the design is correct and complete? / A: Yes, confirmed.
+Gate accepted: P0 (2026-09-10T06:40:53Z)
+P0 complete. Three of the four flagged the same gap: the brief has no decision on existing installs whose .claude/settings.json still wires telemetry hooks.
 Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.orchestrator-ack`.
+
+### P1: Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-10T06:40:53Z` |
+| Model tier | primary (orchestrator), cheaper (artifact subagents) |
+| Skills loaded | planifest-orchestrator, planifest-spec-agent |
+| Agents spawned | `pending` |
+| MCP calls | `0` |
+| Parallel task batches | `pending` |
+| Telemetry | confirmed-disabled |
+| Notes | Continuous run. This repo's own pipeline runs on planifest-framework/, whose telemetry signal is not active this session, so no marker and no emission. |
 
 ---
 
