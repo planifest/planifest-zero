@@ -1,8 +1,8 @@
 # Planifest Component Manifest
 id: "planifest-zero"
 name: "Planifest Framework"
-feature: "0000032-relocate-setup-config-to-plan-state"
-version: "0.3.0"
+feature: "0000033-remove-telemetry-mcp"
+version: "0.4.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -20,7 +20,7 @@ responsibilities:
   - "Direct model tier selection for all spawned subagents"
   - "Enforce parallelism directives across all phase skills"
   - "Track installed skill directories via .planifest-manifest for safe re-runs"
-  - "Record the active setup flags and backend URL in plan/state/{tool}.md, tracked, and remove any legacy planifest-overrides/setup-config record on the next run"
+  - "Record the active setup flags in plan/state/{tool}.md, tracked, and retract any legacy setup-config record or telemetry wiring on the next run"
   - "Detect and recommend adoption mode at discovery"
   - "Suggest and confirm the version number at discovery"
   - "Run the Scope Lock Challenge before design confirmation, drafted inline"
@@ -116,7 +116,7 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-09-05"
+  updatedAt: "2026-09-10"
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-implement"

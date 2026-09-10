@@ -107,11 +107,11 @@ Final P3 state: 44 feature suites passed, 1 failed. Regression 12 passed, 0 fail
 | Start | `2026-09-10T07:15:47Z` |
 | Model tier | primary |
 | Skills loaded | planifest-orchestrator, planifest-validate-and-accept |
-| Agents spawned | `pending` |
+| Agents spawned | `0` |
 | MCP calls | `0` |
-| Parallel task batches | `pending` |
+| Parallel task batches | `1` |
 | Telemetry | confirmed-disabled |
-| Notes | pending |
+| Notes | Checks batched: bash -n clean on setup.sh and 3 new suites, node --check clean on all 7 surviving hook modules, self-description-check pass, consistency-check clean, product-version 0.3.0, CI parity no src/ change. Only telemetry strings left in planifest-zero are inside the two cleanup functions, as ADR-002 requires. Verify by execution: seeded a scratch project with telemetry settings entries, a sentinel, both marker directories, plus a user-added hook and check-design, then ran setup. All four removals printed, telemetry gone from settings, the user's own hook and check-design survived, runs two and three printed no telemetry line. Skill prune noise on re-run confirmed pre-existing on main, with all 12 skills present afterwards. Bumped planifest-zero/component.yml to 0.4.0 here, since P3 closed without it. Full runner: 44 feature suites passed, 1 failed. Regression 12 passed, 0 failed. The single failure is test-0000031-req-001-rename.sh on its two backlog-0000086 assertions, identical to main. Zero self-corrections. Human override requested for the pre-existing failure. Gate reached at 2026-09-10T07:17:01Z. |
 
 ---
 
