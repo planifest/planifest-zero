@@ -14,7 +14,7 @@
   - The six surviving enforcement hooks and the `commit-msg` git hook must keep working unchanged.
   - `hooks/enforcement/read-stdin.mjs` must survive. Six surviving hooks import it.
   - 0000032's setup-config record work must not regress. This feature edits the same functions.
-  - The five phase names from 0000031 ADR 001 survive. Only the module that encoded them goes.
+  - The five phase names survive unchanged: `discovery`, `plan`, `implement`, `validate-and-accept`, `ship`. Only the module that encoded them goes.
 - Integrations: none after this feature. The telemetry backend was the only outbound integration.
 
 ## Component Paths
