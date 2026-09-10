@@ -2,8 +2,6 @@
 name: planifest-implementer
 description: TDD green phase: writes the minimum code to make one failing test pass and confirms GREEN (zero exit). Invoked by planifest-implement after planifest-test-writer confirms RED.
 recommended_model: haiku
-hooks:
-  phase: implement
 ---
 
 # Planifest - implementer

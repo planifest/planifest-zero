@@ -2,8 +2,6 @@
 name: planifest-migrator
 description: Executes a pending Planifest framework migration interactively. Reads a migration file, presents findings to the human, applies confirmed changes, and archives the migration on completion. Invoked by the orchestrator when pending migrations are detected.
 bundle_standards: [formatting-standards.md]
-hooks:
-  phase: orchestrator
 ---
 
 # Planifest Migrator

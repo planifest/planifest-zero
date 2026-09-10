@@ -1,8 +1,6 @@
 ---
 name: planifest-refresh-setup
 description: Refreshes a Planifest install by detecting the target tool, reading the tracked `plan/state/{tool}.md` record first, falling back to the flags-used marker file and then installed hook wiring, confirming with the human on the loop, and re-invoking setup.sh/setup.ps1 with those flags. Invoke on request ("refresh the framework setup", "re-run setup with current settings", "refresh setup for {tool}").
-hooks:
-  phase: standalone
 ---
 
 # Planifest - refresh-setup
@@ -37,19 +35,17 @@ Skip this step if Step 2 produced a recovered flag set.
 
 1. Check `plan/state/{tool}.md` first. This is the tracked record and, when valid, the highest-confidence source available. Read it and validate it:
    - It must contain a fenced ```json block that parses as well-formed JSON.
-   - The parsed object must hold all four fields: `tool`, `flags`, `backendUrl`, `writtenAt`.
+   - The parsed object must hold all three fields: `tool`, `flags`, `writtenAt`.
    - The `tool` field matches the target tool from Step 1.
-   - Every entry in `flags` belongs to the allowed set: `--structured-telemetry-mcp`, `--strict-orchestrator`. Reject the record if any other value appears.
-   - `backendUrl` is either `null` or matches `^https?://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9._/-]*)?$`, the same pattern `setup.sh` enforces on `--backend-url`.
-   - Validate the values, not only the shape. The record is git-tracked, so a hostile commit could otherwise place a shell metacharacter in `flags` or `backendUrl`, and Step 4 builds a shell command from them.
-   - If all of the above hold, the record is valid: report every flag it holds, plus the backend URL, at **high** confidence, source: `plan/state/{tool}.md`. The marker file is not consulted, and Step 3 skips straight to sub-step 4 below.
-   - If the record is absent, unreadable, fails to parse, is missing any of the four fields, names a different tool, carries an unknown flag, or carries a malformed `backendUrl`, treat it as missing. This does not stop the run: continue to sub-step 2.
-2. Check `{tool-dir}/.planifest-setup-flags`. If it exists and is well-formed (see `planifest-zero/component.yml`), read `flags` and `backendUrl` and report every flag at **high** confidence, source: marker file.
+   - Every entry in `flags` belongs to the allowed set: `--strict-orchestrator`. Reject the record if any other value appears.
+   - Validate the values, not only the shape. The record is git-tracked, so a hostile commit could otherwise place a shell metacharacter in `flags`, and Step 4 builds a shell command from them.
+   - If all of the above hold, the record is valid: report every flag it holds at **high** confidence, source: `plan/state/{tool}.md`. The marker file is not consulted, and Step 3 skips straight to sub-step 4 below.
+   - If the record is absent, unreadable, fails to parse, is missing any of the three fields, names a different tool, or carries an unknown flag, treat it as missing. This does not stop the run: continue to sub-step 2.
+2. Check `{tool-dir}/.planifest-setup-flags`. If it exists and is well-formed (see `planifest-zero/component.yml`), read `flags` and report every flag at **high** confidence, source: marker file.
 3. If the marker file is also absent, incomplete, or for a different tool, infer flags from installed hook wiring instead:
 
    | Signal | Implies | Confidence |
    |--------|---------|-----------|
-   | `{tool-dir}/hooks/telemetry/` exists with `context-pressure.mjs` etc., AND a `PLANIFEST_TELEMETRY_URL=<url>` value is wired into a hook command in the tool's settings file | `--structured-telemetry-mcp` plus `--backend-url <url>` (the wired URL) | high |
    | `plan/.orchestrator-strict` file exists | `--strict-orchestrator` | high |
    | No signal present for a given flag | that flag was not used | high (absence of a signal is itself a confident signal) |
 
@@ -65,7 +61,7 @@ Wait for an explicit affirmative. If the human rejects the proposed flags, halt 
 
 ## Step 5 - Write the Marker Before Any Deletion
 
-Immediately after confirmation and before Step 6's deletion, write `{tool-dir}/.planifest-setup-flags` as JSON with: `tool`, `flags` (the confirmed flags), `backendUrl` (URL or null), `writtenAt` (ISO 8601 UTC timestamp), `attemptStatus: "pending"`, and `attemptedCommand` (the exact command from Step 3.3).
+Immediately after confirmation and before Step 6's deletion, write `{tool-dir}/.planifest-setup-flags` as JSON with: `tool`, `flags` (the confirmed flags), `writtenAt` (ISO 8601 UTC timestamp), `attemptStatus: "pending"`, and `attemptedCommand` (the exact command from Step 3.3).
 
 This is the same file `setup.sh`/`setup.ps1` write on successful completion, not a separate cache file. This write must complete before Step 6 begins, so a process killed at any point after it leaves recoverable state on disk (see Step 2).
 

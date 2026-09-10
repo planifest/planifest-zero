@@ -2,8 +2,6 @@
 name: planifest-optimise-agent
 description: Reviews planifest-zero/skills/ for superfluous content and presents one suggestion at a time for human confirmation. Never modifies files.
 bundle_standards: [language-quirks-en-gb.md]
-hooks:
-  phase: optimise
 ---
 
 # Planifest: optimise-agent

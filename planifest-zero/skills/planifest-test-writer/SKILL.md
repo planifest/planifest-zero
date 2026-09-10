@@ -2,8 +2,6 @@
 name: planifest-test-writer
 description: TDD red phase: writes exactly one failing test per requirement and confirms RED (non-zero exit). Invoked by planifest-implement for each requirement in the TDD inner loop.
 recommended_model: haiku
-hooks:
-  phase: implement
 ---
 
 # Planifest - test-writer

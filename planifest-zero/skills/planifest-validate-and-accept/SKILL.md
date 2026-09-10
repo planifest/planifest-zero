@@ -2,9 +2,7 @@
 name: planifest-validate-and-accept
 description: CI, security review, execution verification, and the human acceptance gate.
 bundle_templates: [security-report.template.md, loop-state.template.md]
-bundle_standards: [code-quality-standards.md, testing-standards.md, build-target-standards.md, formatting-standards.md, telemetry-standards.md]
-hooks:
-  phase: validate-and-accept
+bundle_standards: [code-quality-standards.md, testing-standards.md, build-target-standards.md, formatting-standards.md]
 ---
 
 # Planifest - validate-and-accept
@@ -104,16 +102,6 @@ The human accepts, requests changes, or rejects. Rollbacks are human-initiated, 
 ## Parallelism
 
 Batch 1 (parallel): lint + typecheck, library audit + semantic check. Batch 2 (after Batch 1 passes): tests. Batch 3: build. Security analyses (dependency audit, secrets scan, input validation scan) run in parallel with each other. Never run tests before typecheck passes, the summary risk rating before all findings are in, or cycle N+1 before N's fix is verified. File out-of-scope discoveries to `plan/backlog/` per `agent-dispatch-standards.md`.
-
-## Telemetry
-
-See `standards/telemetry-standards.md` for the event envelope, emission conditions, and the mandatory-when-active gate. Phase value: `validate-and-accept`.
-
-- `validation_failure`: `{ "failure_type": "test" | "lint" | "type" | "build", "phase_name": "validate-and-accept", "attempt_number": <n>, "action_id": "<check>" }`
-- `self_correction`: `{ "phase_name": "validate-and-accept", "attempt_number": <n>, "action_id": "<action>", "correction_type": "fix_and_retry" }`
-- `retry_limit_exceeded`: `{ "phase_name": "validate-and-accept", "action_id": "<action>", "attempt_count": 5 }`
-- `security_finding`: `{ "component_id": "<component>", "title": "<short description>", "severity": "low" | "medium" | "high" | "critical", "cwe": "<CWE-NNN, optional>" }`
-- `loop_iteration`: one per verification pass, loop_id `verify_by_execution`
 
 ## Commit cadence
 

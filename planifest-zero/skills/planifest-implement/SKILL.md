@@ -2,9 +2,7 @@
 name: planifest-implement
 description: Implements requirements with tests and documentation landing together through the TDD loop. Invoked during the implement phase.
 bundle_templates: [component.template.yml, data-contract.template.md, iteration-log.template.md]
-bundle_standards: [code-quality-standards.md, testing-standards.md, build-target-standards.md, library-standards/_version-policy.md, agent-dispatch-standards.md, telemetry-standards.md]
-hooks:
-  phase: implement
+bundle_standards: [code-quality-standards.md, testing-standards.md, build-target-standards.md, library-standards/_version-policy.md, agent-dispatch-standards.md]
 ---
 
 # Planifest - implement
@@ -124,10 +122,6 @@ Independent requirements MUST be dispatched in parallel per `planifest-zero/stan
 4. Record the batch count in the build log. If nothing can be parallelised, state the dependency reason there.
 
 Per-component docs for independent components also parallelise. The registry and dependency graph wait until all component docs exist. If a dispatched subagent finds an out-of-scope bug or gap, it files a `plan/backlog/` entry directly per the dispatch standards.
-
-## Telemetry
-
-See `planifest-zero/standards/telemetry-standards.md` for the event envelope, emission conditions, and the mandatory-when-active gate. Phase value: `implement`. Events this phase emits: `deviation`, `migration_proposal`, `doc_gap`, `self_correction`, and `retry_limit_exceeded`.
 
 ## Commit cadence
 

@@ -2,9 +2,7 @@
 name: planifest-plan
 description: Produces the plan-phase artifact set (requirements, ADRs, scope, risks, glossary) behind one human gate. Invoked by the orchestrator during the plan phase.
 bundle_templates: [requirement.template.md, adr.template.md, execution-plan.template.md, scope.template.md, risk-register.template.md, domain-glossary.template.md, component.template.yml, component-guide.md, data-contract.template.md, data-contract-guide.md]
-bundle_standards: [formatting-standards.md, telemetry-standards.md, agent-dispatch-standards.md]
-hooks:
-  phase: plan
+bundle_standards: [formatting-standards.md, agent-dispatch-standards.md]
 ---
 
 # Planifest - plan
@@ -105,13 +103,6 @@ When the confirmed design groups features into waves:
 - Produce artifacts for the current wave only. Later waves may change.
 - Suffix wave artifacts, for example `execution-plan-wave-2.md`. Reference prior-wave manifests and contracts rather than re-specifying them.
 - The glossary and risk register are cumulative. Add entries each wave and never remove prior ones. Risks remain unless explicitly mitigated.
-
-## Telemetry
-
-See `planifest-zero/standards/telemetry-standards.md` for the event envelope, emission conditions, and phase_start/phase_end ownership. The phase value is `plan`. Telemetry is mandatory, not best-effort, when the unified signal is active. If `emit_event` fails, ask the human whether to block until resolved or proceed without telemetry.
-
-- `spec_gap` when the plan cannot proceed without human input: `{ "question": "<blocking question>", "phase_name": "plan" }`
-- `adr_decision` after each ADR is written to disk: `{ "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<option selected>" }`
 
 ## Commit cadence
 

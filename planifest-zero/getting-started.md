@@ -63,18 +63,6 @@ Setup installs:
 - The `CLAUDE.md` boot file.
 - Git hooks and the orchestrator sentinel machinery, activated automatically.
 
-#### Option: structured telemetry
-
-Requires [structured-telemetry-mcp](https://github.com/anthropics/structured-telemetry-mcp) to be running, then pass `--structured-telemetry-mcp`:
-
-```bash
-./planifest-zero/setup.sh claude-code --structured-telemetry-mcp
-```
-
-```powershell
-.\planifest-zero\setup.ps1 claude-code --structured-telemetry-mcp
-```
-
 → **Git guardrails and the orchestrator sentinel** are activated automatically by setup. See [project-operations.md](project-operations.md) for how they work and how to enable strict mode.
 
 ### 4. Write your first feature brief

@@ -27,7 +27,6 @@ Planifest installs these deterministic enforcement hooks via `setup.sh`:
 - **check-design** (UserPromptSubmit): Injects active component scope from `design.md` as additional context.
 - **commit-msg** (git hook): Blocks commits with AI attribution, affirmatory language, or >72-char subjects. Exit 1 on violation; use `git commit --no-verify` to bypass intentionally.
 - **ratchet-check** (PreToolUse: Write, Edit): While a loop is active (a `plan/current/loop-state-*.md` with `status: active`), blocks writes that remove acceptance-criteria or in-scope lines from `plan/current/` artifacts. Strengthening passes; intentional weakening needs a human-written `plan/current/.ratchet-approve` line (single-use). Agents must never write that marker.
-- **emit-phase-start / emit-phase-end**: Structured telemetry for pipeline phases (no-op if `PLANIFEST_TELEMETRY_URL` is unset).
 
 Enforcement failures exit 2 and surface a human-readable message. All unexpected errors exit 0; hooks never block your session unexpectedly.
 

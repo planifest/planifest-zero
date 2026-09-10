@@ -11,7 +11,6 @@
 # ship (with versionPolicy: max-component-version) if it is absent. The
 # orchestrator reads it at discovery to suggest the next version.
 
-id: "{{product-id}}"                # kebab-case, stable across releases
 name: "{{Product Display Name}}"
 version: "0.1.0"                    # last version tagged; authoritative only under versionPolicy: explicit
 feature: "{{feature-id of the release that last set this version}}"

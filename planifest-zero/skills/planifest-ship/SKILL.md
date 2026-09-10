@@ -2,9 +2,7 @@
 name: planifest-ship
 description: Archive, build assessment, changelog, version, tag, and PR behind the final human gate.
 bundle_templates: []
-bundle_standards: [telemetry-standards.md]
-hooks:
-  phase: ship
+bundle_standards: []
 ---
 
 # Planifest - ship
@@ -64,7 +62,6 @@ Read the archived `build-log.md`. It is now the only copy. Write `build-report.m
 - Agent counts and model tiers per phase.
 - Parallelism used, and multi-task phases that ran sequentially.
 - Self-corrections, with whether each was avoidable.
-- Telemetry gaps: phases with sparse or missing log entries, marked "not captured".
 - One improvement suggestion per phase where warranted.
 
 Source every metric from the build log. Never infer or fabricate. If routing or parallelism is not evidenced, treat it as not applied.
@@ -111,10 +108,3 @@ PR: {URL, or "see description above"}
 ```
 
 This gate always stops. Merging the PR is human-only, no exception.
-
-## Telemetry
-
-See `standards/telemetry-standards.md` for the event envelope and emission conditions. Phase value: `ship`.
-
-- `phase_start` before Step 1: `{ "phase_name": "ship" }`
-- `phase_end` after Step 10: `{ "phase_name": "ship", "status": "pass", "duration_ms": <elapsed> }`

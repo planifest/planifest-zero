@@ -9,7 +9,7 @@ target only.
 | Path | Contents |
 |------|----------|
 | `test-*.sh` | Per-feature test suites |
-| `helpers/` | Shared assertions (`assert.sh`) and the controllable telemetry backend |
+| `helpers/` | Shared assertions (`assert.sh`) |
 | `regression/` | The long-term regression pack and its manifest |
 | `run-tests.sh` | The runner |
 

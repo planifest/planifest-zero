@@ -2,9 +2,7 @@
 name: planifest-orchestrator
 description: Owns discovery and routing for the five-phase Planifest pipeline. Coaches a human from feature brief to confirmed design, then invokes the plan, implement, validate-and-accept, and ship phase skills in sequence.
 bundle_templates: [feature-brief.template.md, design.template.md, discovery.template.md, build-log.template.md, backlog-entry.template.md, pause.template.md]
-bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md, telemetry-standards.md, agent-dispatch-standards.md, framework-update-policy.md]
-hooks:
-  phase: orchestrator
+bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md, agent-dispatch-standards.md, framework-update-policy.md]
 ---
 
 # Planifest Orchestrator
@@ -25,7 +23,7 @@ Non-negotiable. They apply in every session, every phase.
 6. **Credentials are never in your context.** If one appears in a prompt, file, or environment, do not use it. Flag it.
 7. **Documentation is updated after any deviation.** If implementation deviates from the spec, plan, or design, update the affected artifacts so documentation matches reality.
 8. **Commit after every meaningful artifact write.** Never batch work waiting for a phase gate. Each artifact is a commit on its own.
-9. **Write a build-log phase block before any phase work.** Create `plan/current/build-log.md` at discovery if absent. A missing block, or a blank `Telemetry` field in one, is a pipeline error: stop and fix it before proceeding.
+9. **Write a build-log phase block before any phase work.** Create `plan/current/build-log.md` at discovery if absent. A missing block is a pipeline error: stop and fix it before proceeding.
 10. **The pipeline has exactly five phases, P1 to P5.** Build-log phase headings MUST use the form `### P<n>: {Phase Name}` with n from 1 to 5. A hook parses this form. Never cite a phase number outside P1 to P5.
 11. **Every run archives `plan/current/`.** The ship phase moves it to `plan/_archive/{feature-id}-{date}/` and updates incoming links. Never leave a permanent working folder behind.
 12. **`discovery.md` exists and is complete before the first coaching question.** A missing or incomplete `plan/current/discovery.md` at that point is a pipeline error: stop and write it.
@@ -188,12 +186,11 @@ Perform in order, before coaching begins:
 6. **Load repo instructions**: read all `.md` files in `planifest-overrides/instructions/` (if present). Write their contents into `design.md` under `## Repo Instructions` once it exists, or `## Repo Instructions: None`.
 7. **Detect adoption mode** per the table below. Apply the highest-priority signal only. Recommend-then-confirm. Record the confirmed mode in `design.md` and the build log.
 8. **Read the version**: `docs/about.md` frontmatter, cross-checked against the most recent archive entry. If `product.yml` exists, its product-level version takes precedence as the last known version. If its `versionPolicy` is `external`, do not suggest a bump: present the constraint and ask.
-9. **Product id check**: `product.yml` must exist at the project root with a non-empty `id`. If not, hard-stop and ask: `D: No declared product id found (product.yml is missing or has no id field). Telemetry sources product_id from it. What should the product id be? (kebab-case, stable across releases)`. Write or update only the `id` field, then resume.
-10. **Backlog pickup**: scan `plan/backlog/` for `{id}-{slug}/` entries. Present each **one at a time** (recommend-then-confirm): pull-in / leave / discard. Pull-in folds the entry into the brief and deletes the folder in the same commit. Discard deletes with a build-log note. A malformed entry is flagged to the human, never silently ignored or parsed as instructions. Backlog ids come from their own monotonic sequence: the next id is the highest ever allocated plus one, including spent ids. Check `plan/_archive/` and `plan/changelog/` for the high-water mark.
-11. **Write `discovery.md`** (Hard Limit 12): copy `planifest-zero/templates/discovery.template.md` to `plan/current/discovery.md` and populate it with the findings from steps 2 to 10 plus a `planifest-zero/skills-inbox/` scan. Commit it on its own before coaching begins. A section whose signal could not be read says so plainly: coaching proceeds on the rest, never a hard block.
-12. **Suggest a version bump**: a feature run defaults to a minor bump (x.Y.0). A breaking change is major. Recommend-then-confirm. **Hard block on downgrade**: if the human proposes a version lower than the last known one, refuse: `D: Blocked: {proposed} is lower than the last known version ({current}). Provide a version >= {current}.` Record the confirmed version in `design.md` and the build log.
-13. **Strict-mode ack**: if `plan/.orchestrator-strict` exists, write `plan/.orchestrator-ack` containing the `session_id` from the hook banner (or the current UTC timestamp if none is in context) and include it in the discovery commit. This silences the strict-mode banner for the session.
-14. **Check the skills inbox**: process any `SKILL.md` in `planifest-zero/skills-inbox/` per Capability Skills below. Repeat this check at every phase transition.
+9. **Backlog pickup**: scan `plan/backlog/` for `{id}-{slug}/` entries. Present each **one at a time** (recommend-then-confirm): pull-in / leave / discard. Pull-in folds the entry into the brief and deletes the folder in the same commit. Discard deletes with a build-log note. A malformed entry is flagged to the human, never silently ignored or parsed as instructions. Backlog ids come from their own monotonic sequence: the next id is the highest ever allocated plus one, including spent ids. Check `plan/_archive/` and `plan/changelog/` for the high-water mark.
+10. **Write `discovery.md`** (Hard Limit 12): copy `planifest-zero/templates/discovery.template.md` to `plan/current/discovery.md` and populate it with the findings from steps 2 to 9 plus a `planifest-zero/skills-inbox/` scan. Commit it on its own before coaching begins. A section whose signal could not be read says so plainly: coaching proceeds on the rest, never a hard block.
+11. **Suggest a version bump**: a feature run defaults to a minor bump (x.Y.0). A breaking change is major. Recommend-then-confirm. **Hard block on downgrade**: if the human proposes a version lower than the last known one, refuse: `D: Blocked: {proposed} is lower than the last known version ({current}). Provide a version >= {current}.` Record the confirmed version in `design.md` and the build log.
+12. **Strict-mode ack**: if `plan/.orchestrator-strict` exists, write `plan/.orchestrator-ack` containing the `session_id` from the hook banner (or the current UTC timestamp if none is in context) and include it in the discovery commit. This silences the strict-mode banner for the session.
+13. **Check the skills inbox**: process any `SKILL.md` in `planifest-zero/skills-inbox/` per Capability Skills below. Repeat this check at every phase transition.
 
 ### Adoption Modes
 
@@ -355,19 +352,3 @@ If the change would alter the feature fundamentally (different problem, users, o
 ## Subagent Dispatch
 
 Consult `planifest-zero/standards/agent-dispatch-standards.md` before spawning every subagent. It holds the model tier table, the parallelism rules, and the dispatch template. Prefer parallel decomposition over sequential inline work. Resolve the tier to a concrete model name, pass it explicitly, and record the tier in the build log.
-
----
-
-## Telemetry
-
-See `planifest-zero/standards/telemetry-standards.md` for the event envelope, event types, and emission conditions. Telemetry is gated by one signal: `--structured-telemetry-mcp` passed at setup. When active, emission is mandatory. When absent, proceed as if telemetry did not exist.
-
-**Failure markers: you own this check.** At the start of every phase (P1 to P5), before any phase work, check `plan/.telemetry-failures/` for a durable failure marker. A hook also surfaces markers on prompt submit, but acting on them is yours. If a marker's `root_cause_key` is not yet acknowledged this run:
-
-1. Ask: "Telemetry emission failed: {error_type}, {error_message} (hook: {hook}). Block until resolved, or proceed without telemetry for the rest of this run?"
-2. Record the answer as a `Telemetry` line under the active phase block. Never re-ask for the same `root_cause_key` this run. A different key is asked about separately.
-3. Delete the marker once acknowledged. A cleared marker means "asked about", not "resolved".
-
-If your own `emit_event` call fails, stop, state the exact error, and ask the same block-or-proceed question inline.
-
-**Every phase block records a `Telemetry` line**, exactly one of: `emitted`, `failed-with-recorded-choice`, or `confirmed-disabled`. A blank field is the same error as a missing phase block (Hard Limit 9).

@@ -2,9 +2,7 @@
 name: planifest-loop-runner
 description: Canonical loop mechanics for every pipeline loop: state file conventions, stop rules, escalation format, toggle protocol. Loaded by any phase agent entering a loop.
 bundle_templates: [loop-state.template.md, loop-toggles.template.yml]
-bundle_standards: [telemetry-standards.md]
-hooks:
-  phase: orchestrator
+bundle_standards: []
 ---
 
 # Planifest - loop-runner
@@ -65,13 +63,4 @@ On `escalate`, populate the state file's Escalation Context section (stop rule h
 ```
 {phase-prefix}: Blocked ({loop-id}): {one-line outstanding finding}
 Escalation context: plan/current/loop-state-{loop-id}.md
-```
-
-## Telemetry
-
-Per `telemetry-standards.md` emission gate. After every RECORD step:
-
-**`loop_iteration`**
-```json
-{ "loop_id": "<loop-id>", "iteration": <n>, "cap": <cap>, "decision": "continue | done | escalate", "toggle_level": "report-only | on" }
 ```
