@@ -1,7 +1,7 @@
 ---
 title: "Feature Brief - remove-telemetry-mcp"
 summary: "The business case, scope, and product requirements for the feature."
-status: "draft"
+status: "confirmed"
 version: "0.4.0"
 ---
 # Feature Brief - remove-telemetry-mcp
@@ -90,6 +90,10 @@ suites. No new stack.
   `tests/README.md`, `templates/standard-boot.md`, and `component.yml`.
 - Edit the 19 mixed test suites to drop their telemetry assertions while keeping the rest, and
   remove the five telemetry entries from `tests/regression/regression-manifest.json`.
+- Clean up an upgraded project on every setup run: remove telemetry hook entries from the
+  project's `.claude/settings.json`, delete the `.claude/telemetry-enabled` sentinel, and delete
+  `plan/.telemetry-failures/` and `plan/.telemetry-receipts/` when present. One printed line per
+  removal, a warning without failing on error, and silence when there is nothing to remove.
 
 ### Out of Scope
 
@@ -128,13 +132,28 @@ suites. No new stack.
 
 ## Scenario Paths
 
-**Happy path:** {{to be coached}}
+**Happy path:** A maintainer runs `setup.sh` or `setup.ps1`. The install offers no telemetry flags
+and writes no telemetry entries into `.claude/settings.json`. The six enforcement hooks and the
+`commit-msg` git hook fire exactly as before. Nothing in the framework posts an event anywhere, and
+nothing in the setup output, the skills, or the docs mentions telemetry. Anyone wanting
+observability configures it at the tool level, outside anything Zero provides.
 
-**First-run path:** {{to be coached}}
+**First-run path:** A brand-new project installs with no telemetry present and nothing to
+initialise. A project that previously ran setup with `--structured-telemetry-mcp` gets its
+telemetry wiring removed by the same run: the settings entries, the sentinel, and the marker
+directories go, each with one printed line. A second run finds nothing to remove and stays silent.
 
-**Error / sad path:** {{to be coached}}
+**Error / sad path:** The most likely failure is an upgraded project whose `.claude/settings.json`
+still points at deleted hook modules, so the tool tries to run a missing file on every prompt. The
+cleanup above prevents it. If a removal fails, setup prints one warning, leaves the entry alone,
+and continues. A saved command still carrying `--structured-telemetry-mcp` or `--backend-url` is
+rejected as an unknown argument, so the person sees the problem at once.
 
-**Cross-session continuity:** {{to be coached}}
+**Cross-session continuity:** No telemetry state is at risk, because none exists. A pipeline run
+resumes cleanly whether its build log was started before or after the `Telemetry` row was removed,
+because a blank or absent field no longer stops a run. Setup no longer pauses for a product id, so
+a run that stopped at that gate does not stop there again. A setup run interrupted partway through
+the settings rewrite is finished by the next run, which is idempotent.
 
 ## Acceptance Criteria
 
@@ -144,3 +163,4 @@ suites. No new stack.
 - [ ] `product.yml` has no top-level `id` field, and P0 no longer hard-stops asking for one.
 - [ ] The test runner passes with no telemetry suite present, and `regression-manifest.json` carries no telemetry entry.
 - [ ] `docs/` and the `planifest-zero/` docs describe a framework with no telemetry.
+- [ ] Running the new setup on a project that previously enabled telemetry removes the telemetry entries from its `.claude/settings.json`, the `.claude/telemetry-enabled` sentinel, and the `plan/.telemetry-failures/` and `plan/.telemetry-receipts/` directories, printing one line per removal. A second run prints none.
