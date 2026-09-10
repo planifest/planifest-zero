@@ -79,7 +79,20 @@ Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.o
 | MCP calls | `0` |
 | Parallel task batches | `0` |
 | Telemetry | confirmed-disabled |
-| Notes | ADRs cross-reference each other, so written inline rather than in parallel. |
+| Notes | ADRs cross-reference each other, so written inline rather than in parallel. ADR-001 telemetry is not a framework concern, ADR-002 setup cleans up telemetry wiring on every run, ADR-003 the phase vocabulary lives in prose (folding in the product-id gate). consistency-check clean. Gate passed under continuous run at 2026-09-10T06:46:13Z. |
+
+### P3: Code Generation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-10T06:46:13Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-codegen-agent |
+| Agents spawned | `pending` |
+| MCP calls | `0` |
+| Parallel task batches | `pending` |
+| Telemetry | confirmed-disabled |
+| Notes | pending |
 
 ---
 
