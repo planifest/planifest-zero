@@ -66,7 +66,20 @@ Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.o
 | MCP calls | `0` |
 | Parallel task batches | `1` |
 | Telemetry | confirmed-disabled |
-| Notes | Continuous run. Two subagent findings checked at source. First: a subagent claimed phase-enum.mjs exports one value. It exports four. The design was correct and unchanged. Second: R-006 is genuine. test-0000031-req-003-five-phases.sh has five sections, three coupled to deleted files and two that must survive, so req-008 rewrites rather than deletes it. That test also surfaced the CI question: the telemetry job lives only in this repo's own .github/workflows/planifest.yml, which guards the framework copy and stays. The shipped planifest-zero/hooks/planifest.yml carries no telemetry. Recorded as out of scope. Also added the five literal phase names to the design, because no artifact stated them. Continuous run. This repo's own pipeline runs on planifest-framework/, whose telemetry signal is not active this session, so no marker and no emission. |
+| Notes | Continuous run. Two subagent findings checked at source. First: a subagent claimed phase-enum.mjs exports one value. It exports four. The design was correct and unchanged. Second: R-006 is genuine. test-0000031-req-003-five-phases.sh has five sections, three coupled to deleted files and two that must survive, so req-008 rewrites rather than deletes it. That test also surfaced the CI question: the telemetry job lives only in this repo's own .github/workflows/planifest.yml, which guards the framework copy and stays. The shipped planifest-zero/hooks/planifest.yml carries no telemetry. Recorded as out of scope. Gate passed under continuous run at 2026-09-10T06:45:00Z. Also added the five literal phase names to the design, because no artifact stated them. Continuous run. This repo's own pipeline runs on planifest-framework/, whose telemetry signal is not active this session, so no marker and no emission. |
+
+### P2: Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-10T06:45:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-adr-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | confirmed-disabled |
+| Notes | ADRs cross-reference each other, so written inline rather than in parallel. |
 
 ---
 
