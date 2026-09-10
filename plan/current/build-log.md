@@ -92,7 +92,7 @@ Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.o
 | MCP calls | `0` |
 | Parallel task batches | `pending` |
 | Telemetry | confirmed-disabled |
-| Notes | pending |
+| Notes | Batch 1 of 4: req-001 deletions (35 paths, import graph verified, 4 enforcement suites pass with 72 assertions), req-005 and req-006 (12 skills, 2 templates, product.yml), req-007 (5 docs). Only remaining telemetry mention in planifest-zero is backend-stack-evaluation.md, a false positive about OpenTelemetry SDK maturity in language evaluations. Decision recorded in ADR-001 point 6: drop backendUrl from the record and marker, since it could only ever be null after removal. Narrows 0000032 ADR 001's record shape. |
 
 ---
 

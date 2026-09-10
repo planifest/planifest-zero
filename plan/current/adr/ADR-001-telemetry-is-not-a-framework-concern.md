@@ -41,6 +41,12 @@ the telemetry it guarded.
 5. `.github/workflows/planifest.yml`, this repository's own CI, keeps its `validate-telemetry-schema`
    job. That job guards the framework copy's telemetry, which survives. The workflow setup ships to
    consumers carries no telemetry already.
+6. Drop the `backendUrl` field from the setup-config record and the flags marker. Feature 0000032
+   ADR 001 defined the record as holding `tool`, `flags`, `backendUrl`, and `writtenAt`. That field
+   held the telemetry backend URL and nothing else, so after this decision it could only ever be
+   `null`. A field that can only be null carries no information. The record now holds `tool`,
+   `flags`, and `writtenAt`. The `planifest-refresh-setup` skill no longer requires the key and
+   does not reject a record for its absence.
 
 ## Alternatives Considered
 
@@ -59,6 +65,7 @@ the telemetry it guarded.
 | planifest-zero (setup) | Both setup scripts lose two flags, three functions each, and their interleaved telemetry wiring. |
 | planifest-zero (skills) | Six skills lose a `## Telemetry` section and a bundled standard. All twelve lose a `hooks: phase:` key. |
 | planifest-zero (docs, templates, tests) | Six docs and two templates are updated. 20 test suites are deleted and 19 edited. |
+| planifest-zero (setup-config record) | The record and the flags marker lose the `backendUrl` field, narrowing the shape 0000032 ADR 001 defined. |
 
 ## Consequences
 
@@ -83,6 +90,7 @@ the telemetry it guarded.
 ## Supersedes
 
 - The telemetry decisions of features 0000018, 0000024, 0000026, 0000027, and 0000028 as they apply to `planifest-zero`. Those ADRs live in git history. Their subject no longer exists in this component.
+- 0000032 ADR 001's record shape, in one narrow respect: the `backendUrl` field is dropped. Every other part of that decision, including the record's location at `plan/state/{tool}.md` and its git-tracked status, stands unchanged.
 
 ## Superseded By
 
