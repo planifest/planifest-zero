@@ -38,6 +38,7 @@ Git pre-flight: PR #5 was open at pre-flight. Human merged it. Checked out `main
 P0 exchange (branch base): Q: Merge PR 5 first, or stack on the 0000032 branch? / A: Merged.
 P0 exchange (backlog): Q: Discard telemetry-related backlog entries? / A: Yes. 0000085 discarded, the other four unrelated and kept.
 P0 exchange (scope shape): Q: Clean removal, or removal plus a documented extension seam? / A: Removal only. "People adding their own telemetry" means at the tool level, if the tool supports it. The framework does not concern itself with telemetry at all.
+P0 exchange (phase-enum.mjs): Q: Delete the module, or keep it with no importers? / A: Delete. pipeline-reference.md states the five phases directly instead, matching 0000031 ADR 004.
 Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.orchestrator-ack`.
 
 ---
