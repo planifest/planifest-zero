@@ -53,6 +53,7 @@
   - Edit 19 mixed test suites to drop telemetry assertions while keeping the rest, and remove the five telemetry entries from `tests/regression/regression-manifest.json`.
 - Out:
   - `planifest-framework/` in this repository. It keeps its telemetry and runs this repo's own pipeline.
+  - `.github/workflows/planifest.yml`, this repository's own CI. Its `validate-telemetry-schema` job guards the framework copy's telemetry, which survives. The workflow setup ships to consumers, `planifest-zero/hooks/planifest.yml`, carries no telemetry and needs no change.
   - Any replacement telemetry, extension seam, or documented hook attachment point.
   - `hooks/enforcement/read-stdin.mjs` behaviour and the six surviving enforcement hooks. Only telemetry wording in comments is corrected.
   - The five phase names and the pipeline contract from 0000031 ADR 001.

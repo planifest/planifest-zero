@@ -62,11 +62,11 @@ Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.o
 | Start | `2026-09-10T06:40:53Z` |
 | Model tier | primary (orchestrator), cheaper (artifact subagents) |
 | Skills loaded | planifest-orchestrator, planifest-spec-agent |
-| Agents spawned | `pending` |
+| Agents spawned | `2` |
 | MCP calls | `0` |
-| Parallel task batches | `pending` |
+| Parallel task batches | `1` |
 | Telemetry | confirmed-disabled |
-| Notes | Continuous run. This repo's own pipeline runs on planifest-framework/, whose telemetry signal is not active this session, so no marker and no emission. |
+| Notes | Continuous run. Two subagent findings checked at source. First: a subagent claimed phase-enum.mjs exports one value. It exports four. The design was correct and unchanged. Second: R-006 is genuine. test-0000031-req-003-five-phases.sh has five sections, three coupled to deleted files and two that must survive, so req-008 rewrites rather than deletes it. That test also surfaced the CI question: the telemetry job lives only in this repo's own .github/workflows/planifest.yml, which guards the framework copy and stays. The shipped planifest-zero/hooks/planifest.yml carries no telemetry. Recorded as out of scope. Also added the five literal phase names to the design, because no artifact stated them. Continuous run. This repo's own pipeline runs on planifest-framework/, whose telemetry signal is not active this session, so no marker and no emission. |
 
 ---
 
