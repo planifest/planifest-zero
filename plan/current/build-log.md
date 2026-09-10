@@ -46,7 +46,10 @@ Scope Lock (error path): the likely failure is an upgraded project whose setting
 Scope Lock (cross-session): no telemetry state is at risk. A build log started under the old template resumes cleanly once the blank-field rule is gone. Setup no longer pauses for a product id. Leftover marker directories are deleted by the cleanup. [source: agent-draft-edited]
 P0 exchange (upgrade cleanup): Q: Adopt the 0000032 inline cleanup pattern for telemetry wiring on existing installs? / A: Accept all four paths with cleanup. On every setup run, remove telemetry entries from .claude/settings.json, delete the .claude/telemetry-enabled sentinel, and delete plan/.telemetry-failures/ and plan/.telemetry-receipts/. One line per removal, warn without failing, silent when nothing to remove.
 Verified in code: setup.sh already filters telemetry entries out of the settings array at three points, but those filters live inside the telemetry functions being deleted. Removing them naively would strand broken hook entries in upgraded projects.
-Scope Lock complete. All four scenario paths captured. Three of the four flagged the same gap: the brief has no decision on existing installs whose .claude/settings.json still wires telemetry hooks.
+Scope Lock complete. All four scenario paths captured.
+P0 exchange (run mode): Q: Check after each phase, or continuous run? / A: Continuous run. plan/.run-mode written.
+Capability skills: none relevant to this stack. Proceeded silently.
+P0 gate checklist: all items pass. Design drafted and presented for confirmation. Three of the four flagged the same gap: the brief has no decision on existing installs whose .claude/settings.json still wires telemetry hooks.
 Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.orchestrator-ack`.
 
 ---
