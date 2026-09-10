@@ -287,6 +287,99 @@ function Merge-AllowedTools {
     }
 }
 
+# Telemetry hook module names a pre-0000033 project may still reference from
+# .claude/settings.json (0000033 req-004, ADR-002 decision 1). The modules
+# themselves are gone, so every entry naming one is a broken reference.
+$TelemetryHookModules = @(
+    'emit-phase-start',
+    'emit-phase-end',
+    'emit-event-receipt',
+    'emit-event',
+    'context-pressure',
+    'resolve-phase',
+    'record-telemetry-failure',
+    'check-telemetry-failures',
+    'check-telemetry-receipts'
+)
+$TelemetryMcpMatcher = 'mcp__structured-telemetry-mcp__emit_event'
+
+function Remove-LegacyTelemetryWiring {
+    # Mirror of remove_legacy_telemetry_wiring in setup.sh (0000033 req-004,
+    # ADR-002), with the same printed wording. Runs on every invocation, and is
+    # called BEFORE Install-EnforcementHooks so that install is the last writer
+    # of settings.json this run. Prints one line per removal, warns and
+    # continues on failure, and prints nothing when there is nothing to remove.
+    param(
+        [string]$SettingsRel
+    )
+
+    # 1. Telemetry hook entries in the project's settings.json.
+    $settings = Join-Path $ProjectRoot $SettingsRel
+    if (Test-Path $settings) {
+        try {
+            # The raw contents are never logged (req-004 logging policy).
+            $existing = Get-Content -Raw -Path $settings -ErrorAction Stop | ConvertFrom-Json
+            $removed = 0
+
+            if ($existing.hooks) {
+                foreach ($event in @($existing.hooks.PSObject.Properties.Name)) {
+                    $entries = @($existing.hooks.$event)
+                    $kept = @()
+                    foreach ($entry in $entries) {
+                        if ($null -eq $entry) { continue }
+                        if ("$($entry.matcher)" -like "*$TelemetryMcpMatcher*") { $removed++; continue }
+                        $hooks = @($entry.hooks)
+                        $keptHooks = @($hooks | Where-Object {
+                            $command = "$($_.command)"
+                            $isTelemetry = $command -like "*$TelemetryMcpMatcher*"
+                            foreach ($module in $TelemetryHookModules) {
+                                if ($command -like "*$module*") { $isTelemetry = $true }
+                            }
+                            -not $isTelemetry
+                        })
+                        if ($keptHooks.Count -eq 0 -and $hooks.Count -gt 0) { $removed++; continue }
+                        if ($keptHooks.Count -ne $hooks.Count) { $entry.hooks = $keptHooks; $removed++ }
+                        $kept += $entry
+                    }
+                    $existing.hooks.$event = $kept
+                }
+            }
+
+            if ($removed -gt 0) {
+                $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $settings -Encoding UTF8 -ErrorAction Stop
+                Write-Host "  - removed telemetry hook entries from $SettingsRel"
+            }
+        } catch {
+            Write-Warning "Could not remove telemetry hook entries from $SettingsRel"
+        }
+    }
+
+    # 2. The telemetry opt-in sentinel (decision 2).
+    $sentinelRel = '.claude/telemetry-enabled'
+    $sentinel = Join-Path $ProjectRoot '.claude\telemetry-enabled'
+    if (Test-Path $sentinel) {
+        try {
+            Remove-Item -Path $sentinel -Force -ErrorAction Stop
+            Write-Host "  - removed $sentinelRel"
+        } catch {
+            Write-Warning "Could not remove $sentinelRel"
+        }
+    }
+
+    # 3. The failure and receipt marker directories (decision 3).
+    foreach ($markerRel in @('plan/.telemetry-failures', 'plan/.telemetry-receipts')) {
+        $marker = Join-Path $ProjectRoot ($markerRel -replace '/', '\')
+        if (Test-Path $marker) {
+            try {
+                Remove-Item -Path $marker -Recurse -Force -ErrorAction Stop
+                Write-Host "  - removed $markerRel/"
+            } catch {
+                Write-Warning "Could not remove $markerRel/"
+            }
+        }
+    }
+}
+
 function Install-EnforcementHooks {
     # Copy gate-write.mjs + check-design.mjs and wire settings.json.
     # Always runs — no flag required.
@@ -722,6 +815,14 @@ function Invoke-PlanifestSetup {
     # Append project-specific instructions to boot file (idempotent on re-run)
     if ($toolConfig.BootFile) {
         Append-OverrideInstructions -BootFilePath $toolConfig.BootFile
+    }
+
+    # Remove-LegacyTelemetryWiring retracts what a pre-0000033 run left behind
+        # (req-004, ADR-002).
+    # Ordered BEFORE the enforcement hook install so that install is the last
+    # writer of settings.json this run.
+    if ($toolConfig.SettingsFile) {
+        Remove-LegacyTelemetryWiring -SettingsRel $toolConfig.SettingsFile
     }
 
     # Install Planifest enforcement hooks unconditionally (gate-write, check-design)

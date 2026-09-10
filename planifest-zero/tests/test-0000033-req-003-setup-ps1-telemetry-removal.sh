@@ -36,9 +36,25 @@ extract_function_body() {
 echo ""
 echo "=== req-003: setup.ps1 carries no telemetry string ==="
 
-TELEMETRY_HITS="$(grep -c -i 'telemetry' "$SETUP_PS1")"
-assert_equals "0" "$TELEMETRY_HITS" \
-  "req-003: setup.ps1 contains no telemetry string"
+# req-004 and 0000033 ADR-002 require the legacy-cleanup block to name the
+# telemetry modules, matcher, and paths. So the check is that every telemetry
+# string sits inside that block, and that no flag, install, or sentinel write
+# survives outside it.
+OUTSIDE_CLEANUP="$(awk '
+  /^# Telemetry hook module names/ { in_block = 1 }
+  in_block && /^}/ { in_block = 0; next }
+  !in_block { print }
+' "$SETUP_PS1" | grep -i "telemetry" | grep -vc "Remove-LegacyTelemetryWiring" || true)"
+assert_equals "0" "$OUTSIDE_CLEANUP" \
+  "req-003: setup.ps1 has no telemetry string outside the legacy-cleanup block except references to it"
+
+for FORBIDDEN in "StructuredTelemetryMcp" "Install-TelemetryHooks" "Merge-TelemetryHookSettings" "Test-TelemetryHooksInstalled" "BackendUrl"; do
+  assert_equals "0" "$(grep -c -- "$FORBIDDEN" "$SETUP_PS1" || true)" \
+    "req-003: setup.ps1 declares no $FORBIDDEN"
+done
+
+assert_equals "0" "$(grep -c 'New-Item.*telemetry-enabled\|Set-Content.*telemetry-enabled' "$SETUP_PS1" || true)" \
+  "req-003: setup.ps1 never writes the telemetry-enabled sentinel"
 
 BACKEND_HITS="$(grep -c -i 'backend' "$SETUP_PS1")"
 assert_equals "0" "$BACKEND_HITS" \

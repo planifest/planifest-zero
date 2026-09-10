@@ -22,7 +22,7 @@ As a maintainer, I want `setup.ps1` free of telemetry code, so that a Windows in
 - Remove the telemetry hook path variables from `setup/claude-code.ps1`.
 
 ## Acceptance Criteria
-- [ ] `grep -i telemetry planifest-zero/setup.ps1` returns no matches.
+- [ ] `planifest-zero/setup.ps1` declares no telemetry flag, installs no telemetry hook, writes no telemetry entry, and writes no telemetry sentinel. The only telemetry strings it may contain are the module names, matcher, and paths that the legacy-cleanup function of req-004 must name to find them, and every such string sits inside that function or its comment.
 - [ ] Static grep confirms `Merge-TelemetryHookSettings`, `Test-TelemetryHooksInstalled`, and `Install-TelemetryHooks` are absent from `setup.ps1`, and that `--structured-telemetry-mcp` and `--backend-url` are absent from its usage text.
 - [ ] A line-by-line mirror review of `setup.ps1`'s argument parsing and `Merge-EnforcementHookSettings` array against `setup.sh`'s equivalent (req-002) confirms the same six surviving hook entries and no telemetry entry, recorded as the review outcome since PowerShell has no test runner (backlog 0000084).
 

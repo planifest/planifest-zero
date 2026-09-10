@@ -249,6 +249,99 @@ copy_workflow() {
   echo "  + workflows/${name}.md"
 }
 
+# Telemetry hook module names a pre-0000033 project may still reference from
+# .claude/settings.json (0000033 req-004, ADR-002 decision 1). The modules
+# themselves are gone, so every entry naming one is a broken reference.
+TELEMETRY_HOOK_MODULES="emit-phase-start emit-phase-end emit-event-receipt emit-event context-pressure resolve-phase record-telemetry-failure check-telemetry-failures check-telemetry-receipts"
+TELEMETRY_MCP_MATCHER="mcp__structured-telemetry-mcp__emit_event"
+
+remove_legacy_telemetry_wiring() {
+  # Retract the telemetry wiring setup itself once wrote (0000033 req-004,
+  # ADR-002). Runs on every invocation, not behind a flag, because a person
+  # cannot be expected to remember they once passed --structured-telemetry-mcp
+  # (decision 6). Called BEFORE install_enforcement_hooks so the enforcement
+  # install is the last writer of settings.json and its six entries cannot be
+  # disturbed by this filter.
+  #
+  # Prints one line per removal (decision 4), warns and continues on failure so
+  # setup still exits 0 (decision 4), and prints nothing when there is nothing
+  # to remove, which makes an upgraded project indistinguishable from a fresh
+  # install on the second run (decision 5).
+  local settings_rel="$1"   # e.g. .claude/settings.json
+
+  # 1. Telemetry hook entries in the project's settings.json.
+  local settings="$PROJECT_ROOT/$settings_rel"
+  if [ -f "$settings" ] && command -v node >/dev/null 2>&1; then
+    local result
+    result="$(PLANIFEST_SETTINGS="$settings" \
+      PLANIFEST_TELEMETRY_MODULES="$TELEMETRY_HOOK_MODULES" \
+      PLANIFEST_TELEMETRY_MATCHER="$TELEMETRY_MCP_MATCHER" node -e '
+      const fs = require("fs");
+      const sf      = process.env.PLANIFEST_SETTINGS;
+      const modules = process.env.PLANIFEST_TELEMETRY_MODULES.split(" ").filter(Boolean);
+      const matcher = process.env.PLANIFEST_TELEMETRY_MATCHER;
+      // Never log the file contents (req-004 logging policy): report only
+      // "removed" or "none" on stdout.
+      const raw = fs.readFileSync(sf, "utf8").replace(/^﻿/, "");
+      const s = JSON.parse(raw);
+      const isTelemetryCommand = (c) =>
+        modules.some(m => (c || "").includes(m)) || (c || "").includes(matcher);
+      let removed = 0;
+      for (const [event, entries] of Object.entries(s.hooks || {})) {
+        if (!Array.isArray(entries)) continue;
+        const kept = [];
+        for (const entry of entries) {
+          if ((entry.matcher || "").includes(matcher)) { removed++; continue; }
+          const hooks = Array.isArray(entry.hooks) ? entry.hooks : [];
+          const keptHooks = hooks.filter(h => !isTelemetryCommand(h.command));
+          if (keptHooks.length === 0 && hooks.length > 0) { removed++; continue; }
+          if (keptHooks.length !== hooks.length) { entry.hooks = keptHooks; removed++; }
+          kept.push(entry);
+        }
+        s.hooks[event] = kept;
+      }
+      if (removed > 0) {
+        fs.writeFileSync(sf, JSON.stringify(s, null, 2) + "\n");
+        console.log("removed");
+      } else {
+        console.log("none");
+      }
+    ' 2>/dev/null)" || result="error"
+
+    case "$result" in
+      removed) echo "  - removed telemetry hook entries from $settings_rel" ;;
+      none)    ;;
+      *)       echo "  ! Warning: could not remove telemetry hook entries from $settings_rel" >&2 ;;
+    esac
+  fi
+
+  # 2. The telemetry opt-in sentinel (decision 2).
+  local sentinel_rel=".claude/telemetry-enabled"
+  local sentinel="$PROJECT_ROOT/$sentinel_rel"
+  if [ -e "$sentinel" ]; then
+    if rm -f "$sentinel" 2>/dev/null; then
+      echo "  - removed $sentinel_rel"
+    else
+      echo "  ! Warning: could not remove $sentinel_rel" >&2
+    fi
+  fi
+
+  # 3. The failure and receipt marker directories (decision 3).
+  local marker_rel
+  for marker_rel in "plan/.telemetry-failures" "plan/.telemetry-receipts"; do
+    local marker="$PROJECT_ROOT/$marker_rel"
+    if [ -e "$marker" ]; then
+      if rm -rf "$marker" 2>/dev/null && [ ! -e "$marker" ]; then
+        echo "  - removed $marker_rel/"
+      else
+        echo "  ! Warning: could not remove $marker_rel/" >&2
+      fi
+    fi
+  done
+
+  return 0
+}
+
 install_enforcement_hooks() {
   # Copy enforcement hooks and wire PreToolUse/UserPromptSubmit (REQ-002, REQ-006, REQ-008).
   # Includes auto-trigger-orchestrator.mjs (REQ-002), gate-write.mjs, check-design.mjs,
@@ -714,6 +807,14 @@ setup_tool() {
   # Append project-specific override instructions to boot file (REQ-006, REQ-007)
   if [ -n "${TOOL_BOOT_FILE:-}" ]; then
     append_override_instructions "$TOOL_BOOT_FILE"
+  fi
+
+  # remove_legacy_telemetry_wiring retracts what a pre-0000033 run left behind
+  # (req-004, ADR-002).
+  # Ordered BEFORE the enforcement hook install so that install is the last
+  # writer of settings.json this run.
+  if [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
+    remove_legacy_telemetry_wiring "$TOOL_SETTINGS_FILE"
   fi
 
   # Install Planifest enforcement hooks unconditionally (REQ-008)

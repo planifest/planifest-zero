@@ -67,9 +67,35 @@ make_workspace() {
 echo ""
 echo "=== req-002 (a): setup.sh and setup/claude-code.sh mention no telemetry ==="
 
-TELEMETRY_HITS="$(grep -c -i "telemetry" "$FRAMEWORK/setup.sh")"
-assert_equals "0" "$TELEMETRY_HITS" \
-  "req-002 (a): setup.sh contains no telemetry string"
+# req-004 and 0000033 ADR-002 require the legacy-cleanup block to name the
+# telemetry modules, matcher, and paths so it can find and remove them. So the
+# check is not "no telemetry string anywhere": it is that every telemetry string
+# sits inside that block, and that no flag, install, or sentinel write survives
+# outside it. The block runs from its module-name constants to the end of
+# remove_legacy_telemetry_wiring().
+OUTSIDE_CLEANUP="$(awk '
+  /^# Telemetry hook module names/ { in_block = 1 }
+  in_block && /^}/ { in_block = 0; next }
+  !in_block { print }
+' "$FRAMEWORK/setup.sh" | grep -i "telemetry" | grep -vc "remove_legacy_telemetry_wiring" || true)"
+assert_equals "0" "$OUTSIDE_CLEANUP" \
+  "req-002 (a): setup.sh has no telemetry string outside the legacy-cleanup block except references to it"
+
+# No telemetry flag is accepted: the argument parser has no case label for it.
+assert_equals "0" "$(grep -cE '^\s*--structured-telemetry-mcp\)' "$FRAMEWORK/setup.sh" || true)" \
+  "req-002 (a): setup.sh parses no --structured-telemetry-mcp argument"
+assert_equals "0" "$(grep -cE '^\s*--backend-url\)' "$FRAMEWORK/setup.sh" || true)" \
+  "req-002 (a): setup.sh parses no --backend-url argument"
+
+# No telemetry install path survives.
+for FORBIDDEN in "install_telemetry_hooks" "merge_telemetry_hook_settings" "verify_telemetry_hooks_installed" "STRUCTURED_TELEMETRY_MCP"; do
+  assert_equals "0" "$(grep -c -- "$FORBIDDEN" "$FRAMEWORK/setup.sh" || true)" \
+    "req-002 (a): setup.sh declares no $FORBIDDEN"
+done
+
+# The sentinel is only ever removed, never written.
+assert_equals "0" "$(grep -c 'touch .*telemetry-enabled\|> .*telemetry-enabled' "$FRAMEWORK/setup.sh" || true)" \
+  "req-002 (a): setup.sh never writes the telemetry-enabled sentinel"
 
 TOOL_HITS="$(grep -c -i "telemetry" "$FRAMEWORK/setup/claude-code.sh")"
 assert_equals "0" "$TOOL_HITS" \

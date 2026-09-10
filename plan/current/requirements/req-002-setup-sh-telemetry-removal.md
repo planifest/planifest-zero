@@ -22,7 +22,7 @@ As a maintainer, I want `setup.sh` free of telemetry code, so that a fresh insta
 - Remove the telemetry hook path variables from `setup/claude-code.sh`.
 
 ## Acceptance Criteria
-- [ ] `grep -i telemetry planifest-zero/setup.sh` returns no matches.
+- [ ] `planifest-zero/setup.sh` declares no telemetry flag, installs no telemetry hook, writes no telemetry entry, and writes no telemetry sentinel. The only telemetry strings it may contain are the module names, matcher, and paths that the legacy-cleanup function of req-004 must name to find them, and every such string sits inside that function or its comment.
 - [ ] `planifest-zero/setup.sh --structured-telemetry-mcp` exits with a non-zero code and prints an unknown-argument error.
 - [ ] A setup run's generated `.claude/settings.json` contains exactly six enforcement hook entries and no `mcp__structured-telemetry-mcp__emit_event` matcher, checked by a test in `planifest-zero/tests/`.
 
