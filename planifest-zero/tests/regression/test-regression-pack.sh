@@ -168,4 +168,30 @@ if [ -f "$REAL_MANIFEST" ]; then
   assert_equals "0" "$real_json_valid" "real regression-manifest.json is valid JSON"
 fi
 
+# ── Section 7: manifest and regression dir agree ─────────────────────────────
+# A stale manifest entry (test deleted, entry left behind) used to pass silently
+# because Section 6 only checked that the JSON parsed.
+echo ""
+echo "--- regression-manifest.json: every entry names a file on disk ---"
+
+if [ -f "$REAL_MANIFEST" ]; then
+  missing_entries=$( cd "$REAL_REGRESSION_DIR" && node -e "
+const fs = require('fs');
+const m = JSON.parse(fs.readFileSync('regression-manifest.json','utf8'));
+const missing = m.tests.filter(t => !fs.existsSync(t.name)).map(t => t.name);
+console.log(missing.join(' '));
+" 2>/dev/null )
+  assert_equals "" "$missing_entries" "every manifest entry names a test file present in tests/regression/"
+
+  unlisted_tests=$( cd "$REAL_REGRESSION_DIR" && node -e "
+const fs = require('fs');
+const m = JSON.parse(fs.readFileSync('regression-manifest.json','utf8'));
+const listed = new Set(m.tests.map(t => t.name));
+const unlisted = fs.readdirSync('.')
+  .filter(f => f.startsWith('test-') && f.endsWith('.sh') && !listed.has(f));
+console.log(unlisted.join(' '));
+" 2>/dev/null )
+  assert_equals "" "$unlisted_tests" "every test-*.sh in tests/regression/ has a manifest entry"
+fi
+
 print_summary

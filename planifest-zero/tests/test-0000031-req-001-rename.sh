@@ -24,8 +24,14 @@ HITS=$(grep -rl "$OLD_NAME" "$REPO" \
   | grep -v "$REPO/plan/\|$REPO/CLAUDE.md\|decisions-index.md" | wc -l | tr -d ' ')
 assert_equals "0" "$HITS" "live files referencing the old name"
 
-echo "=== (c) product.yml id is planifest-zero ==="
-assert_equals "planifest-zero" "$(grep -E '^id:' "$REPO/product.yml" | sed 's/id: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/' | tr -d ' ')" "product id"
+echo "=== (c) product.yml identifies the component, not a product id ==="
+# 0000033 ADR-003 removed product.yml's top-level `id`. Telemetry was its only
+# consumer. The components[] entries keep their own `id`, because
+# scripts/product-version.mjs reads them to resolve each manifest.
+assert_equals "0" "$(grep -cE '^id:' "$REPO/product.yml" || true)" \
+  "no top-level product id"
+assert_equals "planifest-zero" "$(grep -E '^\s+- id:' "$REPO/product.yml" | head -1 | sed 's/.*id: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/' | tr -d ' ')" \
+  "components[] still names the planifest-zero component"
 
 echo "=== (d) refresh script renamed and portable ==="
 assert_equals "no" "$([ -f "$REPO/refresh-$OLD_NAME-dir.ps1" ] && echo yes || echo no)" "old refresh script absent"

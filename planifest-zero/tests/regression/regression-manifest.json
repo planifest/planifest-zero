@@ -59,34 +59,6 @@
       "filePath": "tests/regression/test-0000017-req-006-structured-discovery-pass.sh"
     },
     {
-      "name": "test-0000018-req-002-hook-failure-marker.sh",
-      "sourceFeature": "0000018-telemetry-emission-consistency",
-      "promotionDate": "2026-08-01",
-      "promotedBy": "agent",
-      "filePath": "tests/regression/test-0000018-req-002-hook-failure-marker.sh"
-    },
-    {
-      "name": "test-0000018-req-003-orchestrator-marker-check-and-prompt.sh",
-      "sourceFeature": "0000018-telemetry-emission-consistency",
-      "promotionDate": "2026-08-01",
-      "promotedBy": "agent",
-      "filePath": "tests/regression/test-0000018-req-003-orchestrator-marker-check-and-prompt.sh"
-    },
-    {
-      "name": "test-0000018-req-005-build-log-telemetry-record.sh",
-      "sourceFeature": "0000018-telemetry-emission-consistency",
-      "promotionDate": "2026-08-01",
-      "promotedBy": "agent",
-      "filePath": "tests/regression/test-0000018-req-005-build-log-telemetry-record.sh"
-    },
-    {
-      "name": "test-0000018-req-006-telemetry-standards-update.sh",
-      "sourceFeature": "0000018-telemetry-emission-consistency",
-      "promotionDate": "2026-08-01",
-      "promotedBy": "agent",
-      "filePath": "tests/regression/test-0000018-req-006-telemetry-standards-update.sh"
-    },
-    {
       "name": "test-0000018-req-007-discovery-md-hard-limit.sh",
       "sourceFeature": "0000018-telemetry-emission-consistency",
       "promotionDate": "2026-08-01",
@@ -120,13 +92,6 @@
       "promotionDate": "2026-08-01",
       "promotedBy": "agent",
       "filePath": "tests/regression/test-regression-pack.sh"
-    },
-    {
-      "name": "test-skill-telemetry.sh",
-      "sourceFeature": "0000018-telemetry-emission-consistency",
-      "promotionDate": "2026-08-01",
-      "promotedBy": "agent",
-      "filePath": "tests/regression/test-skill-telemetry.sh"
     }
   ]
 }

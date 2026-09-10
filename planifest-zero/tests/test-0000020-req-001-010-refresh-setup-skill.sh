@@ -43,8 +43,8 @@ echo ""
 echo "=== req-002: flag reconstruction with confidence ==="
 
 assert_contains "high" "$STEP3" "req-002: marker-sourced flags reported at high confidence"
-assert_contains "PLANIFEST_TELEMETRY_URL=<url>" "$STEP3" \
-  "req-002: telemetry backend URL signal mapped to --backend-url"
+assert_contains "No signal present for a given flag" "$STEP3" \
+  "req-002: absence of a signal maps to that flag not being used"
 assert_contains "plan/.orchestrator-strict\` file exists" "$STEP3" \
   "req-002: strict-orchestrator marker signal mapped"
 

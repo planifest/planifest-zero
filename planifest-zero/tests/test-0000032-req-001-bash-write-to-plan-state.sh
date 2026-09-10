@@ -4,10 +4,10 @@
 #
 # Covers ADR-001 (setup-config record lives in plan/state/): setup.sh's
 # write_setup_config_override writes plan/state/{tool}.md as the tracked,
-# git-versioned source of truth for active setup flags/backendUrl, in
+# git-versioned source of truth for the active setup flags, in
 # addition to (not instead of) the existing gitignored
 # {tool-dir}/.planifest-setup-flags marker. The marker continues to be
-# written and its flags/backendUrl must match the tracked file's for the
+# written and its flags must match the tracked file's for the
 # same run (ADR-001 decision 5 — both are regenerated from the same
 # current-run values, so they never disagree coming out of a single setup
 # run).
@@ -35,7 +35,7 @@ read_marker_field() {
 }
 
 # Reads a field from the tracked plan/state/{tool}.md file's fenced
-# ```json block — the same flags/backendUrl shape as the marker (req-001).
+# ```json block — the same tool/flags/writtenAt shape as the marker (req-001).
 read_config_field() {
   local file="$1"
   local field="$2"
@@ -46,6 +46,23 @@ read_config_field() {
       const j = JSON.parse(d);
       const v = j[process.argv[1]];
       console.log(v === undefined || v === null ? "null" : JSON.stringify(v));
+    });
+  ' "$field" 2>/dev/null
+}
+
+# Reports whether the tracked record's json block holds the named key at all.
+# read_config_field cannot tell an absent key from a null one — both print
+# "null" — so absence assertions use this instead (ADR-001 decision 6 drops
+# backendUrl entirely, and the key must not be present).
+config_has_key() {
+  local file="$1"
+  local field="$2"
+  awk '/^```json$/{flag=1; next} /^```$/{flag=0} flag' "$file" | node -e '
+    let d = "";
+    process.stdin.on("data", (c) => (d += c));
+    process.stdin.on("end", () => {
+      const j = JSON.parse(d);
+      console.log(Object.prototype.hasOwnProperty.call(j, process.argv[1]) ? "yes" : "no");
     });
   ' "$field" 2>/dev/null
 }
@@ -89,38 +106,31 @@ assert_equals '"claude-code"' "$(read_config_field "plan/state/claude-code.md" "
 assert_equals "[]" "$(read_config_field "plan/state/claude-code.md" "flags")" \
   "req-001 (a): tracked file flags empty when no flags passed"
 
-assert_equals "null" "$(read_config_field "plan/state/claude-code.md" "backendUrl")" \
-  "req-001 (a): tracked file backendUrl null when telemetry flag not passed"
+assert_equals "no" "$(config_has_key "plan/state/claude-code.md" "backendUrl")" \
+  "req-001 (a): tracked file carries no backendUrl key at all (ADR-001 dec 6)"
 
 cd "$SCRIPT_DIR"
 rm -rf "$WS"
 
-# ── (b): flags/backendUrl match between tracked file and marker ─────────────
+# ── (b): flags match between tracked file and marker ────────────────────────
 
 echo ""
 echo "=== req-001 (b): setup.sh claude-code with flags — tracked file and marker agree ==="
 
 WS=$(make_workspace); cd "$WS"
-bash planifest-zero/setup.sh claude-code --structured-telemetry-mcp \
-  --strict-orchestrator --backend-url http://example.test:9999 >/dev/null 2>&1
+bash planifest-zero/setup.sh claude-code --strict-orchestrator >/dev/null 2>&1
 assert_exit_zero $? "req-001 (b): setup exits 0 with all flags"
 
 CONFIG_FLAGS="$(read_config_field "plan/state/claude-code.md" "flags")"
 MARKER_FLAGS="$(read_marker_field ".claude/.planifest-setup-flags" "flags")"
 
-assert_contains "--structured-telemetry-mcp" "$CONFIG_FLAGS" "req-001 (b): tracked file records --structured-telemetry-mcp"
 assert_contains "--strict-orchestrator" "$CONFIG_FLAGS" "req-001 (b): tracked file records --strict-orchestrator"
 
 assert_equals "$MARKER_FLAGS" "$CONFIG_FLAGS" \
   "req-001 (b): tracked file flags match marker flags for the same run"
 
-CONFIG_URL="$(read_config_field "plan/state/claude-code.md" "backendUrl")"
-MARKER_URL="$(read_marker_field ".claude/.planifest-setup-flags" "backendUrl")"
-
-assert_equals '"http://example.test:9999"' "$CONFIG_URL" \
-  "req-001 (b): tracked file records custom --backend-url"
-assert_equals "$MARKER_URL" "$CONFIG_URL" \
-  "req-001 (b): tracked file backendUrl matches marker backendUrl for the same run"
+assert_equals "no" "$(config_has_key "plan/state/claude-code.md" "backendUrl")" \
+  "req-001 (b): tracked file carries no backendUrl key even on a flagged run (ADR-001 dec 6)"
 
 cd "$SCRIPT_DIR"
 rm -rf "$WS"
@@ -135,7 +145,7 @@ bash planifest-zero/setup.sh claude-code >/dev/null 2>&1
 
 FIRST_TOOL="$(read_config_field "plan/state/claude-code.md" "tool")"
 FIRST_FLAGS="$(read_config_field "plan/state/claude-code.md" "flags")"
-FIRST_URL="$(read_config_field "plan/state/claude-code.md" "backendUrl")"
+FIRST_HAS_URL="$(config_has_key "plan/state/claude-code.md" "backendUrl")"
 FIRST_WRITTEN_AT="$(read_config_field "plan/state/claude-code.md" "writtenAt")"
 
 sleep 1
@@ -145,15 +155,17 @@ assert_exit_zero $? "req-001 (c): second setup run exits 0"
 
 SECOND_TOOL="$(read_config_field "plan/state/claude-code.md" "tool")"
 SECOND_FLAGS="$(read_config_field "plan/state/claude-code.md" "flags")"
-SECOND_URL="$(read_config_field "plan/state/claude-code.md" "backendUrl")"
+SECOND_HAS_URL="$(config_has_key "plan/state/claude-code.md" "backendUrl")"
 SECOND_WRITTEN_AT="$(read_config_field "plan/state/claude-code.md" "writtenAt")"
 
 assert_equals "$FIRST_TOOL" "$SECOND_TOOL" \
   "req-001 (c): second run keeps the same tool field"
 assert_equals "$FIRST_FLAGS" "$SECOND_FLAGS" \
   "req-001 (c): second run keeps the same flags field"
-assert_equals "$FIRST_URL" "$SECOND_URL" \
-  "req-001 (c): second run keeps the same backendUrl field"
+assert_equals "no" "$FIRST_HAS_URL" \
+  "req-001 (c): first run writes no backendUrl key at all (ADR-001 dec 6)"
+assert_equals "$FIRST_HAS_URL" "$SECOND_HAS_URL" \
+  "req-001 (c): second run still writes no backendUrl key"
 
 if [ "$FIRST_WRITTEN_AT" != "$SECOND_WRITTEN_AT" ]; then
   WRITTEN_AT_CHANGED="yes"

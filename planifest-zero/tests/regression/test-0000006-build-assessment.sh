@@ -49,7 +49,7 @@ assert_contains "model tiers"                "$SHIP" "req-002: covers agent coun
 assert_contains "Parallelism used"           "$SHIP" "req-002: covers parallelism"
 assert_contains "Self-corrections"           "$SHIP" "req-002: covers self-corrections"
 assert_contains "avoidable"                  "$SHIP" "req-002: avoidability judged per self-correction"
-assert_contains "Telemetry gaps"             "$SHIP" "req-002: covers telemetry gaps"
+assert_contains "ran sequentially"           "$SHIP" "req-002: covers phases that ran sequentially"
 assert_contains "improvement suggestion"     "$SHIP" "req-002: one improvement suggestion per phase"
 assert_contains "build-report.md"            "$SHIP" "req-002: output path references build-report.md"
 assert_contains "build-log.md"               "$SHIP" "req-002: step reads build-log.md as input"

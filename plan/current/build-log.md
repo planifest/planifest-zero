@@ -88,13 +88,30 @@ Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.o
 | Start | `2026-09-10T06:46:13Z` |
 | Model tier | primary |
 | Skills loaded | planifest-orchestrator, planifest-codegen-agent |
+| Agents spawned | `7` |
+| MCP calls | `0` |
+| Parallel task batches | `4` |
+| Telemetry | confirmed-disabled |
+| Notes | Batch 1 of 4: req-001 deletions (35 paths, import graph verified, 4 enforcement suites pass with 72 assertions), req-005 and req-006 (12 skills, 2 templates, product.yml), req-007 (5 docs). Only remaining telemetry mention in planifest-zero is backend-stack-evaluation.md, a false positive about OpenTelemetry SDK maturity in language evaluations. Decision recorded in ADR-001 point 6: drop backendUrl from the record and marker, since it could only ever be null after removal. Narrows 0000032 ADR 001's record shape. Batch 2: req-002 33/33, req-003 19/19, both setup scripts clean. Filed backlog 0000090 after confirming setup.ps1 has never wired ratchet-check or em-dash-guard, on main too. Batch 3: req-004 51/51, cleanup ordered before the enforcement install so the installer stays the last writer of settings.json.
+
+Requirement Change (P3 active, contradictory, resolved in place): req-002 and req-003 each carried the acceptance criterion "grep -i telemetry returns no matches" against their setup script. req-004 and ADR-002 require the legacy-cleanup function to name nine telemetry module names, the mcp__structured-telemetry-mcp__emit_event matcher, and three telemetry paths, so no implementation can satisfy both. The two criteria were written before the cleanup existed in the same file. Resolved by making both criteria more precise rather than weaker: the script must declare no telemetry flag, install no telemetry hook, write no telemetry entry, and write no telemetry sentinel, and every remaining telemetry string must sit inside the cleanup function. No design decision changed. Re-ran req-002 and req-003 against the amended criteria.
+
+Batch 4: req-008 rewrote 16 suites, pruned 5 stale entries from regression-manifest.json, and added a check that every manifest entry names a file on disk, closing the silent-skip gap of backlog 0000084 for the regression pack. Orchestrator also re-pointed test-0000031-req-001-rename.sh case (c), which asserted product.yml's top-level id: ADR-003 removed that field, so the assertion now proves its absence and that components[] still names the component.
+
+Final P3 state: 44 feature suites passed, 1 failed. Regression 12 passed, 0 failed. Suite arithmetic reconciles: 57 baseline, minus 20 deleted, plus 3 new, equals 45. The single failure is test-0000031-req-001-rename.sh, failing its two backlog-0000086 assertions about planifest-framework/ existing, identical to main. One anomaly investigated and dismissed: test-0000010 prints a "FAIL: 0" summary line in a different format and passes with 15 assertions, exit 0. Gate passed under continuous run at 2026-09-10T07:15:47Z. |
+
+### P4: Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-09-10T07:15:47Z` |
+| Model tier | primary |
+| Skills loaded | planifest-orchestrator, planifest-validate-and-accept |
 | Agents spawned | `pending` |
 | MCP calls | `0` |
 | Parallel task batches | `pending` |
 | Telemetry | confirmed-disabled |
-| Notes | Batch 1 of 4: req-001 deletions (35 paths, import graph verified, 4 enforcement suites pass with 72 assertions), req-005 and req-006 (12 skills, 2 templates, product.yml), req-007 (5 docs). Only remaining telemetry mention in planifest-zero is backend-stack-evaluation.md, a false positive about OpenTelemetry SDK maturity in language evaluations. Decision recorded in ADR-001 point 6: drop backendUrl from the record and marker, since it could only ever be null after removal. Narrows 0000032 ADR 001's record shape. Batch 2: req-002 33/33, req-003 19/19, both setup scripts clean. Filed backlog 0000090 after confirming setup.ps1 has never wired ratchet-check or em-dash-guard, on main too. Batch 3: req-004 51/51, cleanup ordered before the enforcement install so the installer stays the last writer of settings.json.
-
-Requirement Change (P3 active, contradictory, resolved in place): req-002 and req-003 each carried the acceptance criterion "grep -i telemetry returns no matches" against their setup script. req-004 and ADR-002 require the legacy-cleanup function to name nine telemetry module names, the mcp__structured-telemetry-mcp__emit_event matcher, and three telemetry paths, so no implementation can satisfy both. The two criteria were written before the cleanup existed in the same file. Resolved by making both criteria more precise rather than weaker: the script must declare no telemetry flag, install no telemetry hook, write no telemetry entry, and write no telemetry sentinel, and every remaining telemetry string must sit inside the cleanup function. No design decision changed. Re-ran req-002 and req-003 against the amended criteria. |
+| Notes | pending |
 
 ---
 

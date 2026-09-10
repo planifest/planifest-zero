@@ -85,7 +85,7 @@ FRONTMATTER_NAME=$(grep "^name:" "$OPTIMISE_FILE" | head -1 | awk '{print $2}')
 assert_equals "planifest-optimise-agent" "$FRONTMATTER_NAME" "req-003: frontmatter name matches directory"
 
 assert_contains "bundle_standards"            "$OPTIMISE" "req-003: frontmatter has bundle_standards"
-assert_contains "hooks:"                      "$OPTIMISE" "req-003: frontmatter has hooks"
+assert_contains "description:"                "$OPTIMISE" "req-003: frontmatter has description"
 assert_contains "planifest-zero/skills/" "$OPTIMISE" "req-003: skill targets planifest-zero/skills/"
 assert_contains "Do NOT review"              "$OPTIMISE" "req-003: skill explicitly excludes out-of-scope directories"
 
@@ -105,14 +105,13 @@ assert_contains "Never write"                 "$OPTIMISE" "req-003: hard limit �
 echo ""
 echo "=== req-004: skill boilerplate removal ==="
 
-TELEMETRY_POINTER="telemetry-standards.md"
-
-# Phase skills that emit telemetry events — must reference telemetry-standards.md
+# Phase skills must declare their bundled standards in frontmatter.
+# (0000033: the telemetry-standards.md pointer assertion is gone — see below.)
 for skill in planifest-plan planifest-implement \
              planifest-validate-and-accept planifest-ship; do
   SKILL_CONTENT=$(cat "$SKILLS/$skill/SKILL.md")
-  assert_contains "$TELEMETRY_POINTER" "$SKILL_CONTENT" "req-004: $skill references telemetry-standards.md"
   assert_contains "bundle_standards" "$SKILL_CONTENT" "req-004: $skill has bundle_standards in frontmatter"
+  assert_not_contains "telemetry-standards.md" "$SKILL_CONTENT" "req-004: $skill no longer bundles telemetry-standards.md"
 done
 
 # Sub-agent skills (footer-only removal) — verify skill files still exist and are valid
@@ -130,18 +129,18 @@ done
 # -----------------------------------------------------------------------
 
 echo ""
-echo "=== req-005: telemetry standards extraction ==="
+echo "=== req-005: telemetry standards extraction (retired by 0000033) ==="
 
-TELEM_FILE="$STANDARDS/telemetry-standards.md"
-assert_file_exists "$TELEM_FILE" "req-005: telemetry-standards.md exists"
-
-TELEM=$(cat "$TELEM_FILE")
-assert_contains "phase_start"       "$TELEM" "req-005: telemetry-standards has phase_start event"
-assert_contains "phase_end"         "$TELEM" "req-005: telemetry-standards has phase_end event"
-assert_contains "schema_version"    "$TELEM" "req-005: telemetry-standards has schema_version in envelope"
-assert_contains "emit_event"        "$TELEM" "req-005: telemetry-standards references emit_event"
-assert_contains "telemetry-enabled" "$TELEM" "req-005: telemetry-standards references telemetry-enabled sentinel"
-assert_contains "orchestrator"      "$TELEM" "req-005: telemetry-standards documents phase_start/phase_end ownership"
+# 0000033 removed telemetry from planifest-zero: standards/telemetry-standards.md
+# is deleted, so every assertion about its contents is gone. What remains is the
+# strengthened inverse: the file must not come back.
+if [ -e "$STANDARDS/telemetry-standards.md" ]; then
+  echo "  FAIL: req-005: telemetry-standards.md is retired and must not exist"
+  ((FAIL++)) || true
+else
+  echo "  PASS: req-005: telemetry-standards.md is retired and absent"
+  ((PASS++)) || true
+fi
 
 # -----------------------------------------------------------------------
 

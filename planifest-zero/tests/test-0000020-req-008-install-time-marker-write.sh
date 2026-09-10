@@ -6,8 +6,9 @@
 # <tool-dir>/.planifest-setup-flags for non-Claude-Code tools, since the marker
 # doubles as the refresh skill's retry cache per tool, see ADR-002 and
 # src/setup-hook-integration/docs/data-contract.md) on every successful install,
-# recording the tool name, flags passed, backend URL (if telemetry was enabled),
-# a timestamp, and attemptStatus: completed.
+# recording the tool name, flags passed, a timestamp, and
+# attemptStatus: completed. Feature 0000033 ADR-001 decision 6 dropped the
+# backendUrl field along with the telemetry flags.
 
 set -uo pipefail
 
@@ -29,6 +30,17 @@ with open('$file') as f:
     data = json.load(f)
 val = data.get('$field')
 print(json.dumps(val))
+" 2>/dev/null
+}
+
+has_json_key() {
+  local file="$1"
+  local field="$2"
+  python3 -c "
+import json
+with open('$file') as f:
+    data = json.load(f)
+print('yes' if '$field' in data else 'no')
 " 2>/dev/null
 }
 
@@ -59,8 +71,8 @@ assert_equals '"claude-code"' "$(read_json_field ".claude/.planifest-setup-flags
 assert_equals "[]" "$(read_json_field ".claude/.planifest-setup-flags" "flags")" \
   "(a): flags field is empty array when no flags passed"
 
-assert_equals "null" "$(read_json_field ".claude/.planifest-setup-flags" "backendUrl")" \
-  "(a): backendUrl is null when telemetry flag not passed"
+assert_equals "no" "$(has_json_key ".claude/.planifest-setup-flags" "backendUrl")" \
+  "(a): marker has no backendUrl key at all"
 
 assert_equals '"completed"' "$(read_json_field ".claude/.planifest-setup-flags" "attemptStatus")" \
   "(a): attemptStatus is completed after a successful install"
@@ -68,22 +80,20 @@ assert_equals '"completed"' "$(read_json_field ".claude/.planifest-setup-flags" 
 cd "$SCRIPT_DIR"
 rm -rf "$WS"
 
-# ── (b): setup.sh records every flag passed, plus backend URL ───────────────
+# ── (b): setup.sh records every flag passed ─────────────────────────────────
 
 echo ""
 echo "=== (b): setup.sh claude-code with all flags records them all ==="
 
 WS=$(make_workspace); cd "$WS"
-bash planifest-zero/setup.sh claude-code --structured-telemetry-mcp \
-  --strict-orchestrator --backend-url http://example.test:9999 >/dev/null 2>&1
+bash planifest-zero/setup.sh claude-code --strict-orchestrator >/dev/null 2>&1
 assert_exit_zero $? "(b): setup exits 0 with all flags"
 
 FLAGS_JSON="$(read_json_field ".claude/.planifest-setup-flags" "flags")"
-assert_contains "--structured-telemetry-mcp" "$FLAGS_JSON" "(b): --structured-telemetry-mcp recorded"
 assert_contains "--strict-orchestrator" "$FLAGS_JSON" "(b): --strict-orchestrator recorded"
 
-assert_equals '"http://example.test:9999"' "$(read_json_field ".claude/.planifest-setup-flags" "backendUrl")" \
-  "(b): custom --backend-url value recorded"
+assert_equals "no" "$(has_json_key ".claude/.planifest-setup-flags" "backendUrl")" \
+  "(b): marker still has no backendUrl key after a flagged install"
 
 cd "$SCRIPT_DIR"
 rm -rf "$WS"

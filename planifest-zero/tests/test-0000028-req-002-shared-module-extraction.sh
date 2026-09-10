@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
-# Tests for feature 0000028, req-002: extract duplicated hook logic into
-# shared modules under hooks/enforcement/ and hooks/telemetry/ (ADR-002),
-# sequenced so no caller ever imports a module absent from the same commit
-# (ADR-004).
+# Tests for feature 0000028, req-002: extract duplicated hook logic into a
+# shared module under hooks/enforcement/ (ADR-002), sequenced so no caller ever
+# imports a module absent from the same commit (ADR-004).
+#
+# Scope after feature 0000033 removed telemetry: hooks/telemetry/ is gone, and
+# with it read-product-id.mjs, record-telemetry-failure.mjs, get-flag-path.mjs,
+# emit-event.mjs and phase-enum.mjs. The one shared module req-002 left behind
+# is hooks/enforcement/read-stdin.mjs, so this suite covers that module and its
+# six real importers.
 #
 # Covers:
-#   1. Each extracted helper has exactly one definition left in hooks/.
-#   2. Every shared module exists and every caller imports it by relative path.
+#   1. readStdin has exactly one definition left in hooks/.
+#   2. The shared module exists and every importer takes it by relative path.
 #   3. The shared readStdin settles on a stdin stream error rather than
-#      hanging, and every caller still exits 0 on that path (NFR-001). This is
+#      hanging, and every importer still exits 0 on that path (NFR-001). This is
 #      the deliberate behaviour change req-002 calls out: before extraction
-#      only context-pressure.mjs wired stdin.on("error", reject).
-#   4. The phase enum is defined once and both lookup tables plus the
-#      validation set derive from it, with values matching what the three
-#      hooks encoded independently before extraction.
-#   5. Placement: the always-installed hooks/enforcement/ tree holds anything
-#      an enforcement hook imports; no enforcement hook imports from the
-#      conditionally-installed hooks/telemetry/ tree.
-#   6. The tier 1 install glob copies shared telemetry modules, verified by
-#      running setup.sh into scratch workspaces across all 4 install-flag
-#      combinations and invoking the installed hooks.
-#   7. getSessionId is deliberately NOT consolidated (3 behaviour profiles).
+#      most per-hook copies wired no stdin.on("error", reject).
+#   4. Placement: the always-installed hooks/enforcement/ tree holds everything
+#      an enforcement hook imports, so no enforcement hook reaches outside it.
+#   5. The install glob copies the shared module, verified by running setup.sh
+#      into a scratch workspace with no flags and invoking an installed hook.
 
 set -uo pipefail
 
@@ -30,20 +29,13 @@ source "$SCRIPT_DIR/helpers/assert.sh"
 FRAMEWORK_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"
 HOOKS="$FRAMEWORK_SRC/hooks"
 ENF="$HOOKS/enforcement"
-TEL="$HOOKS/telemetry"
 
-# readStdin callers: the 12 req-002 named (7 enforcement + 5 telemetry), plus
-# em-dash-guard.mjs, which req-006 added to hooks/enforcement/ during this same
-# feature with its own local copy. It is folded in here rather than left as a
-# 13th copy, since req-002's acceptance criterion is one definition in
-# hooks/, not one definition among the files that existed when it was written.
+# The six enforcement hooks that import the shared readStdin. Every other
+# former caller lived in hooks/telemetry/ and no longer exists.
 READSTDIN_CALLERS=(
   "$ENF/auto-trigger-orchestrator.mjs" "$ENF/check-design.mjs"
-  "$ENF/check-orchestrator-presence.mjs" "$ENF/check-telemetry-failures.mjs"
-  "$ENF/check-telemetry-receipts.mjs" "$ENF/em-dash-guard.mjs"
+  "$ENF/check-orchestrator-presence.mjs" "$ENF/em-dash-guard.mjs"
   "$ENF/gate-write.mjs" "$ENF/ratchet-check.mjs"
-  "$TEL/context-pressure.mjs" "$TEL/emit-event-receipt.mjs" "$TEL/emit-phase-end.mjs"
-  "$TEL/emit-phase-start.mjs" "$TEL/resolve-phase.mjs"
 )
 
 count_defs() {
@@ -61,64 +53,53 @@ make_workspace() {
   cp -r "$FRAMEWORK_SRC" "$dir/planifest-zero"
   git init "$dir" >/dev/null 2>&1
   git config --global --add safe.directory "$dir" >/dev/null 2>&1 || true
-  printf 'id: req002-test-product\n' > "$dir/product.yml"
+  printf 'components: []\n' > "$dir/product.yml"
   echo "$dir"
 }
 
 # =============================================================================
-# 1. Each extracted helper has exactly one definition remaining
+# 1. readStdin has exactly one definition remaining
 # =============================================================================
 
 echo ""
-echo "=== req-002: each extracted helper has exactly one definition ==="
+echo "=== req-002: readStdin has exactly one definition ==="
 
-assert_equals "1" "$(count_defs '^export function readStdin' "$ENF" "$TEL")" \
+assert_equals "1" "$(count_defs '^export function readStdin' "$ENF")" \
   "req-002: readStdin is defined exactly once across the hook trees"
-assert_equals "0" "$(count_defs '^function readStdin' "$ENF" "$TEL")" \
-  "req-002: no enforcement or telemetry hook declares a local readStdin"
-assert_equals "1" "$(count_defs '^export function readProductId' "$ENF" "$TEL")" \
-  "req-002: readProductId is defined exactly once"
-assert_equals "0" "$(count_defs '^function readProductId' "$ENF" "$TEL")" \
-  "req-002: no local readProductId copies remain"
-assert_equals "1" "$(count_defs '^export function recordTelemetryFailure' "$ENF" "$TEL")" \
-  "req-002: recordTelemetryFailure is defined exactly once"
-assert_equals "0" "$(count_defs '^function recordTelemetryFailure' "$ENF" "$TEL")" \
-  "req-002: no local recordTelemetryFailure copies remain"
-assert_equals "1" "$(count_defs '^export function getFlagPath' "$ENF" "$TEL")" \
-  "req-002: getFlagPath is defined exactly once"
-assert_equals "0" "$(count_defs '^function getFlagPath' "$ENF" "$TEL")" \
-  "req-002: no local getFlagPath copies remain"
-assert_equals "1" "$(count_defs '^export async function postEvent' "$ENF" "$TEL")" \
-  "req-002: the emit fetch helper is defined exactly once"
+assert_equals "0" "$(count_defs '^function readStdin' "$HOOKS")" \
+  "req-002: no hook declares a local readStdin"
 
-# The AbortController/fetch block must exist only in the shared module now.
-assert_equals "1" "$(count_defs 'new AbortController' "$ENF" "$TEL")" \
-  "req-002: the AbortController emit block survives in exactly one file"
-ABORT_FILE="$(grep -rl 'new AbortController' "$ENF" "$TEL" 2>/dev/null)"
-assert_equals "$TEL/emit-event.mjs" "$ABORT_FILE" \
-  "req-002: that one file is hooks/telemetry/emit-event.mjs"
+# The single definition must be the shared module itself, not a hook that
+# happens to export it.
+DEF_FILE="$(grep -rl '^export function readStdin' "$HOOKS" 2>/dev/null)"
+assert_equals "$ENF/read-stdin.mjs" "$DEF_FILE" \
+  "req-002: that one definition lives in hooks/enforcement/read-stdin.mjs"
 
 # =============================================================================
-# 2. Shared modules exist and every caller imports them
+# 2. The shared module exists and every importer takes it
 # =============================================================================
 
 echo ""
-echo "=== req-002: shared modules exist and callers import them ==="
+echo "=== req-002: the shared module exists and callers import it ==="
 
-for m in "$ENF/read-stdin.mjs" "$ENF/phase-enum.mjs" "$TEL/read-product-id.mjs" \
-         "$TEL/record-telemetry-failure.mjs" "$TEL/get-flag-path.mjs" "$TEL/emit-event.mjs"; do
-  if [ -f "$m" ]; then
-    assert_equals "0" "0" "req-002: shared module exists: ${m#$FRAMEWORK_SRC/}"
-  else
-    assert_equals "exists" "missing" "req-002: shared module exists: ${m#$FRAMEWORK_SRC/}"
-  fi
-done
+if [ -f "$ENF/read-stdin.mjs" ]; then
+  assert_equals "0" "0" "req-002: shared module exists: hooks/enforcement/read-stdin.mjs"
+else
+  assert_equals "exists" "missing" "req-002: shared module exists: hooks/enforcement/read-stdin.mjs"
+fi
 
 for caller in "${READSTDIN_CALLERS[@]}"; do
   CONTENT="$(cat "$caller")"
-  assert_contains "read-stdin.mjs" "$CONTENT" \
+  assert_contains 'import { readStdin } from "./read-stdin.mjs";' "$CONTENT" \
     "req-002: $(basename "$caller") imports the shared readStdin"
 done
+
+# The importer list must be the whole set: a hook added later with its own
+# inline copy would otherwise go unnoticed.
+ACTUAL_IMPORTERS="$(grep -rl 'read-stdin.mjs' "$HOOKS" 2>/dev/null | sort | tr '\n' ' ')"
+EXPECTED_IMPORTERS="$(printf '%s\n' "${READSTDIN_CALLERS[@]}" | sort | tr '\n' ' ')"
+assert_equals "$EXPECTED_IMPORTERS" "$ACTUAL_IMPORTERS" \
+  "req-002: the six enforcement hooks are the complete set of readStdin importers"
 
 # Every import in every hook must resolve on disk. A missing shared module is
 # an ESM module-load failure, which happens before the hook's own try/catch and
@@ -139,7 +120,7 @@ UNRESOLVED=$(node -e '
     }
   }
   console.log(missing.join(","));
-' "$ENF" "$TEL")
+' "$ENF")
 assert_equals "" "$UNRESOLVED" "req-002: no hook imports a module that is absent from the source tree"
 
 # =============================================================================
@@ -220,137 +201,88 @@ for caller in "${READSTDIN_CALLERS[@]}"; do
 done
 
 # =============================================================================
-# 4. The phase enum is defined once and both lookups derive from it
+# 4. Placement: enforcement is a self-contained, always-installed tree
 # =============================================================================
 
 echo ""
-echo "=== req-002: the phase enum has one definition, all lookups derived ==="
+echo "=== req-002: no enforcement hook imports from outside hooks/enforcement/ ==="
 
-PHASE_CHECK=$(node --input-type=module -e "
-  import { PHASE_ENUM, KNOWN_PHASES, PHASE_NUMBER_TO_ENUM, PHASE_SKILLS } from '$ENF/phase-enum.mjs';
-  const expectedEnum = ['discovery','plan','implement','validate-and-accept','ship'];
-  // Values the three hooks encoded independently before extraction.
-  const expectedNumbers = {1:'discovery',2:'plan',3:'implement',4:'validate-and-accept',5:'ship'};
-  const expectedSkills = {
-    'planifest-orchestrator':'discovery','planifest-plan':'plan','planifest-implement':'implement',
-    'planifest-validate-and-accept':'validate-and-accept','planifest-ship':'ship'};
-  const errs = [];
-  if (JSON.stringify(PHASE_ENUM) !== JSON.stringify(expectedEnum)) errs.push('enum');
-  if (JSON.stringify(PHASE_NUMBER_TO_ENUM) !== JSON.stringify(expectedNumbers)) errs.push('numbers');
-  if (JSON.stringify(PHASE_SKILLS) !== JSON.stringify(expectedSkills)) errs.push('skills');
-  if (JSON.stringify([...KNOWN_PHASES]) !== JSON.stringify(expectedEnum)) errs.push('known');
-  if (PHASE_NUMBER_TO_ENUM[0] !== undefined) errs.push('P0-should-be-absent');
-  console.log(errs.length ? errs.join(',') : 'OK');
-")
-assert_equals "OK" "$PHASE_CHECK" \
-  "req-002: derived phase lookups match the values the 3 hooks encoded before extraction"
+# Setup installs hooks/enforcement/ as a unit. Any relative import that escapes
+# that directory would resolve against a file setup never copies, which fails at
+# ESM module-load time before the hook's own try/catch can run.
+ESCAPING=$(node -e '
+  const fs = require("fs"), path = require("path");
+  const root = process.argv[1];
+  const bad = [];
+  for (const f of fs.readdirSync(root).filter((n) => n.endsWith(".mjs"))) {
+    const src = fs.readFileSync(path.join(root, f), "utf8");
+    for (const m of src.matchAll(/from\s+"(\.[^"]+)"/g)) {
+      const target = path.resolve(root, m[1]);
+      if (path.dirname(target) !== root) bad.push(`${f} -> ${m[1]}`);
+    }
+  }
+  console.log(bad.join(","));
+' "$ENF")
+assert_equals "" "$ESCAPING" \
+  "req-002: every relative import in an enforcement hook stays inside hooks/enforcement/"
 
-# A phase cannot be added to one key space without the others: all three
-# lookups must have consistent cardinality against PHASE_ENUM.
-DERIVE_CHECK=$(node --input-type=module -e "
-  import { PHASE_ENUM, KNOWN_PHASES, PHASE_NUMBER_TO_ENUM, PHASE_SKILLS } from '$ENF/phase-enum.mjs';
-  const skills = Object.keys(PHASE_SKILLS).length;
-  const known = KNOWN_PHASES.size;
-  const numbered = new Set(Object.values(PHASE_NUMBER_TO_ENUM)).size;
-  console.log(skills === PHASE_ENUM.length && known === PHASE_ENUM.length && numbered === PHASE_ENUM.length ? 'OK' : 'DRIFT');
-")
-assert_equals "OK" "$DERIVE_CHECK" "req-002: every phase lookup covers exactly the shared enum"
-
-# No hook may re-declare the enum locally.
-assert_equals "1" "$(count_defs 'PHASE_NUMBER_TO_ENUM = ' "$ENF" "$TEL")" \
-  "req-002: PHASE_NUMBER_TO_ENUM is assigned in exactly one file"
-assert_equals "1" "$(count_defs 'PHASE_SKILLS = ' "$ENF" "$TEL")" \
-  "req-002: PHASE_SKILLS is assigned in exactly one file"
-assert_equals "1" "$(count_defs 'KNOWN_PHASES = ' "$ENF" "$TEL")" \
-  "req-002: KNOWN_PHASES is assigned in exactly one file"
+if [ -f "$ENF/read-stdin.mjs" ]; then
+  assert_equals "0" "0" "req-002: read-stdin.mjs lives in the always-installed enforcement tree"
+else
+  assert_equals "enforcement" "elsewhere" "req-002: read-stdin.mjs lives in the always-installed enforcement tree"
+fi
 
 # =============================================================================
-# 5. Placement: enforcement is the always-installed superset
+# 5. Install topology: the shared module ships with the default install
 # =============================================================================
 
 echo ""
-echo "=== req-002: no enforcement hook imports from the conditional telemetry tree ==="
+echo "=== req-002: the shared module installs with a no-flag setup run ==="
 
-BAD_DIRECTION=$(grep -l 'from "\.\./telemetry/' "$ENF"/*.mjs 2>/dev/null | tr '\n' ' ')
-assert_equals "" "${BAD_DIRECTION% }" \
-  "req-002: enforcement hooks never import from hooks/telemetry/ (installed only with --structured-telemetry-mcp)"
-
-for f in "$ENF/phase-enum.mjs" "$ENF/read-stdin.mjs"; do
-  if [ -f "$f" ]; then
-    assert_equals "0" "0" "req-002: $(basename "$f") lives in the always-installed enforcement tree"
-  else
-    assert_equals "enforcement" "telemetry" "req-002: $(basename "$f") lives in the always-installed enforcement tree"
-  fi
-done
-
-# =============================================================================
-# 6. Install topology across all 4 flag combinations
-# =============================================================================
-
-echo ""
-echo "=== req-002: shared modules install with telemetry on and off ==="
-
-# (a) Telemetry OFF — hooks/telemetry/ is absent entirely, so
-# check-telemetry-receipts.mjs proves the phase-enum placement decision.
 WS=$(make_workspace); cd "$WS"
 bash planifest-zero/setup.sh claude-code >/dev/null 2>&1
-if [ -d "$WS/.claude/hooks/telemetry" ]; then
-  assert_equals "absent" "present" "req-002: telemetry tree is absent without --structured-telemetry-mcp"
-else
-  assert_equals "0" "0" "req-002: telemetry tree is absent without --structured-telemetry-mcp"
-fi
-mkdir -p "$WS/plan/current"
-printf '### P3: Implement\n\n| Telemetry | emitted |\n' > "$WS/plan/current/build-log.md"
-RECEIPT_OUT=$(printf '{"cwd":"%s"}' "$WS" | node "$WS/.claude/hooks/enforcement/check-telemetry-receipts.mjs" 2>&1)
-assert_exit_zero $? "req-002: check-telemetry-receipts exits 0 with telemetry uninstalled"
-assert_contains "P3 (phase: implement)" "$RECEIPT_OUT" \
-  "req-002: check-telemetry-receipts resolves the phase enum with hooks/telemetry/ absent"
-cd /; rm -rf "$WS"
 
-# (b) Telemetry ON — the full *.mjs glob copies every shared module.
-WS=$(make_workspace); cd "$WS"
-bash planifest-zero/setup.sh claude-code --structured-telemetry-mcp >/dev/null 2>&1
-MISSING=""
-for m in read-product-id.mjs record-telemetry-failure.mjs get-flag-path.mjs emit-event.mjs resolve-phase.mjs; do
-  [ -f "$WS/.claude/hooks/telemetry/$m" ] || MISSING="$MISSING $m"
+if [ -f "$WS/.claude/hooks/enforcement/read-stdin.mjs" ]; then
+  assert_equals "0" "0" "req-002: setup.sh installs hooks/enforcement/read-stdin.mjs with no flags"
+else
+  assert_equals "installed" "missing" "req-002: setup.sh installs hooks/enforcement/read-stdin.mjs with no flags"
+fi
+
+# Every installed importer must sit beside the module it imports.
+INST_MISSING=""
+for caller in "${READSTDIN_CALLERS[@]}"; do
+  NAME="$(basename "$caller")"
+  [ -f "$WS/.claude/hooks/enforcement/$NAME" ] || INST_MISSING="$INST_MISSING $NAME"
 done
-assert_equals "" "$MISSING" "req-002: telemetry on installs every shared telemetry module"
+assert_equals "" "$INST_MISSING" "req-002: every readStdin importer installs alongside the shared module"
 
-# The installed emit hook must run end to end: with an unreachable backend, the
-# shared recordTelemetryFailure writes a marker. That marker can only exist if
-# all five shared imports resolved.
-#
-# getFlagPath keys the phase-start dedup flag on session_id+phase alone, in the
-# shared OS tmpdir, not scoped to this test's workspace. A fixed session id
-# collides with a flag left by a prior run of this same file and short-circuits
-# emission before a marker is written. Use a run-unique id.
-T_SESSION="t-$$-$(date +%s%N 2>/dev/null || date +%s)"
-printf '{"cwd":"%s","session_id":"%s"}' "$WS" "$T_SESSION" \
-  | PLANIFEST_SESSION_ID="$T_SESSION" PLANIFEST_TELEMETRY_URL=http://127.0.0.1:39499 \
-    node "$WS/.claude/hooks/telemetry/emit-phase-start.mjs" codegen >/dev/null 2>&1
-assert_exit_zero $? "req-002: installed emit-phase-start exits 0"
-if ls "$WS/plan/.telemetry-failures"/*.json >/dev/null 2>&1; then
-  assert_equals "0" "0" "req-002: emit-phase-start ran end to end (shared marker written)"
-else
-  assert_equals "marker" "none" "req-002: emit-phase-start ran end to end (shared marker written)"
-fi
+# End to end: an installed hook must run against the installed copy of the
+# shared module. check-design.mjs reads stdin through readStdin and, with no
+# feature brief and no orchestrator sentinel, emits its STOP context. That
+# output can only appear if the shared import resolved in the installed tree.
+DESIGN_OUT=$(printf '{"cwd":"%s"}' "$WS" | node "$WS/.claude/hooks/enforcement/check-design.mjs" 2>&1)
+assert_exit_zero $? "req-002: installed check-design exits 0"
+assert_contains "[Planifest] STOP" "$DESIGN_OUT" \
+  "req-002: installed check-design read stdin through the installed shared module"
+
+# A second importer, on its own code path, to prove the install is not a
+# one-file accident. gate-write blocks a write to src/ when no design.md exists.
+# Reaching that block means the payload parsed: an unreadable stdin falls into
+# gate-write's own catch and exits 0 silently, so exit 2 plus the message is
+# only possible once the shared module resolved and returned the JSON.
+GATE_OUT=$(printf '{"tool_name":"Write","tool_input":{"file_path":"%s/src/app/main.ts"},"cwd":"%s"}' "$WS" "$WS" \
+  | node "$WS/.claude/hooks/enforcement/gate-write.mjs" 2>&1)
+GATE_EXIT=$?
+assert_equals "2" "$GATE_EXIT" "req-002: installed gate-write blocks a src/ write with no design.md"
+assert_contains "No confirmed design" "$GATE_OUT" \
+  "req-002: installed gate-write parsed its stdin payload through the shared module"
+
 cd /; rm -rf "$WS"
 
-# setup.ps1 parity: the telemetry filter is the same widened *.mjs glob.
+# setup.ps1 parity: the enforcement install uses the same *.mjs glob, so the
+# shared module ships on Windows too.
 PS1_CONTENT="$(cat "$FRAMEWORK_SRC/setup.ps1")"
 assert_contains "Get-ChildItem -Path \$src -Filter '*.mjs'" "$PS1_CONTENT" \
-  "req-002: setup.ps1 telemetry filter is the widened *.mjs glob"
-
-# =============================================================================
-# 7. getSessionId is deliberately NOT consolidated
-# =============================================================================
-
-echo ""
-echo "=== req-002: getSessionId is deliberately left un-consolidated ==="
-
-assert_equals "4" "$(count_defs '^function getSessionId' "$TEL")" \
-  "req-002: all 4 getSessionId copies remain (3 distinct behaviour profiles)"
-assert_contains "creates" "$(cat "$TEL/emit-phase-start.mjs")" \
-  "req-002: emit-phase-start documents why its getSessionId stays local"
+  "req-002: setup.ps1 copies enforcement hooks with the same *.mjs glob"
 
 print_summary

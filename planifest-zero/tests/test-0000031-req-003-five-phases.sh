@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Feature 0000031 req-003: five phases, 12 skills, five-value enum.
+# Feature 0000031 req-003: five phases, 12 skills, five phase names in pipeline-reference.
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 FRAMEWORK="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -13,22 +13,14 @@ for s in planifest-orchestrator planifest-plan planifest-implement planifest-val
   assert_equals "yes" "$([ -f "$FRAMEWORK/skills/$s/SKILL.md" ] && echo yes || echo no)" "skill $s present"
 done
 
-echo "=== (b) phase enum is exactly five values ==="
-ENUM=$(node -e "import('$FRAMEWORK/hooks/enforcement/phase-enum.mjs').then(m=>console.log(m.PHASE_ENUM.join(',')))")
-assert_equals "discovery,plan,implement,validate-and-accept,ship" "$ENUM" "PHASE_ENUM values"
-
-echo "=== (c) consumers derive from the enum ==="
-for f in enforcement/check-telemetry-receipts.mjs telemetry/resolve-phase.mjs telemetry/emit-event-receipt.mjs; do
-  assert_contains "phase-enum.mjs" "$(cat "$FRAMEWORK/hooks/$f")" "hooks/$f imports phase-enum"
-done
-
-echo "=== (d) telemetry-standards lists the five ==="
-STD="$FRAMEWORK/standards/telemetry-standards.md"
+echo "=== (b) pipeline-reference names exactly the five phases ==="
+REF="$FRAMEWORK/pipeline-reference.md"
+REF_TEXT="$(cat "$REF")"
 for p in discovery plan implement validate-and-accept ship; do
-  assert_contains "$p" "$(cat "$STD")" "telemetry-standards mentions $p"
+  assert_contains "\`$p\`" "$REF_TEXT" "pipeline-reference names phase $p"
 done
-for old in '"spec"' '"adr"' '"codegen"' '"security"' '"docs"'; do
-  assert_equals "0" "$(grep -c "$old" "$STD" || true)" "old enum value $old gone from standards"
+for old in spec adr codegen security docs; do
+  assert_equals "0" "$(grep -c "\`$old\`" "$REF" || true)" "old phase name $old gone from pipeline-reference"
 done
 
 echo "=== (e) CI posts all five phase names ==="

@@ -41,8 +41,8 @@ assert_contains "tool" "$STEP3" \
   "req-004: validation requires the tool field"
 assert_contains "flags" "$STEP3" \
   "req-004: validation requires the flags field"
-assert_contains "backendUrl" "$STEP3" \
-  "req-004: validation requires the backendUrl field"
+assert_contains 'all three fields: `tool`, `flags`, `writtenAt`' "$STEP3" \
+  "req-004: validation requires exactly the tool, flags and writtenAt fields"
 assert_contains "writtenAt" "$STEP3" \
   "req-004: validation requires the writtenAt field"
 assert_contains "matches the target" "$STEP3" \
@@ -77,14 +77,17 @@ assert_contains 'attemptStatus: "pending"' "$STEP2" \
 echo ""
 echo "=== req-004: the record's values are validated, not just its shape ==="
 
-assert_contains "--structured-telemetry-mcp" "$STEP3" \
-  "req-004: Step 3 names the allowed flag --structured-telemetry-mcp"
+if echo "$STEP3" | grep -q -- "--structured-telemetry-mcp"; then
+  NAMES_REMOVED_FLAG="yes"
+else
+  NAMES_REMOVED_FLAG="no"
+fi
+assert_equals "no" "$NAMES_REMOVED_FLAG" \
+  "req-004: Step 3 no longer names the removed flag --structured-telemetry-mcp"
 assert_contains "--strict-orchestrator" "$STEP3" \
   "req-004: Step 3 names the allowed flag --strict-orchestrator"
 assert_contains "allowed set" "$STEP3" \
   "req-004: Step 3 constrains flags to an allowed set"
-assert_contains 'https?://' "$STEP3" \
-  "req-004: Step 3 constrains backendUrl to an http(s) URL pattern"
 assert_contains "shell metacharacter" "$STEP3" \
   "req-004: Step 3 states why unvalidated values are refused"
 

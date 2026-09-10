@@ -64,15 +64,24 @@ assert_equals "yes" "$ORDER_OK" \
 echo ""
 echo "=== req-002: record shape matches the bash version field for field ==="
 
-# Only the [ordered]@{...} hash literal defines field order — the flags/backendUrl
+# Only the [ordered]@{...} hash literal defines field order — the tool/flags
 # names also appear earlier in the function body (param checks), so scope the
 # extraction to the hash block itself.
 ORDERED_HASH="$(echo "$BODY" | awk '/\[ordered\]@\{/{flag=1} flag{print} flag && /\}/{if (/\[ordered\]@\{/ == 0) exit}')"
 FIELD_ORDER="$(echo "$ORDERED_HASH" | grep -oE '^\s*(tool|flags|backendUrl|writtenAt)\s*=' | grep -oE '(tool|flags|backendUrl|writtenAt)')"
-EXPECTED_ORDER=$'tool\nflags\nbackendUrl\nwrittenAt'
+EXPECTED_ORDER=$'tool\nflags\nwrittenAt'
 
 assert_equals "$EXPECTED_ORDER" "$FIELD_ORDER" \
-  "req-002: here-string/JSON block declares tool, flags, backendUrl, writtenAt in bash order"
+  "req-002: here-string/JSON block declares tool, flags, writtenAt in bash order"
+
+# ADR-001 decision 6 drops backendUrl from the record entirely.
+if echo "$BODY" | grep -q "backendUrl"; then
+  FOUND_BACKEND_URL="yes"
+else
+  FOUND_BACKEND_URL="no"
+fi
+assert_equals "no" "$FOUND_BACKEND_URL" \
+  "req-002: Write-SetupConfigOverride does not mention backendUrl anywhere"
 
 echo ""
 echo "=== req-002: success/failure messaging names the new path ==="

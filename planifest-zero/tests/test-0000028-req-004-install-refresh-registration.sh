@@ -22,18 +22,13 @@ source "$SCRIPT_DIR/helpers/assert.sh"
 SETUP_SH="$FRAMEWORK_DIR/setup.sh"
 setup_content=$(cat "$SETUP_SH")
 
-echo "=== req-004: setup.sh wires every phase telemetry hook ==="
+echo "=== req-004: setup.sh retracts legacy telemetry wiring ==="
 
-assert_contains "merge_telemetry_hook_settings" "$setup_content" \
-  "req-004: setup.sh defines merge_telemetry_hook_settings"
-
-for wiring in "resolve-phase.mjs start" "resolve-phase.mjs end" "emit-event-receipt.mjs"; do
-  assert_contains "$wiring" "$setup_content" \
-    "req-004: setup.sh wires $wiring"
-done
-
+# 0000033 removed the telemetry hooks themselves. What setup.sh still owns is
+# the cleanup path that strips a pre-0000033 project's telemetry entries out of
+# settings.json, which is matched on the same emit_event MCP tool call.
 assert_contains "mcp__structured-telemetry-mcp__emit_event" "$setup_content" \
-  "req-004: receipt hook is matched on the emit_event MCP tool call"
+  "req-004: legacy telemetry cleanup matches the emit_event MCP tool call"
 
 echo ""
 echo "=== req-004: shared modules reach tier 1 installs ==="
@@ -53,15 +48,15 @@ echo "=== req-004 / SEC-001: enforcement hooks are invoked through node ==="
 # executable bit. That bit is a committed file mode, and 9 of 10 hook files are
 # mode 100644, so the shell could not exec them: the command exited 126 and the
 # hook silently never ran. A PreToolUse hook that fails to start looks exactly
-# like one that passed, so gate-write, em-dash-guard, check-design and both
-# telemetry backstops were dead on every bash install.
+# like one that passed, so gate-write, em-dash-guard and check-design were dead
+# on every bash install.
 #
 # The suite could not catch this before because every test invokes hooks via
 # `node` directly, never through the command string setup.sh actually writes.
 # These assertions check the wiring itself, which is where the defect lived.
+# The list is the six enforcement hooks that survive 0000033.
 for hook in gate-write ratchet-check em-dash-guard auto-trigger-orchestrator \
-            check-orchestrator-presence check-design check-telemetry-failures \
-            check-telemetry-receipts; do
+            check-orchestrator-presence check-design; do
   assert_contains "node \\\"\$hooks_dir_rel/$hook.mjs\\\"" "$setup_content" \
     "req-004: setup.sh invokes $hook.mjs through node, not as a bare path"
 done

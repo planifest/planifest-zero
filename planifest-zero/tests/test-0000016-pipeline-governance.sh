@@ -140,14 +140,11 @@ assert_contains "Decision"                 "$LS_T" "req-010: decision field (con
 
 # -----------------------------------------------------------------------
 echo ""
-echo "=== req-011: telemetry event types + toggles default off ==="
+echo "=== req-011: loop toggles default off ==="
 # -----------------------------------------------------------------------
-
-TEL=$(cat "$STANDARDS/telemetry-standards.md" 2>/dev/null || echo "")
-assert_contains "loop_iteration"             "$TEL" "req-011: loop_iteration event documented"
-assert_not_contains "phase_reversal_petitioned"  "$TEL" "req-011: reversal events retired from standards"
-assert_not_contains "phase_reversal_granted"     "$TEL" "req-011: granted event retired"
-assert_not_contains "phase_reversal_denied"      "$TEL" "req-011: denied event retired"
+# 0000033 removed telemetry from planifest-zero. The telemetry event-vocabulary
+# half of this section asserted over standards/telemetry-standards.md, which is
+# deleted; those four assertions are gone. The toggle half stands unchanged.
 
 assert_file_exists "$TEMPLATES/loop-toggles.template.yml" "req-011: loop-toggles.template.yml exists"
 TOG=$(cat "$TEMPLATES/loop-toggles.template.yml" 2>/dev/null || echo "")
