@@ -9,32 +9,15 @@
 
 .EXAMPLE
     .\planifest-zero\setup.ps1 claude-code
-    .\planifest-zero\setup.ps1 claude-code --structured-telemetry-mcp
 #>
 
 # Manual arg parsing — supports --flag style for cross-platform consistency
 $Tool = $null
-$StructuredTelemetryMcp = $false
-$BackendUrl = 'http://localhost:3741'
 $StrictOrchestrator = $false
 $i = 0
 while ($i -lt $args.Count) {
     switch ($args[$i]) {
-        '--structured-telemetry-mcp'  { $StructuredTelemetryMcp = $true; $i++ }
-        '--strict-orchestrator'       { $StrictOrchestrator = $true; $i++ }
-        '--backend-url' {
-            $i++
-            if ($i -ge $args.Count) { Write-Host "Error: --backend-url requires a value"; exit 1 }
-            # Validated here, once, at parse time -- Merge-TelemetryHookSettings
-            # interpolates this value directly into a shell command string
-            # written into the target tool's hook config (backlog 0000055,
-            # found during 0000027's P5 review). Fail loudly (setup-time check).
-            if ($args[$i] -notmatch '^https?://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9._/-]*)?$') {
-                Write-Host "Error: --backend-url must be a plain http(s) URL (host[:port][/path]), got: $($args[$i])"
-                exit 1
-            }
-            $BackendUrl = $args[$i]; $i++
-        }
+        '--strict-orchestrator' { $StrictOrchestrator = $true; $i++ }
         default {
             if ($args[$i] -like '-*') { Write-Host "Unknown flag: $($args[$i])"; exit 1 }
             else { $Tool = $args[$i]; $i++ }
@@ -204,175 +187,10 @@ function Copy-PlanifestWorkflow {
     Write-Host "  + workflows/$name.md"
 }
 
-function Merge-TelemetryHookSettings {
-    # Merge context-pressure (PostToolUse), emit-phase-start (PreToolUse), and
-    # emit-phase-end (Stop) hook entries into .claude/settings.json, plus the
-    # emit_event receipt hook (PostToolUse, req-004/ADR-001). Idempotent: each
-    # script's prior entry is removed before being re-added.
-    #
-    # Wiring design decision (req-001, feature 0000027) -- mirrors setup.sh's
-    # Merge-TelemetryHookSettings/merge_telemetry_hook_settings: a single hook
-    # `command` string is fixed at setup time and cannot vary the <phase>
-    # argument emit-phase-start.mjs/emit-phase-end.mjs each require as the
-    # pipeline moves through phases. Both entries below route through
-    # hooks/telemetry/resolve-phase.mjs, which infers the active phase from an
-    # observable tool-lifecycle signal (which phase-agent Skill was invoked)
-    # and re-execs the real script with that phase supplied. See
-    # resolve-phase.mjs's own header for the full mechanism.
-    param(
-        [string]$SettingsPath,
-        [string]$HooksDir,
-        [string]$BackendUrl
-    )
-
-    $pressureCmd = "PLANIFEST_TELEMETRY_URL=$BackendUrl node $HooksDir/context-pressure.mjs"
-    $startCmd    = "PLANIFEST_TELEMETRY_URL=$BackendUrl node $HooksDir/resolve-phase.mjs start $HooksDir/emit-phase-start.mjs"
-    $endCmd      = "PLANIFEST_TELEMETRY_URL=$BackendUrl node $HooksDir/resolve-phase.mjs end $HooksDir/emit-phase-end.mjs"
-    $receiptCmd  = "node $HooksDir/emit-event-receipt.mjs"
-
-    $postToolUseEntries = @(
-        @{
-            matcher = ".*"
-            hooks = @(@{ type = "command"; command = $pressureCmd; async = $true; timeout = 5000 })
-        },
-        @{
-            matcher = "mcp__structured-telemetry-mcp__emit_event"
-            hooks = @(@{ type = "command"; command = $receiptCmd; async = $true; timeout = 5000 })
-        }
-    )
-    $preToolUseEntry = @(
-        @{
-            matcher = "Skill"
-            hooks = @(@{ type = "command"; command = $startCmd })
-        }
-    )
-    $stopEntry = @(
-        @{
-            matcher = ".*"
-            hooks = @(@{ type = "command"; command = $endCmd })
-        }
-    )
-
-    if (Test-Path $SettingsPath) {
-        $existing = Get-Content -Raw -Path $SettingsPath | ConvertFrom-Json
-
-        if (-not $existing.hooks) {
-            $existing | Add-Member -NotePropertyName 'hooks' -NotePropertyValue ([PSCustomObject]@{}) -Force
-        }
-        if (-not $existing.hooks.PostToolUse) {
-            $existing.hooks | Add-Member -NotePropertyName 'PostToolUse' -NotePropertyValue @() -Force
-        }
-        if (-not $existing.hooks.PreToolUse) {
-            $existing.hooks | Add-Member -NotePropertyName 'PreToolUse' -NotePropertyValue @() -Force
-        }
-        if (-not $existing.hooks.Stop) {
-            $existing.hooks | Add-Member -NotePropertyName 'Stop' -NotePropertyValue @() -Force
-        }
-
-        # Remove existing entries for each script then append the fresh ones.
-        $filteredPost = @($existing.hooks.PostToolUse | Where-Object {
-            $hooks = $_.hooks
-            -not ($hooks | Where-Object { $_.command -match 'context-pressure' -or $_.command -match 'emit-event-receipt' })
-        })
-        $existing.hooks.PostToolUse = $filteredPost + $postToolUseEntries
-
-        $filteredPre = @($existing.hooks.PreToolUse | Where-Object {
-            $hooks = $_.hooks
-            -not ($hooks | Where-Object { $_.command -match 'resolve-phase' -and $_.command -match 'emit-phase-start' })
-        })
-        $existing.hooks.PreToolUse = $filteredPre + $preToolUseEntry
-
-        $filteredStop = @($existing.hooks.Stop | Where-Object {
-            $hooks = $_.hooks
-            -not ($hooks | Where-Object { $_.command -match 'resolve-phase' -and $_.command -match 'emit-phase-end' })
-        })
-        $existing.hooks.Stop = $filteredStop + $stopEntry
-
-        $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
-        Write-Host "  ~ .claude/settings.json (telemetry hooks merged: context-pressure, emit-phase-start, emit-phase-end, emit-event-receipt)"
-    }
-    else {
-        $dir = Split-Path -Parent $SettingsPath
-        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-
-        $settings = [PSCustomObject]@{
-            hooks = [PSCustomObject]@{
-                PostToolUse = $postToolUseEntries
-                PreToolUse  = $preToolUseEntry
-                Stop        = $stopEntry
-            }
-        }
-        $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
-        Write-Host "  + .claude/settings.json (created with telemetry hooks: context-pressure, emit-phase-start, emit-phase-end, emit-event-receipt)"
-    }
-}
-
-function Test-TelemetryHooksInstalled {
-    # Positive-presence check (req-001, acceptance criterion): fails loudly if
-    # any telemetry hook was copied to disk but never actually registered in
-    # the target tool's settings -- the exact partial-wiring regression this
-    # requirement exists to prevent from recurring silently. Static parity
-    # with setup.sh's verify_telemetry_hooks_installed() / scripts/
-    # verify-telemetry-hooks.mjs (no live PowerShell run required to verify
-    # this parity -- see test-0000027-req-001-telemetry-hooks-wired.sh).
-    param(
-        [string]$SettingsPath,
-        [string]$ScriptDirPath
-    )
-
-    $verifyScript = Join-Path $ScriptDirPath 'scripts/verify-telemetry-hooks.mjs'
-    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-        Write-Host "  ! Warning: node not found -- skipping telemetry hook presence verification"
-        return
-    }
-
-    & node $verifyScript $SettingsPath '--with-receipt'
-    if ($LASTEXITCODE -ne 0) {
-        throw "Telemetry hook presence check failed -- see output above."
-    }
-}
-
-function Install-TelemetryHooks {
-    # Copy context-pressure hook and wire PostToolUse in settings.json (REQ-008, REQ-010)
-    # Only called when --structured-telemetry-mcp is active (0000018 req-001).
-    param(
-        [string]$HooksSrcRel,    # relative to ScriptDir  e.g. hooks/telemetry
-        [string]$HooksDirRel,    # relative to ProjectRoot e.g. .claude/hooks/telemetry
-        [string]$SettingsRel,    # relative to ProjectRoot e.g. .claude/settings.json
-        [string]$BackendUrl
-    )
-
-    $src      = Join-Path $ScriptDir $HooksSrcRel
-    $dest     = Join-Path $ProjectRoot $HooksDirRel
-    $settings = Join-Path $ProjectRoot $SettingsRel
-
-    if (-not (Test-Path $src)) {
-        Write-Host "  ! Warning: telemetry hook scripts not found at $src — skipping"
-        return
-    }
-
-    Write-Host ""
-    Write-Host "  Installing structured telemetry hooks"
-
-    New-Item -ItemType Directory -Path $dest -Force | Out-Null
-
-    Get-ChildItem -Path $src -Filter '*.mjs' | ForEach-Object {
-        $destFile = Join-Path $dest $_.Name
-        Copy-Item -Path $_.FullName -Destination $destFile -Force
-        Write-Host "  + $HooksDirRel/$($_.Name)"
-    }
-
-    Merge-TelemetryHookSettings -SettingsPath $settings -HooksDir $HooksDirRel -BackendUrl $BackendUrl
-}
-
 function Merge-EnforcementHookSettings {
-    # Merge gate-write (PreToolUse), auto-trigger-orchestrator, check-orchestrator-presence,
-    # check-design, check-telemetry-failures, and check-telemetry-receipts (UserPromptSubmit)
-    # into settings.json.
-    # check-telemetry-failures (0000026, backlog 0000044) and check-telemetry-receipts
-    # (req-004, feature 0000027, ADR-001) are UserPromptSubmit-shaped like the other
-    # enforcement hooks here, not PostToolUse like context-pressure.mjs, and are always
-    # installed regardless of MCP flags. Idempotent.
+    # Merge gate-write (PreToolUse), auto-trigger-orchestrator,
+    # check-orchestrator-presence, and check-design (UserPromptSubmit) into
+    # settings.json. Idempotent.
     param(
         [string]$SettingsPath,
         [string]$HooksDir
@@ -393,14 +211,6 @@ function Merge-EnforcementHookSettings {
     $userPromptEntry = @{
         matcher = '.*'
         hooks   = @(@{ type = 'command'; command = "node $HooksDir/check-design.mjs" })
-    }
-    $telemetryFailuresEntry = @{
-        matcher = '.*'
-        hooks   = @(@{ type = 'command'; command = "node $HooksDir/check-telemetry-failures.mjs" })
-    }
-    $telemetryReceiptsEntry = @{
-        matcher = '.*'
-        hooks   = @(@{ type = 'command'; command = "node $HooksDir/check-telemetry-receipts.mjs" })
     }
 
     if (Test-Path $SettingsPath) {
@@ -427,12 +237,10 @@ function Merge-EnforcementHookSettings {
             -not ($_.hooks | Where-Object {
                 $_.command -match 'auto-trigger-orchestrator' -or
                 $_.command -match 'check-orchestrator-presence' -or
-                $_.command -match 'check-design' -or
-                $_.command -match 'check-telemetry-failures' -or
-                $_.command -match 'check-telemetry-receipts'
+                $_.command -match 'check-design'
             })
         })
-        $existing.hooks.UserPromptSubmit = $filtered + $autoTriggerEntry + $presenceEntry + $userPromptEntry + $telemetryFailuresEntry + $telemetryReceiptsEntry
+        $existing.hooks.UserPromptSubmit = $filtered + $autoTriggerEntry + $presenceEntry + $userPromptEntry
 
         $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
         Write-Host "  ~ .claude/settings.json (enforcement hook entries merged)"
@@ -444,7 +252,7 @@ function Merge-EnforcementHookSettings {
         $settings = [PSCustomObject]@{
             hooks = [PSCustomObject]@{
                 PreToolUse       = @($preToolEntry)
-                UserPromptSubmit = @($autoTriggerEntry, $presenceEntry, $userPromptEntry, $telemetryFailuresEntry, $telemetryReceiptsEntry)
+                UserPromptSubmit = @($autoTriggerEntry, $presenceEntry, $userPromptEntry)
             }
         }
         $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
@@ -480,8 +288,8 @@ function Merge-AllowedTools {
 }
 
 function Install-EnforcementHooks {
-    # Copy gate-write.mjs + check-design.mjs + check-telemetry-failures.mjs (0000026) and
-    # wire settings.json. Always runs — no flag required.
+    # Copy gate-write.mjs + check-design.mjs and wire settings.json.
+    # Always runs — no flag required.
     param(
         [string]$HooksSrcRel,
         [string]$HooksDirRel,
@@ -930,32 +738,6 @@ function Invoke-PlanifestSetup {
         Merge-AllowedTools -SettingsPath $settingsPath
     }
 
-    # Write telemetry opt-in sentinel so skills know emission is authorised (REQ-004)
-    if ($StructuredTelemetryMcp) {
-        $sentinel = Join-Path $ProjectRoot '.claude\telemetry-enabled'
-        $sentinelDir = Split-Path -Parent $sentinel
-        if (-not (Test-Path $sentinelDir)) { New-Item -ItemType Directory -Path $sentinelDir -Force | Out-Null }
-        if (-not (Test-Path $sentinel)) {
-            New-Item -ItemType File -Path $sentinel -Force | Out-Null
-            Write-Host "  + .claude/telemetry-enabled (telemetry opt-in sentinel)"
-        } else {
-            Write-Host "  - .claude/telemetry-enabled (already exists)"
-        }
-    }
-
-    # Install telemetry hooks whenever --structured-telemetry-mcp is active (0000018 req-001)
-    if ($StructuredTelemetryMcp -and
-        $toolConfig.TelemetryHooksSrc -and $toolConfig.TelemetryHooksDir -and $toolConfig.SettingsFile) {
-        Install-TelemetryHooks `
-            -HooksSrcRel  $toolConfig.TelemetryHooksSrc `
-            -HooksDirRel  $toolConfig.TelemetryHooksDir `
-            -SettingsRel  $toolConfig.SettingsFile `
-            -BackendUrl   $BackendUrl
-        Test-TelemetryHooksInstalled `
-            -SettingsPath (Join-Path $ProjectRoot $toolConfig.SettingsFile) `
-            -ScriptDirPath $ScriptDir
-    }
-
     # Write manifest listing all installed skill directories (enables safe re-run cleanup)
     New-Item -ItemType Directory -Path $skillsDir -Force | Out-Null
     $installedDirs = @(Get-ChildItem -Path $skillsDir -Directory | ForEach-Object { $_.FullName })
@@ -979,7 +761,7 @@ function Invoke-PlanifestSetup {
 }
 
 # Write plan/state/{tool}.md — the tracked, git-versioned source of truth for
-# active setup flags/backendUrl (0000032 req-002, ADR-001). This is additive:
+# active setup flags (0000032 req-002, ADR-001; 0000033 ADR-001 decision 6). This is additive:
 # it does not replace Write-SetupFlagsMarker, and it is called BEFORE it so
 # the gitignored marker is always (re)written to match this file's values for the current
 # run (ADR-001 decision 5, carried over from 0000025 ADR-002 decision 3). On failure to
@@ -992,22 +774,19 @@ function Write-SetupConfigOverride {
     $configFile = Join-Path $configDir "$ToolName.md"
 
     $flags = @()
-    if ($StructuredTelemetryMcp) { $flags += '--structured-telemetry-mcp' }
     if ($StrictOrchestrator) { $flags += '--strict-orchestrator' }
 
-    $backendUrlValue = if ($StructuredTelemetryMcp) { $BackendUrl } else { $null }
     $writtenAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
 
     $configJson = [ordered]@{
-        tool       = $ToolName
-        flags      = $flags
-        backendUrl = $backendUrlValue
-        writtenAt  = $writtenAt
+        tool      = $ToolName
+        flags     = $flags
+        writtenAt = $writtenAt
     } | ConvertTo-Json -Depth 10
 
     $fence = [char]96 + [char]96 + [char]96
     $content = "# Setup config: $ToolName`n`n" +
-        "> Tracked source of truth for active setup flags/backend-url for **$ToolName**`n" +
+        "> Tracked source of truth for active setup flags for **$ToolName**`n" +
         "> (0000032 ADR-001). The gitignored ``.planifest-setup-flags`` marker in`n" +
         "> this tool's config directory is a local completion-status cache, reconciled to`n" +
         "> match this file on every ``setup.sh``/``setup.ps1`` run.`n`n" +
@@ -1036,13 +815,11 @@ function Write-SetupFlagsMarker {
     $markerPath = Join-Path $targetDir '.planifest-setup-flags'
 
     $flags = @()
-    if ($StructuredTelemetryMcp) { $flags += '--structured-telemetry-mcp' }
     if ($StrictOrchestrator) { $flags += '--strict-orchestrator' }
 
     $marker = [ordered]@{
         tool          = $ToolName
         flags         = $flags
-        backendUrl    = if ($StructuredTelemetryMcp) { $BackendUrl } else { $null }
         writtenAt     = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
         attemptStatus = 'completed'
     }
@@ -1099,8 +876,6 @@ if (-not $Tool) {
     }
     Write-Host ""
     Write-Host "Flags:"
-    Write-Host "  --structured-telemetry-mcp   Install structured telemetry hooks."
-    Write-Host "  --backend-url <url>          Override telemetry backend URL (default: http://localhost:3741)"
     Write-Host "  --strict-orchestrator        Write plan/.orchestrator-strict to enable strict mode."
     Write-Host "                               The check-orchestrator-presence hook will require the"
     Write-Host "                               orchestrator to ack each new session before proceeding."
