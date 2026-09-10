@@ -27,9 +27,9 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Start | `2026-09-09T22:29:41Z` |
 | Model tier | primary |
 | Skills loaded | planifest-orchestrator |
-| Agents spawned | `pending` |
+| Agents spawned | `5` |
 | MCP calls | `0` |
-| Parallel task batches | `pending` |
+| Parallel task batches | `2` |
 | Telemetry | pending |
 | Notes | Fresh start. No feature brief on disk: the human stated the goal in conversation, so the brief is drafted from that and confirmed at the design gate. |
 
@@ -39,6 +39,7 @@ P0 exchange (branch base): Q: Merge PR 5 first, or stack on the 0000032 branch? 
 P0 exchange (backlog): Q: Discard telemetry-related backlog entries? / A: Yes. 0000085 discarded, the other four unrelated and kept.
 P0 exchange (scope shape): Q: Clean removal, or removal plus a documented extension seam? / A: Removal only. "People adding their own telemetry" means at the tool level, if the tool supports it. The framework does not concern itself with telemetry at all.
 P0 exchange (phase-enum.mjs): Q: Delete the module, or keep it with no importers? / A: Delete. pipeline-reference.md states the five phases directly instead, matching 0000031 ADR 004.
+Scope Lock dispatch: 1 Explore agent mapped the telemetry surface, then 4 x planifest-scope-lock-agent in parallel (sonnet). Backlog IDs 0000090-0000093 reserved, none filed. All four drafts returned. Three of the four flagged the same gap: the brief has no decision on existing installs whose .claude/settings.json still wires telemetry hooks.
 Strict mode: `plan/.orchestrator-strict` present, session id written to `plan/.orchestrator-ack`.
 
 ---
