@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Feature 0000031 req-003: five phases, 12 skills, five phase names in pipeline-reference.
+# Feature 0000031 req-003: five phases, 13 skills, five phase names in pipeline-reference.
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ZERO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO="$(cd "$ZERO_DIR/.." && pwd)"
 source "$SCRIPT_DIR/helpers/assert.sh"
 
-echo "=== (a) exactly 12 skill folders ==="
+echo "=== (a) exactly 13 skill folders ==="
 COUNT=$(ls -d "$ZERO_DIR/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
-assert_equals "12" "$COUNT" "12 skill folders"
-for s in ravintio-orchestrator ravintio-plan ravintio-implement ravintio-validate-and-accept ravintio-ship ravintio-test-writer ravintio-implementer ravintio-refactor ravintio-loop-runner ravintio-optimise-agent ravintio-migrator ravintio-refresh-setup; do
+assert_equals "13" "$COUNT" "13 skill folders"
+for s in ravintio-orchestrator ravintio-plan ravintio-implement ravintio-validate-and-accept ravintio-ship ravintio-test-writer ravintio-implementer ravintio-refactor ravintio-loop-runner ravintio-optimise-agent ravintio-migrator ravintio-refresh-setup ravintio-file-backlog; do
   assert_equals "yes" "$([ -f "$ZERO_DIR/skills/$s/SKILL.md" ] && echo yes || echo no)" "skill $s present"
 done
 

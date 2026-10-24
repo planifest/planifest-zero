@@ -103,16 +103,4 @@ assert_equals "1" "$(count_line "$WS/setup.err")" "req-005 (a): stderr holds the
 assert_contains "gate-write" "$(cat "$WS/.claude/settings.json")" "req-005 (a): the hook install write had succeeded"
 check_clean_output "$WS" "req-005 (a) allowedTools"
 
-echo ""
-echo "=== req-005 (b): the telemetry cleanup keeps its warning ==="
-
-WS="$(new_workspace)"
-echo '{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"node .claude/hooks/telemetry/emit-event.mjs"}]}]}}' \
-  >"$WS/.claude/settings.json"
-chmod 444 "$WS/.claude/settings.json"
-run_setup "$WS"
-assert_equals "1" "$(grep -c -F -- "! Warning: could not remove telemetry hook entries from .claude/settings.json" "$WS/setup.err" || true)" \
-  "req-005 (b): the one telemetry warning still prints"
-assert_equals "1" "$(count_line "$WS/setup.err")" "req-005 (b): the hook install prints the fixed line"
-
 print_summary

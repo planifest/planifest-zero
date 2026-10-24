@@ -269,8 +269,7 @@ function Write-SettingsAtomic {
 function Write-SettingsOrExit {
     # Write-SettingsAtomic, with any fault turned into one fixed line on
     # stderr and exit 1, as setup.sh prints it (0000151 req-005). The line holds
-    # no absolute path and no PowerShell error text. Remove-LegacyTelemetryWiring
-    # calls Write-SettingsAtomic directly, so it keeps its own warning.
+    # no absolute path and no PowerShell error text.
     param(
         [string]$Path,
         [string]$Json,
@@ -404,8 +403,7 @@ function Test-JsonText {
 }
 
 function Read-SettingsObject {
-    # The shape check that the hook install step and
-    # Remove-LegacyTelemetryWiring share (0000040 ADR-002, 0000041 ADR-002).
+    # The shape check that the hook install step uses (0000040 ADR-002, 0000041 ADR-002).
     # Returns 'ok', 'invalid', or 'shape', and never prints. On 'ok' the
     # parsed settings object goes to -Settings. Text that fails Test-JsonText
     # on syntax is 'invalid'. Each of these is 'shape':
@@ -500,6 +498,26 @@ function Merge-EnforcementHookSettings {
             $existing.hooks.$eventName = @()
         }
 
+        # Drop each settings entry that runs a retired hook, on every event
+        # (0000151 ADR-007), so no entry names a pruned file. The match is the
+        # same path-boundary rule as below. A non-array event value stays as it
+        # was. setup.sh does the same from RETIRED_HOOK_NAMES.
+        $retiredPattern = '(^|[\s"''/\\])(' + ($RetiredHookNames -join '|') + ')\.mjs\b'
+        foreach ($eventName in @($existing.hooks.PSObject.Properties.Name)) {
+            if (-not $eventName) { continue }
+            $eventValue = $existing.hooks.$eventName
+            if ($eventValue -is [array]) {
+                # One line per removed entry names it (0000164 S-005).
+                foreach ($entry in $eventValue) {
+                    foreach ($hook in @($entry.hooks)) {
+                        $m = [regex]::Match("$($hook.command)", $retiredPattern)
+                        if ($m.Success) { Write-Host "  - removed retired hook entry $($m.Groups[2].Value) from $SettingsRel" }
+                    }
+                }
+                $existing.hooks.$eventName = @(Remove-RavintioHookCommands -Entries $eventValue -Pattern $retiredPattern)
+            }
+        }
+
         # Merge PreToolUse. Remove every earlier command for the three
         # modules, on any matcher, so an old single Write|Edit entry goes too.
         # A user command in the same entry stays (0000038 ADR-002).
@@ -584,13 +602,10 @@ function Remove-LeftoverSettingsTmp {
     try { Remove-SettingsTmpEntry -Tmp $tmp } catch { }
 }
 
-# Telemetry hook module names a pre-0000033 project may still reference from
-# .claude/settings.json (0000033 req-004, ADR-002 decision 1). The modules
-# themselves are gone, so every entry naming one is a broken reference.
-# This is also the retired-hooks list: Install-EnforcementHooks deletes an
-# installed hook on it and never one absent from it (0000151 ADR-007).
-# Retiring a hook means adding its name here and in setup.sh.
-$TelemetryHookModules = @(
+# The retired-hooks list (0000151 ADR-007). Install-EnforcementHooks deletes an
+# installed hook named here and never one absent from it, through
+# Remove-RetiredHooks. Retiring a hook means adding its name here and in setup.sh.
+$RetiredHookNames = @(
     'emit-phase-start',
     'emit-phase-end',
     'emit-event-receipt',
@@ -602,102 +617,6 @@ $TelemetryHookModules = @(
     'check-telemetry-receipts',
     'phase-enum'
 )
-$TelemetryMcpMatcher = 'mcp__structured-telemetry-mcp__emit_event'
-# Remove-RetiredHooks prunes installed hooks by this list (0000151 ADR-007).
-$RetiredHookNames = $TelemetryHookModules
-
-function Remove-LegacyTelemetryWiring {
-    # Mirror of remove_legacy_telemetry_wiring in setup.sh (0000033 req-004,
-    # ADR-002), with the same printed wording. Runs on every invocation, and is
-    # called BEFORE Install-EnforcementHooks so that install is the last writer
-    # of settings.json this run. Prints one line per removal, warns and
-    # continues on a read or write failure, and prints nothing when there is
-    # nothing to remove.
-    param(
-        [string]$SettingsRel
-    )
-
-    # 1. Telemetry hook entries in the project's settings.json.
-    $settings = Join-Path $ProjectRoot $SettingsRel
-    if (Test-Path $settings) {
-        try {
-            # The raw contents are never logged (req-004 logging policy).
-            $raw = "$(Get-Content -Raw -Path $settings -Encoding UTF8 -ErrorAction Stop)"
-            # A file that fails the parse or the shape check has nothing to
-            # clean. Skip it with no output and no write. The hook install
-            # step then prints its one line and exits 1 (0000041 ADR-002).
-            $existing = $null
-            $check = Read-SettingsObject -Raw $raw -Settings ([ref]$existing)
-            $removed = 0
-            # Case-sensitive, and only `<module>.mjs` at a path boundary, to
-            # match setup.sh. A bare substring would also catch a user hook
-            # such as ./my-tools/emit-event-logger.sh.
-            $moduleRegex = "(^|[\s""'/\\])(" + ($TelemetryHookModules -join '|') + ")\.mjs\b"
-
-            if ($check -eq 'ok' -and $existing.hooks) {
-                foreach ($event in @($existing.hooks.PSObject.Properties.Name)) {
-                    # A non-array value stays as it was, as in setup.sh (0000035 req-002).
-                    if ($existing.hooks.$event -isnot [System.Array]) { continue }
-                    $entries = @($existing.hooks.$event)
-                    $kept = @()
-                    foreach ($entry in $entries) {
-                        if ($null -eq $entry) { continue }
-                        if ("$($entry.matcher)".Contains($TelemetryMcpMatcher)) { $removed++; continue }
-                        $hooks = @($entry.hooks)
-                        $keptHooks = @($hooks | Where-Object {
-                            $command = "$($_.command)"
-                            $isTelemetry = $command.Contains($TelemetryMcpMatcher) -or ($command -cmatch $moduleRegex)
-                            -not $isTelemetry
-                        })
-                        if ($keptHooks.Count -eq 0 -and $hooks.Count -gt 0) { $removed++; continue }
-                        if ($keptHooks.Count -ne $hooks.Count) { $entry.hooks = $keptHooks; $removed++ }
-                        $kept += $entry
-                    }
-                    $existing.hooks.$event = $kept
-                }
-            }
-
-            if ($removed -gt 0) {
-                Write-SettingsAtomic -Path $settings -Json ($existing | ConvertTo-Json -Depth 100)
-                Write-Host "  - removed telemetry hook entries from $SettingsRel"
-            }
-        } catch {
-            Write-Warning "Could not remove telemetry hook entries from $SettingsRel"
-        }
-    }
-
-    # 2. The telemetry opt-in sentinel (decision 2).
-    $sentinelRel = '.claude/telemetry-enabled'
-    $sentinel = Join-Path $ProjectRoot '.claude\telemetry-enabled'
-    if (Test-Path $sentinel) {
-        try {
-            Remove-Item -Path $sentinel -Force -ErrorAction Stop
-            Write-Host "  - removed $sentinelRel"
-        } catch {
-            Write-Warning "Could not remove $sentinelRel"
-        }
-    }
-
-    # 3. The failure and receipt marker directories (decision 3).
-    foreach ($markerRel in @('plan/.telemetry-failures', 'plan/.telemetry-receipts')) {
-        $marker = Join-Path $ProjectRoot ($markerRel -replace '/', '\')
-        if (Test-Path $marker) {
-            try {
-                $item = Get-Item -Path $marker -Force -ErrorAction Stop
-                if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-                    # A symlink or junction: delete the link only. Windows
-                    # PowerShell 5.1 Remove-Item -Recurse follows it into the target.
-                    [System.IO.Directory]::Delete($marker)
-                } else {
-                    Remove-Item -Path $marker -Recurse -Force -ErrorAction Stop
-                }
-                Write-Host "  - removed $markerRel/"
-            } catch {
-                Write-Warning "Could not remove $markerRel/"
-            }
-        }
-    }
-}
 
 function Test-UnderRealRoot {
     # True when the item and every folder between it and the root are plain
@@ -1214,13 +1133,10 @@ function Invoke-RavintioSetup {
         Append-OverrideInstructions -BootFilePath $toolConfig.BootFile
     }
 
-    # Remove-LegacyTelemetryWiring retracts what a pre-0000033 run left behind
-        # (req-004, ADR-002).
     # Ordered BEFORE the enforcement hook install so that install is the last
     # writer of settings.json this run.
     if ($toolConfig.SettingsFile) {
         Remove-LeftoverSettingsTmp -SettingsRel $toolConfig.SettingsFile
-        Remove-LegacyTelemetryWiring -SettingsRel $toolConfig.SettingsFile
     }
 
     # Install RAVINTIO enforcement hooks unconditionally (gate-write, check-design)

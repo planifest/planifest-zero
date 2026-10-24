@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # Tests for feature 0000035-powershell-setup-parity, req-002 to req-004.
 #
-# req-002: Remove-LegacyTelemetryWiring skips a non-array event value
-# (backlog 0000094). req-003: setup.ps1 uses no -AsHashtable, so it runs on
-# Windows PowerShell 5.1 (ADR-002). req-004: the flag switch is
-# case-sensitive (ADR-003). No pwsh runner exists (backlog 0000084), so these
-# checks read the source.
+# req-003: setup.ps1 uses no -AsHashtable, so it runs on Windows PowerShell
+# 5.1 (ADR-002). req-004: the flag switch is case-sensitive (ADR-003). The
+# req-002 checks tested the legacy telemetry cleanup, which 0000164 retired.
+# No pwsh runner exists (backlog 0000084), so these checks read the source.
 
 set -uo pipefail
 
@@ -22,19 +21,6 @@ extract_function_body() {
     flag { print }
   ' "$SETUP_PS1"
 }
-
-echo ""
-echo "=== req-002: the legacy cleanup skips a non-array event value ==="
-
-CLEANUP="$(extract_function_body 'Remove-LegacyTelemetryWiring')"
-SKIP_LINE="$(printf '%s\n' "$CLEANUP" | grep -n -- '-isnot \[System.Array\]' | head -1 | cut -d: -f1)"
-WRAP_LINE="$(printf '%s\n' "$CLEANUP" | grep -n 'entries = @(\$existing.hooks.\$event)' | head -1 | cut -d: -f1)"
-assert_equals "yes" "$([ -n "$SKIP_LINE" ] && echo yes || echo no)" \
-  "req-002: the loop tests each event value with -isnot [System.Array]"
-assert_equals "yes" "$([ -n "$SKIP_LINE" ] && [ -n "$WRAP_LINE" ] && [ "$SKIP_LINE" -lt "$WRAP_LINE" ] && echo yes || echo no)" \
-  "req-002: the test runs before the value is wrapped in an array"
-assert_contains "continue" "$(printf '%s\n' "$CLEANUP" | sed -n "${SKIP_LINE:-1}p")" \
-  "req-002: a non-array value is skipped with continue"
 
 echo ""
 echo "=== req-003: setup.ps1 runs on Windows PowerShell 5.1 ==="

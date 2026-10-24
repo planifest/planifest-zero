@@ -82,8 +82,8 @@ echo "=== req-005 (d): setup.ps1 removes the leftover before its first settings 
 
 SETUP_BODY="$(awk '/^function Invoke-RavintioSetup/{f=1} f && /^function / && !/Invoke-RavintioSetup/{exit} f{print}' "$ZERO_DIR/setup.ps1")"
 REMOVE_LINE="$(printf '%s\n' "$SETUP_BODY" | grep -n 'Remove-LeftoverSettingsTmp -SettingsRel' | head -1 | cut -d: -f1)"
-CLEANUP_LINE="$(printf '%s\n' "$SETUP_BODY" | grep -n 'Remove-LegacyTelemetryWiring -SettingsRel' | head -1 | cut -d: -f1)"
-assert_equals "yes" "$([ -n "$REMOVE_LINE" ] && [ -n "$CLEANUP_LINE" ] && [ "$REMOVE_LINE" -lt "$CLEANUP_LINE" ] && echo yes || echo no)" \
+WRITER_LINE="$(printf '%s\n' "$SETUP_BODY" | grep -n 'Install-EnforcementHooks' | head -1 | cut -d: -f1)"
+assert_equals "yes" "$([ -n "$REMOVE_LINE" ] && [ -n "$WRITER_LINE" ] && [ "$REMOVE_LINE" -lt "$WRITER_LINE" ] && echo yes || echo no)" \
   "req-005 (d): Remove-LeftoverSettingsTmp runs before the first settings writer"
 # The removal itself lives in Remove-SettingsTmpEntry, shared with
 # Write-SettingsAtomic (P5 S-002, S-003).

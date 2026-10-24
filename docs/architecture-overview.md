@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Last updated: 0000160-ravintio-rebrand
+Last updated: 0000164-hardening-and-backlog-skill
 
 ## What this repo is
 
@@ -8,7 +8,7 @@ This repo is RAVINTIO Zero itself. It holds one component, `ravintio-zero`, whic
 
 RAVINTIO Zero is not a service. It has no runtime of its own. It ships these things:
 
-1. **Skills.** Markdown instructions that Claude Code auto-discovers from `.claude/skills/`. Twelve skills drive the five-phase pipeline.
+1. **Skills.** Markdown instructions that Claude Code auto-discovers from `.claude/skills/`. Thirteen skills drive the five-phase pipeline and its support work.
 2. **Hooks.** Node `.mjs` scripts that Claude Code invokes synchronously at tool-call boundaries. Enforcement hooks block or annotate. Git hooks guard commits and pushes. No hook makes an outbound network call.
 3. **Standards, templates, and schemas.** The reference material that skills bundle at install time.
 4. **Setup scripts.** `setup.sh` and `setup.ps1` copy the above into a target project and wire `.claude/settings.json`.
@@ -77,7 +77,7 @@ A roadmap is a chain of feature steps that the human approves once. The standard
 - **Driver.** `ravintio-zero/scripts/roadmap-run.mjs` runs each step as its own `claude -p` session. A lock file at `plan/.roadmap-runner.lock` stops a second driver. The driver stops on a `Blocked:` line, a stalled `position`, or a failed `claude` call, and a restart resumes the same step. It passes `--model` (default `sonnet`) and an optional `--max-turns` to each child. A capped step that exits non-zero stops with `R-C Run: Blocked:`. Each step writes `plan/.roadmap-logs/step-{position}.log`, and the driver appends `work.kind`, `ravintio.roadmap`, and `ravintio.step` labels to the child's `OTEL_RESOURCE_ATTRIBUTES`. The label encoder is `scripts/roadmap-labels.mjs`.
 - **Merge guard.** The `merge-guard` hook blocks any `gh pr merge` unless the command uses `--squash` and the PR base starts with `roadmap/`. It reads the base with `gh pr view` and blocks when it cannot read one. Merging into `main` stays human-only.
 
-The implement phase dispatches a TDD trio per requirement: ravintio-test-writer, ravintio-implementer, and ravintio-refactor. Four support skills complete the set of twelve: ravintio-loop-runner, ravintio-optimise-agent, ravintio-migrator, and ravintio-refresh-setup.
+The implement phase dispatches a TDD trio per requirement: ravintio-test-writer, ravintio-implementer, and ravintio-refactor. Five support skills complete the set of thirteen: ravintio-loop-runner, ravintio-optimise-agent, ravintio-migrator, ravintio-refresh-setup, and ravintio-file-backlog.
 
 ---
 
@@ -111,7 +111,7 @@ Boot files are disposable build outputs. Every run regenerates `CLAUDE.md` from 
 
 Enforcement is deterministic where it can be, and instructional where it cannot.
 
-**Deterministic.** A hook exits 2 with a human-readable message and Claude Code blocks the tool call. `gate-write`, `em-dash-guard`, `ratchet-check`, and `merge-guard` write the reason to stderr and stdout, so the agent sees why the call stopped. `gate-write` blocks writes to `src/` without a confirmed design. `ratchet-check` blocks weakening edits to an active loop's artifacts. `em-dash-guard` rejects U+2014 in scoped prose paths. `merge-guard` blocks a `gh pr merge` that is not a squash into a `roadmap/*` branch.
+**Deterministic.** A hook exits 2 with a human-readable message and Claude Code blocks the tool call. `gate-write`, `em-dash-guard`, `ratchet-check`, and `merge-guard` write the reason to stderr and stdout, so the agent sees why the call stopped. `gate-write` gates this project only. It passes a target whose real path lies outside the project's real root, and resolves symlinks first. So a link inside the project that points outside counts as outside. For an in-project target, it blocks a write that has no confirmed design or no matching declared component. `plan/`, `docs/`, and a few root files always pass. `ratchet-check` blocks weakening edits to an active loop's artifacts. `em-dash-guard` rejects U+2014 in scoped prose paths. `merge-guard` blocks a `gh pr merge` that is not a squash into a `roadmap/*` branch.
 
 **Instructional.** Skills tell the agent what to do. The orchestrator's hard limits, the one-question-at-a-time rule, and the phase gates all rely on the agent following its instructions.
 
@@ -121,16 +121,14 @@ Every hook fails open on an unexpected error. Exit 0 with no output means the to
 
 ## Upgrade cleanup
 
-Every setup run retracts telemetry wiring that an earlier install left in the target project. It runs before the enforcement hook install, so that install writes `.claude/settings.json` last. Setup removes these items when present:
+Setup no longer removes legacy telemetry wiring. A consumer that last ran a setup from before 0000033 removes four items by hand:
 
-- hook entries in `.claude/settings.json` whose command runs a retired telemetry module as `<module>.mjs` at a path boundary
-- hook entries whose matcher or command names `mcp__structured-telemetry-mcp__emit_event`
-- the `.claude/telemetry-enabled` sentinel
-- the `plan/.telemetry-failures/` and `plan/.telemetry-receipts/` directories
+- the `mcp__structured-telemetry-mcp__emit_event` matcher entries in `.claude/settings.json`
+- `.claude/telemetry-enabled`
+- `plan/.telemetry-failures/`
+- `plan/.telemetry-receipts/`
 
-The module match is case-sensitive. Setup prints one line per removal and stays silent when nothing is present. If `settings.json` fails the parse or the shape check, the cleanup skips it in silence and writes nothing. The hook install step then reports the fault once. A read or write failure prints a warning and setup carries on.
-
-If `node` isn't on the `PATH` and `settings.json` exists, `setup.sh` prints one warning that it skipped this cleanup.
+Setup still prunes retired hooks. See Retired hooks under Re-run safety.
 
 **Rename upgrade.** Version 1.0.0 renamed the pack, the overrides folder, the skills, and the marker files. If setup finds the earlier pack or overrides folder in the project root, it stops before it installs anything. It names the folder and the migration helper to run. Each run also removes the two earlier marker files when present, and skips a symlink. Skill pruning removes the earlier skill folders.
 
@@ -155,7 +153,7 @@ Each prints one warning and setup skips it. After `--backend-url`, setup also sk
 
 PowerShell 7 splits an argument such as `--backend-url=https://x` at its first colon. `setup.ps1` skips the rest of the value too, and never prints a tool name that isn't a plain name.
 
-**Retired hooks.** Both scripts delete an installed hook and its wiring only if its name is on the retired list. The list holds `phase-enum`. A hook that is not on the list stays.
+**Retired hooks.** Both scripts prune a hook only if its name is on the retired list, which `setup.sh` keeps as `RETIRED_HOOK_NAMES` and `setup.ps1` as `$RetiredHookNames`. Pruning deletes the installed hook file. The hook install step also drops each `settings.json` entry that runs a retired hook, on every event. A hook that is not on the list stays.
 
 **Write failures.** One catch around the shared `writeSettings` prints a fixed line with the relative path and exits 1. It covers the hook install and the allowed-tools write, and `setup.ps1` prints the same line.
 
@@ -169,7 +167,7 @@ PowerShell 7 splits an argument such as `--backend-url=https://x` at its first c
 
 **Per-command filter.** Both scripts filter `PreToolUse` and `UserPromptSubmit` one command at a time. Setup removes each RAVINTIO command and keeps any user command in the same entry. If an entry holds only RAVINTIO commands, setup drops it. A `hooks` value that holds one object counts as a one-item array, so setup filters it the same way. An entry with no commands stays as it was. A command counts as RAVINTIO only when it runs `<module>.mjs` at a path boundary, matched case-sensitively.
 
-**Invalid JSON.** If `settings.json` isn't valid JSON, the hook install step prints one fixed line that names the file. The line never holds the file's contents. Setup leaves the file unchanged and exits 1, because it can't install the hooks. The telemetry cleanup prints nothing for this file.
+**Invalid JSON.** If `settings.json` isn't valid JSON, the hook install step prints one fixed line that names the file. The line never holds the file's contents. Setup leaves the file unchanged and exits 1, because it can't install the hooks.
 
 **Not a settings object.** If `settings.json` is valid JSON but not a settings object, both scripts print one fixed line that names the file. That covers a top level that isn't an object, and a `hooks` value that is present and isn't an object. Setup leaves the file unchanged and exits 1. `setup.ps1` also gives this line for keys that differ only by case, because `ConvertFrom-Json` can't read them. `setup.sh` accepts those keys, because Node reads them.
 

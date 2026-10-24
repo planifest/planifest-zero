@@ -2,8 +2,15 @@
 /**
  * PreToolUse hook: plan compliance write gate.
  *
- * Enforces three checks before allowing a Write or Edit tool call (ADR-004):
- *   1. Always-permitted paths (plan/, docs/, CLAUDE.md, AGENTS.md) → pass
+ * Gates this project only (0000164 ADR-002). A target whose real path lies outside
+ * the project's real root passes with exit 0 before any check. Symlinks resolve first,
+ * so a link inside the project that points outside counts as outside.
+ *
+ * Enforces these checks on in-project targets before allowing a Write or Edit (ADR-004):
+ *   0. plan/current/** needs the plan/.orchestrator-active sentinel (REQ-007, ADR-003)
+ *   1. Always-permitted paths (plan/, docs/, CLAUDE.md, AGENTS.md) → pass.
+ *      plan/backlog/ and plan/roadmap/ fall under plan/, so they pass between runs
+ *      with no sentinel and no design.md.
  *   2. design.md must exist → block with exit 2 if absent
  *   3. Target path must match a component path prefix in design.md → block if not
  *
@@ -14,12 +21,13 @@
  * Silent on unexpected errors — always exit 0 on non-enforcement failures (ADR-005).
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { basename, join, normalize, resolve } from "node:path";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { basename, dirname, join, normalize, resolve } from "node:path";
 
 import { readStdin } from "./read-stdin.mjs";
 
 // Always-permitted: planning/doc artefacts and RAVINTIO internal files
+// plan/backlog/ and plan/roadmap/ sit under plan/ (0000164 REQ-002)
 const ALWAYS_PERMITTED_PREFIXES = ["plan/", "plan\\", "docs/", "docs\\"];
 const ALWAYS_PERMITTED_FILES = [
   "claude.md", "agents.md", ".ravintio-session", ".skips", ".feature-id",
@@ -31,7 +39,24 @@ const ALWAYS_PERMITTED_FILES = [
 const PATHS_SECTION_RE = /^##\s+(Component Paths|Scope)\s*$/im;
 
 function norm(p) {
-  return normalize(p).replace(/\\/g, "/").toLowerCase();
+  return normalize(p).normalize("NFC").replace(/\\/g, "/").toLowerCase();
+}
+
+// Real path of p. If p does not exist yet, resolve the nearest existing parent
+// and rejoin the remaining segments (0000164 REQ-001, ADR-002).
+function realPathOrParent(p) {
+  const rest = [];
+  let cur = resolve(p);
+  for (;;) {
+    try {
+      return rest.length ? join(realpathSync(cur), ...rest) : realpathSync(cur);
+    } catch {
+      const parent = dirname(cur);
+      if (parent === cur) return resolve(p);
+      rest.unshift(basename(cur));
+      cur = parent;
+    }
+  }
 }
 
 function isAlwaysPermitted(relPath) {
@@ -92,13 +117,17 @@ try {
   // Resolve to a path relative to cwd for prefix matching.
   // Normalise both paths to forward-slash form before comparison to avoid
   // mixed-separator failures on Windows (ADR-005, REQ-012).
-  const absTarget = resolve(cwd, rawTarget);
-  const normCwd = norm(cwd);
+  // Both sides resolve through realpath so symlinks and /tmp aliases compare true
+  // (0000164 REQ-001, REQ-006, ADR-002).
+  const absTarget = realPathOrParent(resolve(cwd, rawTarget));
+  const normCwd = norm(realPathOrParent(cwd));
   const normAbs = norm(absTarget);
   const cwdPrefix = normCwd.endsWith("/") ? normCwd : normCwd + "/";
-  const relTarget = normAbs.startsWith(cwdPrefix)
-    ? normAbs.slice(cwdPrefix.length)
-    : norm(rawTarget);
+
+  // Outside the project's real root → not this hook's business (ADR-002).
+  if (normAbs !== normCwd && !normAbs.startsWith(cwdPrefix)) process.exit(0);
+
+  const relTarget = normAbs === normCwd ? "" : normAbs.slice(cwdPrefix.length);
 
   // Check 0 — sentinel enforcement for plan/current/** (REQ-007, ADR-003)
   // feature-brief.md and ALWAYS_PERMITTED_FILES (e.g. pause.md) bypass sentinel so

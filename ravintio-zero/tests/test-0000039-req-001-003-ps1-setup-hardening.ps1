@@ -189,27 +189,6 @@ Assert-Equal 'leaf-0000039' "$leaf" "req-003: leaf-0000039 survives at the same 
 Remove-SetupWorkspace $ws
 
 Write-Host ""
-Write-Host "=== req-003: deep settings survive the telemetry cleanup write ==="
-
-$ws = New-SetupWorkspace
-$deepText = [System.IO.File]::ReadAllText((Join-Path $fixtureDir 'deep-settings.json'))
-$telemetry = '{"hooks":{"Stop":[{"matcher":"","hooks":[{"type":"command","command":"node .claude/hooks/telemetry/emit-event.mjs"}]}]},'
-Write-SettingsText $ws ($telemetry + $deepText.TrimStart().Substring(1))
-$run = Invoke-Setup $ws @('claude-code')
-Assert-Equal 0 $run.Code "req-003: setup.ps1 exits 0 on deep settings with a telemetry entry"
-if ($run.Code -ne 0) { Write-Host $run.Output }
-Assert-Contains 'removed telemetry hook entries' $run.Output "req-003: the telemetry cleanup wrote settings.json"
-$node = (Read-Settings $ws).custom
-for ($level = 1; $level -le 14; $level++) {
-    if ($null -eq $node) { break }
-    $node = $node."level$level"
-}
-$leaf = $null
-if ($null -ne $node) { $leaf = $node.level15 }
-Assert-Equal 'leaf-0000039' "$leaf" "req-003: leaf-0000039 survives the telemetry cleanup write"
-Remove-SetupWorkspace $ws
-
-Write-Host ""
 Write-Host "=== req-003: the non-array warning omits a deep old value ==="
 
 $ws = New-SetupWorkspace

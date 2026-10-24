@@ -71,6 +71,7 @@ FILES=(
   ravintio-zero/skills/ravintio-implement/SKILL.md
   ravintio-zero/skills/ravintio-validate-and-accept/SKILL.md
   ravintio-zero/skills/ravintio-refresh-setup/SKILL.md
+  ravintio-zero/skills/ravintio-file-backlog/SKILL.md
   ravintio-zero/standards/language-quirks-en-gb.md
   ravintio-zero/standards/code-quality-standards.md
   ravintio-zero/standards/formatting-standards.md

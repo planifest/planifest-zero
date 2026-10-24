@@ -27,7 +27,7 @@ bad_names() {
 }
 
 echo "=== (a) skill names ==="
-assert_equals "12" "$(ls -d "$ZERO_DIR"/skills/ravintio-*/ | wc -l | tr -d ' ')" "the pack ships 12 ravintio- skills"
+assert_equals "13" "$(ls -d "$ZERO_DIR"/skills/ravintio-*/ | wc -l | tr -d ' ')" "the pack ships 13 ravintio- skills"
 assert_equals "" "$(bad_names "$ZERO_DIR/skills")" "every name field matches its folder and starts with ravintio-"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -38,8 +38,9 @@ assert_contains "ravintio-x other-x" "$(bad_names "$TMP/skills")" "a wrong name 
 echo "=== (b) regression manifest paths ==="
 MISSING=""
 while IFS= read -r p; do
+  [ -n "$p" ] || continue
   [ -f "$ZERO_DIR/$p" ] || MISSING="$MISSING $p"
-done < <(sed -n 's/.*"filePath": *"\(tests\/[^"]*\)".*/\1/p' "$ZERO_DIR/tests/regression/regression-manifest.json")
+done <<< "$(sed -n 's/.*"filePath": *"\(tests\/[^"]*\)".*/\1/p' "$ZERO_DIR/tests/regression/regression-manifest.json")"
 assert_equals "" "$MISSING" "every regression manifest filePath exists"
 assert_equals "yes" "$([ "$(grep -c '"filePath": *"tests/' "$ZERO_DIR/tests/regression/regression-manifest.json")" -gt 0 ] && echo yes || echo no)" "the manifest lists at least one test"
 

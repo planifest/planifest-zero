@@ -61,19 +61,6 @@ Assert-Equal 0 $run.Code "req-004 (d): setup exits 0"
 Assert-Equal $note (Read-Settings $ws).note "req-004 (d): the non-ASCII note is unchanged"
 Remove-SetupWorkspace $ws
 
-Write-Host ""
-Write-Host "=== req-004 (e): a non-array hook value stays while telemetry goes ==="
-
-$ws = New-SetupWorkspace
-Write-SettingsText $ws '{"hooks":{"Stop":"keep-me","PreToolUse":[{"matcher":"Write","hooks":[{"type":"command","command":"node .claude/hooks/telemetry/emit-event.mjs"}]}]}}'
-$run = Invoke-Setup $ws @('claude-code')
-Assert-Equal 0 $run.Code "req-004 (e): setup exits 0"
-Assert-Contains 'removed telemetry hook entries' $run.Output "req-004 (e): the cleanup removed the telemetry entry"
-$settings = Read-Settings $ws
-Assert-Equal 'keep-me' $settings.hooks.Stop "req-004 (e): the non-array Stop value is unchanged"
-Assert-True (-not (Get-HookEntries $settings).Contains('emit-event')) "req-004 (e): no telemetry entry remains"
-Remove-SetupWorkspace $ws
-
 }
 finally { Remove-AllWorkspaces }
 

@@ -22,7 +22,7 @@ This project uses RAVINTIO Zero, a confirmed-design pipeline. These rules are no
 
 RAVINTIO installs these deterministic enforcement hooks via `setup.sh`:
 
-- **gate-write** (PreToolUse: Write, Edit): Blocks writes to `src/` unless `plan/current/design.md` exists AND the target path matches a declared component. Writes to `plan/`, `docs/`, and other always-permitted paths are never blocked.
+- **gate-write** (PreToolUse: Write, Edit): Gates every in-project path that is not always permitted. The write needs `plan/current/design.md` AND a declared component match. `plan/current/` also needs `plan/.orchestrator-active`. `plan/` (with `plan/backlog/` and `plan/roadmap/`), `docs/`, and permitted basenames pass. Targets outside the project pass.
 - **auto-trigger-orchestrator** (UserPromptSubmit): At the start of every session in a RAVINTIO project (`ravintio-zero/` present and `plan/.orchestrator-active` absent), automatically loads the `ravintio-orchestrator` skill before the first prompt is processed. This is the primary trigger mechanism for Claude Code.
 - **check-design** (UserPromptSubmit): Injects active component scope from `design.md` as additional context.
 - **commit-msg** (git hook): Blocks commits with AI attribution, affirmatory language, or >72-char subjects. Exit 1 on violation; use `git commit --no-verify` to bypass intentionally.

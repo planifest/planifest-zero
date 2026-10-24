@@ -96,10 +96,11 @@ check_lines() {
   while IFS= read -r path; do
     [ -f "$root/$path" ] || continue
     while IFS= read -r hit; do
+      [ -n "$hit" ] || continue
       num="${hit%%:*}"
       text="${hit#*:}"
       allowed "$path" "$text" || echo "$path:$num"
-    done < <(grep -inI -- framework "$root/$path" 2>/dev/null)
+    done <<< "$(grep -inI -- framework "$root/$path" 2>/dev/null)"
   done
 }
 

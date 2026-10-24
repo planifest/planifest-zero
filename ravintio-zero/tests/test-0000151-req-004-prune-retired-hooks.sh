@@ -48,6 +48,11 @@ done
 count="$(grep -c -- '- removed .claude/hooks/' "$WS/setup.out" || true)"
 assert_equals 3 "$count" "exactly three removal lines"
 
+count="$(grep -c -- '- removed retired hook entry phase-enum from .claude/settings.json' "$WS/setup.out" || true)"
+assert_equals 1 "$count" "S-005: one settings.json removal line for phase-enum"
+count="$(grep -c -- '- removed retired hook entry' "$WS/setup.out" || true)"
+assert_equals 1 "$count" "S-005: only the entry that existed is named"
+
 echo ""
 echo "=== req-004 (b): other hooks and settings entries ==="
 [ -e "$H/custom-local-hook.mjs" ] && ex=present || ex=absent
@@ -71,10 +76,12 @@ run_setup "$WS"
 assert_exit_zero "$?" "second run exits 0"
 count="$(grep -c -- '- removed .claude/hooks/' "$WS/setup.out" || true)"
 assert_equals 0 "$count" "second run prints no removal line"
+count="$(grep -c -- '- removed retired hook entry' "$WS/setup.out" || true)"
+assert_equals 0 "$count" "S-005: second run prints no settings.json removal line"
 
 echo ""
 echo "=== req-004: the retired list holds phase-enum ==="
-assert_contains "phase-enum" "$(grep '^TELEMETRY_HOOK_MODULES=' "$ZERO_DIR/setup.sh")" "setup.sh list has phase-enum"
+assert_contains "phase-enum" "$(grep '^RETIRED_HOOK_NAMES=' "$ZERO_DIR/setup.sh")" "setup.sh list has phase-enum"
 assert_contains "'phase-enum'" "$(cat "$ZERO_DIR/setup.ps1")" "setup.ps1 list has phase-enum"
 
 rm -rf "$WS"

@@ -71,6 +71,7 @@ Twelve skills drive the pipeline.
 | `ravintio-optimise-agent` | Reviews skills for superfluous content, one suggestion at a time |
 | `ravintio-migrator` | Applies pending pack migrations interactively |
 | `ravintio-refresh-setup` | Re-runs setup with the flags currently in effect |
+| `ravintio-file-backlog` | Files one uncommitted backlog entry in another repo |
 
 The TDD trio (`ravintio-test-writer`, `ravintio-implementer`, `ravintio-refactor`) is dispatched by `ravintio-implement`, once per requirement.
 
@@ -163,7 +164,7 @@ Setup wires the enforcement hooks into `.claude/settings.json` on every install.
 
 | Hook | Trigger | What it does |
 |------|---------|--------------|
-| `gate-write` | PreToolUse (Write, Edit) | Blocks writes to `src/` unless `plan/current/design.md` exists and the target path matches a declared component |
+| `gate-write` | PreToolUse (Write, Edit) | Gates every in-project path that is not always permitted. Blocks the write unless `plan/current/design.md` exists and the target path matches a declared component. Writes to `plan/current/` also need the `plan/.orchestrator-active` sentinel. Targets outside the project pass |
 | `ratchet-check` | PreToolUse (Write, Edit) | While a loop or reversal is active, blocks edits that weaken acceptance criteria or in-scope lines in `plan/current/` |
 | `em-dash-guard` | PreToolUse (Write, Edit) | Rejects U+2014 in scoped prose paths |
 | `check-design` | UserPromptSubmit | Injects active component scope from `design.md`, or a hard STOP when no brief or sentinel exists |
@@ -224,18 +225,22 @@ Ship complete       → plan/.orchestrator-active deleted (final cleanup step)
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
-| **gate-write** (PreToolUse: Write, Edit) | Every file write or edit | Blocks writes outside always-permitted paths (`plan/`, `docs/`, `ravintio-zero/`) unless `plan/current/design.md` exists AND the target path matches a declared component in the design |
+| **gate-write** (PreToolUse: Write, Edit) | Every file write or edit | Gates every in-project path that is not always permitted (`plan/`, `docs/`, and listed basenames such as `CLAUDE.md`). Blocks the write unless `plan/current/design.md` exists AND the target path matches a declared component. Writes to `plan/current/` also need the `plan/.orchestrator-active` sentinel. Targets outside the project pass |
 | **check-orchestrator-presence** (UserPromptSubmit) | Every user prompt while the sentinel is present | Injects a reminder banner so the orchestrator skill reloads after context compaction or session resume. Advisory by default, see Strict Mode below |
 | **check-design** (UserPromptSubmit) | Every user prompt | If neither the sentinel nor a `feature-brief.md` is present, injects a hard STOP message before the agent can act. Prevents free-form changes outside the pipeline |
 
 ### How gate-write interacts with design.md
 
-`gate-write` checks two conditions before allowing a write to `src/`:
+`gate-write` gates this project only. It resolves the project root and the target to real paths. A target whose real path lies outside the project passes, even through a symlink.
 
-1. `plan/current/design.md` must exist
-2. The target file path must be under a component directory declared in the design's `## Engineering Layer → Components` section
+For an in-project target, `gate-write` runs these checks:
 
-Writes to `plan/`, `docs/`, `ravintio-zero/`, and `ravintio-overrides/` are always permitted. `gate-write` never blocks documentation or plan artifact writes.
+1. A write to `plan/current/` needs the `plan/.orchestrator-active` sentinel. The feature brief and the always-permitted basenames skip this check.
+2. A path under `plan/` (including `plan/backlog/` and `plan/roadmap/`) or `docs/`, or an always-permitted basename, passes.
+3. For every other path, `plan/current/design.md` must exist.
+4. The target path must sit under a component path declared in the design's `## Component Paths` section.
+
+The always-permitted basenames are `CLAUDE.md`, `AGENTS.md`, `.ravintio-session`, `.skips`, `.feature-id`, `.gitignore`, `.gitattributes`, `.claudeignore`, and `pause.md`. The `ravintio-zero/` and `ravintio-overrides/` folders get no exemption.
 
 ### Manual recovery
 

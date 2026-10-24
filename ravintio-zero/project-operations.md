@@ -28,7 +28,7 @@ When discovery starts, the orchestrator writes `plan/.orchestrator-active` conta
 
 | Hook | What it does |
 |------|-------------|
-| **gate-write** (PreToolUse) | Blocks writes outside always-permitted paths unless `plan/current/design.md` exists and the target path is a declared component |
+| **gate-write** (PreToolUse) | Gates every in-project path that is not always permitted. Blocks the write unless `plan/current/design.md` exists and the target path is a declared component. Writes to `plan/current/` also need the `plan/.orchestrator-active` sentinel. Targets outside the project pass |
 | **check-orchestrator-presence** (UserPromptSubmit) | Injects a reminder banner on every prompt while a pipeline is active, so the orchestrator skill reloads after context compaction or session resume |
 | **check-design** (UserPromptSubmit) | Injects a hard STOP message if neither the sentinel nor a `feature-brief.md` is present |
 | **auto-trigger-orchestrator** (UserPromptSubmit) | Loads the orchestrator skill at the start of a session when no pipeline is active yet |

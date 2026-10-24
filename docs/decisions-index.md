@@ -3,7 +3,7 @@
 > Change record. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file. Update it in place.
 
-Last updated: 0000160-ravintio-rebrand
+Last updated: 0000164-hardening-and-backlog-skill
 
 ---
 
@@ -47,8 +47,17 @@ Rows for features before 0000160 use the product name and paths of their time. 0
 | ADR | Title | Status | Summary |
 |-----|-------|--------|---------|
 | ADR-001 | Telemetry is not a pack concern | accepted | Removes the telemetry system from `planifest-zero` with no replacement and no extension seam. Drops `backendUrl` from the setup-config record, narrowing 0000032 ADR-001. |
-| ADR-002 | Setup cleans up telemetry wiring on every run | accepted | Every setup run removes legacy telemetry hook entries, the opt-in sentinel, and the marker directories. One line per removal, a warning without failing. |
+| ADR-002 | Setup cleans up telemetry wiring on every run | superseded by 0000164 ADR-003 | Every setup run removes legacy telemetry hook entries, the opt-in sentinel, and the marker directories. One line per removal, a warning without failing. |
 | ADR-003 | The phase vocabulary lives in prose, not in a module | accepted | Deletes `phase-enum.mjs` and states the five phase names in `pipeline-reference.md`. The `product.yml` id and its hard stop stay, for versioning. |
+
+### Feature 0000164: hardening-and-backlog-skill
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Stack unchanged | accepted | Keeps the declared stack and adds no dependency. `gate-write.mjs` uses `realpathSync` from `node:fs`. |
+| ADR-002 | gate-write scopes to the project by real path | accepted | The hook exits 0 when a target's real path lies outside the project's real root. A symlink inside the project that points outside counts as outside. |
+| ADR-003 | Retire the telemetry cleanup and keep the retired-hooks list | accepted | Setup drops the legacy telemetry cleanup in both shells. The list stays as `RETIRED_HOOK_NAMES` and `$RetiredHookNames`, and hook install drops settings entries for any retired hook. Supersedes 0000033 ADR-002. |
+| ADR-004 | The file-backlog skill never touches the target repo's git state | accepted | `ravintio-file-backlog` writes one uncommitted entry folder. It never commits, pushes, switches branches, stashes, or opens a pull request there. |
 
 ---
 
@@ -181,3 +190,4 @@ Rows for features before 0000160 use the product name and paths of their time. 0
 | ADR-002 | Legacy aliases stay accepted through 1.x | accepted | Two roadmap variables and the em dash sentinel keep their earlier names as fallbacks. The new name wins. The fallbacks go at 2.0.0. |
 | ADR-003 | Consumer migration 0004 | accepted | Bash and PowerShell helpers move the overrides folder and the workflow, remove old markers, move the old pack folder to `.ravintio-backup/` instead of deleting it, and archive 0004. A migration with a false `Applies when:` condition stays pending. Setup stops while an old folder remains. |
 | ADR-004 | Brand guard test | accepted | A test fails on any tracked path or line outside history that holds the earlier product name, unless a path and line allowlist entry matches. A stale entry also fails. |
+| 0000033 ADR-002 | 0000164 ADR-003 | Setup no longer removes legacy telemetry wiring. A pre-0000033 consumer removes it by hand. |

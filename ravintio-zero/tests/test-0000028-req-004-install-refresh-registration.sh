@@ -22,15 +22,6 @@ source "$SCRIPT_DIR/helpers/assert.sh"
 SETUP_SH="$ZERO_DIR/setup.sh"
 setup_content=$(cat "$SETUP_SH")
 
-echo "=== req-004: setup.sh retracts legacy telemetry wiring ==="
-
-# 0000033 removed the telemetry hooks themselves. What setup.sh still owns is
-# the cleanup path that strips a pre-0000033 project's telemetry entries out of
-# settings.json, which is matched on the same emit_event MCP tool call.
-assert_contains "mcp__structured-telemetry-mcp__emit_event" "$setup_content" \
-  "req-004: legacy telemetry cleanup matches the emit_event MCP tool call"
-
-echo ""
 echo "=== req-004: shared modules reach tier 1 installs ==="
 
 # The tier 1 telemetry copy globbed emit-phase-*.mjs, which would silently drop

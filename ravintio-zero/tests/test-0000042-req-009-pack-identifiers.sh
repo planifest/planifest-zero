@@ -122,8 +122,9 @@ assert_equals "yes" "$(has "\"sourceFeature\": \"0000005-${LO}${W}-governance\""
 # Every filePath in the manifest resolves to a file.
 missing=""
 while IFS= read -r p; do
+  [ -n "$p" ] || continue
   [ -f "$ZERO_DIR/$p" ] || missing="$missing $p"
-done < <(grep -oE '"filePath": "tests/[^"]+"' "$MANIFEST" | sed -E 's/.*: "([^"]+)"/\1/')
+done <<< "$(grep -oE '"filePath": "tests/[^"]+"' "$MANIFEST" | sed -E 's/.*: "([^"]+)"/\1/')"
 assert_equals "" "$missing" "req-009 (a): every manifest filePath resolves"
 
 echo ""

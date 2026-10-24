@@ -19,6 +19,7 @@ version: "1.0.0"
 | ravintio-migrator | Pending migration found at session start | Standalone. Runs before any phase work. |
 | ravintio-optimise-agent | Human asks to optimise or trim a skill | Standalone. Invoke any time. |
 | ravintio-refresh-setup | Human asks to refresh the setup | Standalone. Invoke any time. |
+| ravintio-file-backlog | Human asks to file a backlog entry in another repo | Standalone. Invoke any time. |
 
 ## Capability Skills
 
